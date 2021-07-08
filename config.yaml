@@ -1,0 +1,35 @@
+clients:
+    signatureanalytics:
+        auth_provider: google
+        workspace: 0000-1234-1234-0000
+        roles: 
+            - exec
+            - hr
+            - sales
+            - employee
+
+        dashboards:
+            company_overview: 1234-0000-1234-0002
+                roles:
+                    - employee
+            human_resource_overview: 
+                roles: 
+                    - exec
+                    - hr
+                id: 1234-0000-1234-0000
+            sales_overview: 1234-0000-1234-0001
+
+        users:
+            pheald@signatureanalytics.com: 
+                roles:
+                    - hr
+                    - sales
+                    - overview
+
+            jason
+            izett
+            david
+            chris
+            ray            
+
+    magna_trucking: 
