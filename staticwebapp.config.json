@@ -1,8 +1,12 @@
 {
     "routes": [
         {
-            "route": "/test.html",
+            "route": "/exec.html",
             "allowedRoles": ["exec"]
+        },
+        {
+            "route": "/hr.html",
+            "allowedRoles": ["hr"]
         }
     ]
 }
