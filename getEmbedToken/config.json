@@ -1,0 +1,9 @@
+{
+    "authenticationMode": "ServicePrincipal",
+    "authorityUri": "https://login.microsoftonline.com/common/v2.0",
+    "scope": "https://analysis.windows.net/powerbi/api",
+    "apiUrl": "https://api.powerbi.com/",
+    "clientId": "2d803105-6b8d-43fb-8453-e3fe7abf6521",
+    "clientSecret": "-8~Lndj.rSgx0.GOU4pih7fnyu9Q~F~gRL",
+    "tenantId": "3bedf19d-8c85-4d31-bd65-385b1f083812"
+}
