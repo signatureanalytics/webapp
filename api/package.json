@@ -1,0 +1,20 @@
+{
+    "name": "api",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "build": "echo \"nothing to do\"; ls -al ../ui/build"
+    },
+    "dependencies": {
+        "adal-node": "^0.2.3",
+        "guid": "0.0.12",
+        "node-fetch": "^2.6.2"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "engines": {
+        "node": ">=14.0.0 <17"
+    }
+}
