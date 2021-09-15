@@ -1,8 +1,8 @@
 const workspaces = {
     signatureanalytics: {
         id: '77392655-0b1a-4155-a702-be372e795aa8',
-        authenticationProvider: 'google',
-        dashboards: {
+        identityProvider: 'google',
+        reports: {
             engagement: {
                 id: 'da0df838-dbe5-47e0-9c7c-526898624cc5',
             },

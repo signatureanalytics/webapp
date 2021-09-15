@@ -5,8 +5,6 @@
         (async _ => {
             let models = window['powerbi-client'].models;
 
-            // Initialize iframe for embedding report
-            powerbi.bootstrap(document.getElementById('reportContainer'), { type: 'report' });
             try {
                 // AJAX request to get the report details from the API and pass it to the UI
                 const response = await fetch('/api/getEmbedToken').then(async response => {
@@ -19,53 +17,63 @@
                     }
                 });
 
-                // Create a config object with type of the object, Embed details and Token Type
-                let reportLoadConfig = {
-                    type: 'report',
-                    tokenType: models.TokenType.Embed,
-                    accessToken: response.accessToken,
+                if (response.reports) {
+                    const reportLinks = `<ul>${response.reports.map(
+                        reportName => `<li><a href="${location}/${reportName}">${reportName} report</a></li>`
+                    )}</ul>`;
+                    document.getElementById('reportContainer').innerHTML = reportLinks;
+                } else if (response.accessToken) {
+                    // Create a config object with type of the object, Embed details and Token Type
+                    let reportLoadConfig = {
+                        type: 'report',
+                        tokenType: models.TokenType.Embed,
+                        accessToken: response.accessToken,
 
-                    // Use other embed report config based on the requirement. We have used the first one for demo purpose
-                    embedUrl: response.embedUrl[0].embedUrl,
+                        // Use other embed report config based on the requirement. We have used the first one for demo purpose
+                        embedUrl: response.embedUrl[0].embedUrl,
 
-                    // Enable this setting to remove gray shoulders from embedded report
-                    // settings: {
-                    //     background: models.BackgroundType.Transparent
-                    // }
-                };
+                        // Enable this setting to remove gray shoulders from embedded report
+                        // settings: {
+                        //     background: models.BackgroundType.Transparent
+                        // }
+                    };
 
-                // Use the token expiry to regenerate Embed token for seamless end user experience
-                // Refer https://aka.ms/RefreshEmbedToken
-                // tokenExpiry = embedData.expiry;
+                    // Use the token expiry to regenerate Embed token for seamless end user experience
+                    // Refer https://aka.ms/RefreshEmbedToken
+                    // tokenExpiry = embedData.expiry;
 
-                // Embed Power BI report when Access token and Embed URL are available
-                let report = powerbi.embed(reportContainer, reportLoadConfig);
+                    // Initialize iframe for embedding report
+                    powerbi.bootstrap(document.getElementById('reportContainer'), { type: 'report' });
 
-                // Clear any other loaded handler events
-                report.off('loaded');
+                    // Embed Power BI report when Access token and Embed URL are available
+                    let report = powerbi.embed(reportContainer, reportLoadConfig);
 
-                // Triggers when a report schema is successfully loaded
-                report.on('loaded', function () {
-                    console.log('Report load successful');
-                });
+                    // Clear any other loaded handler events
+                    report.off('loaded');
 
-                // Clear any other rendered handler events
-                report.off('rendered');
+                    // Triggers when a report schema is successfully loaded
+                    report.on('loaded', function () {
+                        console.log('Report load successful');
+                    });
 
-                // Triggers when a report is successfully embedded in UI
-                report.on('rendered', function () {
-                    console.log('Report render successful');
-                });
+                    // Clear any other rendered handler events
+                    report.off('rendered');
 
-                // Clear any other error handler events
-                report.off('error');
+                    // Triggers when a report is successfully embedded in UI
+                    report.on('rendered', function () {
+                        console.log('Report render successful');
+                    });
 
-                // Handle embed errors
-                report.on('error', function (event) {
-                    let errorMsg = event.detail;
-                    console.error(errorMsg);
-                    return;
-                });
+                    // Clear any other error handler events
+                    report.off('error');
+
+                    // Handle embed errors
+                    report.on('error', function (event) {
+                        let errorMsg = event.detail;
+                        console.error(errorMsg);
+                        return;
+                    });
+                }
             } catch (error) {
                 // // Show error container
                 // let errorContainer = $(".error-container");
