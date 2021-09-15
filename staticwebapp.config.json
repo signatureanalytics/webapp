@@ -1,20 +1,7 @@
 {
-    "routes": [
-        {
-            "route": "/api/getEmbedToken/77392655-0b1a-4155-a702-be372e795aa8/1d29c950-edc1-400e-a56a-cd5b6189ed02",
-            "rewrite": "/api/getEmbedToken?workspace=77392655-0b1a-4155-a702-be372e795aa8&report=1d29c950-edc1-400e-a56a-cd5b6189ed02"
-        },
-        {
-            "route": "/api/getEmbedToken/77392655-0b1a-4155-a702-be372e795aa8/9c544dc9-dc07-43dd-8191-f1ffe9eb45a7",
-            "rewrite": "/api/getEmbedToken?workspace=77392655-0b1a-4155-a702-be372e795aa8&report=9c544dc9-dc07-43dd-8191-f1ffe9eb45a7"
-        },
-        {
-            "route": "/forbidden",
-            "statusCode": 403
-        }
-    ],
+    "routes": [],
     "navigationFallback": {
         "rewrite": "/dashboard.html",
-        "exclude": ["/images/*.{png,jpg,gif}", "/css/*"]
+        "exclude": ["/images/*.{png,jpg,gif}", "/css/*", "/.auth/*"]
     }
 }

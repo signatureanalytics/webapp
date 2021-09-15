@@ -5,7 +5,7 @@
     "scripts": {
         "start": "swa start --api .",
         "test": "echo \"No tests yet...\"",
-        "build": "npm ci"
+        "build": "npm ci; mkdir public; cp {index,dashboard}.html {userinfo,powerbi.min}.js public"
     },
     "dependencies": {
         "adal-node": "^0.2.3",

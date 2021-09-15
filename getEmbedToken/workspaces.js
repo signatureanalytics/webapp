@@ -23,7 +23,7 @@ const workspaces = {
             },
         },
         users: {
-            'rwaldin@signatureanalytics.com': ['hr', 'revenue', 'engagement', 'hoursdetail', 'market', 'sales'],
+            'rwaldin@signatureanalytics.com': ['hr', 'revenue', 'engagement', 'hoursdetail', 'sales'],
             'cwagner@signatureanalyics.com': ['hr', 'revenue', 'engagement', 'hoursdetail', 'market', 'sales'],
             'dshannon@signatureanalytics.com': ['hr', 'revenue', 'engagement', 'hoursdetail', 'market', 'sales'],
             'arichards@signatureanalytics.com': ['hr', 'revenue', 'engagement', 'hoursdetail', 'market', 'sales'],
