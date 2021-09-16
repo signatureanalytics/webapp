@@ -37,7 +37,9 @@ module.exports = async function (context, req) {
     const workspace = workspaces[workspaceName];
     const users = workspace ? workspace.users[userInfo.identityProvider] : undefined;
     const user = users ? users[userInfo.userDetails] : undefined;
-    const userReports = Object.keys(workspace ? workspace.reports : {}).filter(reportName => user.includes(reportName));
+    const userReports = Object.keys(workspace ? workspace.reports : {}).filter(
+        reportName => user && user.includes(reportName)
+    );
     const report = reportName ? (workspace ? workspace.reports[reportName] : userReports[0]) : undefined;
 
     if (!workspace || !report) {
