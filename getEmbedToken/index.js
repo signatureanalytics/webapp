@@ -8,8 +8,12 @@ module.exports = async function (context, req) {
 
     const encodedClientPrincipal = req.headers['x-ms-client-principal'];
     const refererMatch = req.headers.referer.match(`^.*//[^/?]+/(?<workspaceName>[^/?]+)(?:/(?<reportName>[^/?]+))?`);
-    if (!refererMatch || !encodedClientPrincipal) {
-        context.res = { status: 403 };
+    if (!encodedClientPrincipal) {
+        context.res = { status: 401 };
+        return;
+    }
+    if (!refererMatch) {
+        context.res = { status: 404 };
         return;
     }
     const userInfo = JSON.parse(decodeBase64(encodedClientPrincipal));
