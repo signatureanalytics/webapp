@@ -1,7 +1,6 @@
 const workspaces = {
     signatureanalytics: {
         id: '77392655-0b1a-4155-a702-be372e795aa8',
-        identityProvider: 'google',
         reports: {
             engagement: {
                 id: 'da0df838-dbe5-47e0-9c7c-526898624cc5',
@@ -23,10 +22,12 @@ const workspaces = {
             },
         },
         users: {
-            'rwaldin@signatureanalytics.com': ['hr', 'revenue', 'engagement', 'hoursdetail', 'sales'],
-            'cwagner@signatureanalyics.com': ['hr', 'revenue', 'engagement', 'hoursdetail', 'market', 'sales'],
-            'dshannon@signatureanalytics.com': ['hr', 'revenue', 'engagement', 'hoursdetail', 'market', 'sales'],
-            'arichards@signatureanalytics.com': ['hr', 'revenue', 'engagement', 'hoursdetail', 'market', 'sales'],
+            google: {
+                'rwaldin@signatureanalytics.com': ['hr', 'revenue', 'engagement', 'hoursdetail', 'market'],
+                'cwagner@signatureanalyics.com': ['hr', 'revenue', 'engagement', 'hoursdetail', 'market', 'sales'],
+                'dshannon@signatureanalytics.com': ['hr', 'revenue', 'engagement', 'hoursdetail', 'market', 'sales'],
+                'arichards@signatureanalytics.com': ['hr', 'revenue', 'engagement', 'hoursdetail', 'market', 'sales'],
+            },
         },
     },
 };

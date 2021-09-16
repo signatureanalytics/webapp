@@ -7,7 +7,7 @@
 
             try {
                 // AJAX request to get the report details from the API and pass it to the UI
-                const response = await fetch('/api/getEmbedToken').then(async response => {
+                const response = await fetch(`/api/getEmbedToken?t=${Date.now()}`).then(async response => {
                     if (!response.ok) {
                         // const json = await response.json();
                         // throw new Error(json.error);
@@ -17,12 +17,7 @@
                     }
                 });
 
-                if (response.reports) {
-                    const reportLinks = `<ul>${response.reports.map(
-                        reportName => `<li><a href="${location}/${reportName}">${reportName} report</a></li>`
-                    )}</ul>`;
-                    document.getElementById('reportContainer').innerHTML = reportLinks;
-                } else if (response.accessToken) {
+                if (response.accessToken) {
                     // Create a config object with type of the object, Embed details and Token Type
                     let reportLoadConfig = {
                         type: 'report',
@@ -33,17 +28,22 @@
                         embedUrl: response.embedUrl[0].embedUrl,
 
                         // Enable this setting to remove gray shoulders from embedded report
-                        // settings: {
-                        //     background: models.BackgroundType.Transparent
-                        // }
+                        settings: {
+                            // background: models.BackgroundType.Transparent,
+                            // panes: {
+                            //     pageNavigation: {
+                            //         visible: tr,
+                            //     },
+                            // },
+                        },
                     };
 
                     // Use the token expiry to regenerate Embed token for seamless end user experience
                     // Refer https://aka.ms/RefreshEmbedToken
                     // tokenExpiry = embedData.expiry;
-
+                    const reportContainer = document.getElementById('reportContainer');
                     // Initialize iframe for embedding report
-                    powerbi.bootstrap(document.getElementById('reportContainer'), { type: 'report' });
+                    powerbi.bootstrap(reportContainer, { type: 'report' });
 
                     // Embed Power BI report when Access token and Embed URL are available
                     let report = powerbi.embed(reportContainer, reportLoadConfig);
@@ -51,9 +51,10 @@
                     // Clear any other loaded handler events
                     report.off('loaded');
 
-                    // Triggers when a report schema is successfully loaded
-                    report.on('loaded', function () {
+                    report.on('loaded', async _ => {
                         console.log('Report load successful');
+                        const pages = await report.getPages();
+                        await report.setPage(pages[0].name);
                     });
 
                     // Clear any other rendered handler events
@@ -73,6 +74,14 @@
                         console.error(errorMsg);
                         return;
                     });
+                } else {
+                    const reportLinks = response.reports.map(
+                        reportName => `<li><a href="${location}/${reportName}">${reportName} report</a></li>`
+                    );
+                    document.getElementById('reportContainer').innerHTML = `
+                        <h2>Signature Analytics reports</h2>
+                        <ul class="reportList">${reportLinks.join('')}</ul>
+                    `;
                 }
             } catch (error) {
                 // // Show error container
@@ -111,4 +120,13 @@
             }
         })();
     </script>
+    <style>
+        .reportList {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            margin-left: 20px;
+            font-size: 20px;
+        }
+    </style>
 </html>

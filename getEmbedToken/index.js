@@ -31,10 +31,11 @@ module.exports = async function (context, req) {
     }
 
     const workspace = workspaces[workspaceName];
-    const report = reportName && workspace?.reports[reportName];
-    const user = workspace?.users[userInfo.userDetails];
+    const user = workspace?.users[userInfo.identityProvider]?.[userInfo.userDetails];
+    const userReports = Object.keys(workspace?.reports).filter(reportName => user.includes(reportName));
+    const report = reportName ? workspace?.reports[reportName] : userReports[0];
 
-    if (!workspace || (reportName && !report)) {
+    if (!workspace || !report) {
         context.res = { status: 404 };
         return;
     }
@@ -44,31 +45,21 @@ module.exports = async function (context, req) {
         return;
     }
 
-    if (workspace.identityProvider !== userInfo.identityProvider || (reportName && !user.includes(reportName))) {
+    if (reportName && !user.includes(reportName)) {
         context.res = { status: 403 };
         return;
     }
 
-    if (reportName) {
-        // Get the details like Embed URL, Access token and Expiry
-        let result = await embedToken.getEmbedInfo(workspace.id, report.id);
-        result.requestHeaders = req.headers;
-        result.query = req.query;
-        result.userInfo = userInfo;
-        context.res = {
-            status: result.status,
-            // status: 200, /* Defaults to 200 */
-            body: result,
-        };
-        return;
-    } else {
-        context.res = {
-            body: {
-                reports: Object.keys(workspace.reports).filter(reportName => user.includes(reportName)),
-            },
-        };
-        return;
-    }
+    // Get the details like Embed URL, Access token and Expiry
+    let result = reportName ? await embedToken.getEmbedInfo(workspace.id, report.id) : {};
+    result.requestHeaders = req.headers;
+    result.query = req.query;
+    result.userInfo = userInfo;
+    result.reports = userReports;
+    context.res = {
+        status: result.status,
+        body: result,
+    };
 };
 
 const decodeBase64 = base64 => Buffer.from(base64, 'base64').toString('ascii');
