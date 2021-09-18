@@ -23,6 +23,7 @@ const workspaces = {
         },
         users: {
             google: {
+<<<<<<< HEAD
                 'rwaldin@signatureanalytics.com': [
                     'HR',
                     'Revenue',
