@@ -69,6 +69,7 @@ module.exports = async function (context, req) {
     }
 
     if (!user || (reportName && !user.includes(reportName))) {
+        console.log(user, userInfo);
         context.res = addHeaders({ status: 403 });
         return;
     }
