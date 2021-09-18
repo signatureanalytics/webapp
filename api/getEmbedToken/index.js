@@ -51,8 +51,12 @@ module.exports = async function (context, req) {
         reportName => user && user.includes(reportName)
     );
 
-    const reportKey = Object.keys(workspace.reports).find(r => slug(r) === reportName);
-    const report = workspace ? (reportName ? workspace.reports[reportKey] : userReports[0]) : undefined;
+    const reportKey = Object.keys(userReports).find(r => slug(r) === reportName) || userReports[0];
+    const report = workspace
+        ? reportName
+            ? workspace.reports[reportKey]
+            : workspace.reports[userReports[0]]
+        : undefined;
 
     if (!workspace || (reportName && !report)) {
         context.res = addVaryHeaders({ status: 404 });
