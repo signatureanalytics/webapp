@@ -142,12 +142,16 @@ class Report extends connect(store)(LitElement) {
                     console.log('Report load successful');
                     const pages = await this.report.getPages();
 
-                    store.dispatch(selectReport({ report: this.reports.find(r => slug(r) === reportName) }));
+                    store.dispatch(
+                        selectReport({
+                            report: reportName ? this.reports.find(r => slug(r) === reportName) : this.reports[0],
+                        })
+                    );
                     store.dispatch(setPages({ pages: pages.map(({ name, displayName }) => ({ name, displayName })) }));
                     if (!pageName) {
                         const page = pages[0].name;
                         const encodedPageName = slug(pages[0].displayName);
-                        const encodedReportName = slug(reportName);
+                        const encodedReportName = slug(reportName || this.reports[0]);
                         history.replaceState(
                             { report: reportName, page },
                             null,
