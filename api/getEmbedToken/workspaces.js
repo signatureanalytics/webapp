@@ -1,5 +1,37 @@
 const workspaces = {
     signatureanalytics: {
+        id: 'f9b1241e-ef36-489b-bc2e-eba05b970c73',
+        reports: {
+            Engagement: {
+                id: 'b16e2006-8ee5-4c0d-981f-3d9bcc5e46a0',
+            },
+            'Hours Detail': {
+                id: 'cdbed8c3-fcde-430b-89c2-c21f11d8ed0b',
+            },
+            HR: {
+                id: '1898d1c22-b3c4-4e98-af5c-9d15ea5b3984',
+            },
+            Market: {
+                id: '8f111861-5cc5-43be-93f6-6913c7c38046',
+            },
+            Revenue: {
+                id: '0764fbaf-f2f2-4524-afc7-f929f27c20d8',
+            },
+            Sales: {
+                id: '63395ed3-39f9-452d-8711-7b6d89741157',
+            },
+        },
+        users: {
+            google: {
+                'rwaldin@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market'],
+                'cwagner@signatureanalyics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
+                'dshannon@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
+                'arichards@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
+            },
+        },
+    },
+
+    sigan: {
         id: '77392655-0b1a-4155-a702-be372e795aa8',
         reports: {
             Engagement: {
