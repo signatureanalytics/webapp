@@ -9,7 +9,7 @@ const workspaces = {
                 id: 'cdbed8c3-fcde-430b-89c2-c21f11d8ed0b',
             },
             HR: {
-                id: '1898d1c22-b3c4-4e98-af5c-9d15ea5b3984',
+                id: '898d1c22-b3c4-4e98-af5c-9d15ea5b3984',
             },
             Market: {
                 id: '8f111861-5cc5-43be-93f6-6913c7c38046',
@@ -23,7 +23,7 @@ const workspaces = {
         },
         users: {
             google: {
-                'rwaldin@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market'],
+                'rwaldin@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
                 'cwagner@signatureanalyics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
                 'dshannon@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
                 'arichards@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
@@ -55,7 +55,7 @@ const workspaces = {
         },
         users: {
             google: {
-                'rwaldin@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market'],
+                'rwaldin@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
                 'cwagner@signatureanalyics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
                 'dshannon@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
                 'arichards@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],

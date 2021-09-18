@@ -51,7 +51,7 @@ module.exports = async function (context, req) {
         reportName => user && user.includes(reportName)
     );
 
-    const reportKey = Object.keys(userReports).find(r => slug(r) === reportName) || userReports[0];
+    const reportKey = userReports.find(r => slug(r) === reportName) || userReports[0];
     const report = workspace
         ? reportName
             ? workspace.reports[reportKey]
