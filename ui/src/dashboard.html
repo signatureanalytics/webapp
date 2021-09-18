@@ -9,36 +9,10 @@
                 padding: 0;
                 box-sizing: border-box;
             }
-            #reportContainer {
-                height: calc(100vh - 80px);
-                grid-area: report;
-            }
-            header {
-                grid-area: header;
-            }
-            nav {
-                grid-area: nav;
-            }
-            .reportList {
-                list-style: none;
-                margin-left: 20px;
-                font-size: 20px;
-            }
-            body {
-                display: grid;
-                grid-template-areas: 'header header' 'nav report';
-                grid-template-rows: 80px auto;
-                grid-template-columns: 200px auto;
-            }
-            iframe {
-                border: 0;
-            }
         </style>
+        <script src="/dashboard.js" type="module"></script>
     </head>
     <body>
-        <header></header>
-        <nav></nav>
-        <div id="reportContainer"></div>
-        <script src="/dashboard.js" type="module"></script>
+        <sa-main></sa-main>
     </body>
 </html>

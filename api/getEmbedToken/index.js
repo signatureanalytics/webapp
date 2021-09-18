@@ -1,8 +1,8 @@
 const embedToken = require('./embedConfigService.js');
 const utils = require('./utils.js');
 const workspaces = require('./workspaces.js');
+const slug = require('./slug.js');
 
-const referrerRegex = `^.*//[^/?]+/(?<workspaceName>[^/?]+)(?:/(?<reportName>[^/?]+))?`;
 const referrerHeaderName = 'referer'; // [sic] see https://en.wikipedia.org/wiki/HTTP_referer#Etymology
 const clientPrincipalHeaderName = 'x-ms-client-principal';
 const varyHeaders = { vary: [referrerHeaderName, clientPrincipalHeaderName] };
@@ -15,13 +15,11 @@ module.exports = async function (context, req) {
 
     // extract workspace name and optional report name from referrer header
     const referrerHeader = req.headers[referrerHeaderName];
-    const referrerMatch = referrerHeader.match(referrerRegex);
-    if (!referrerMatch) {
+    const [, workspaceName, reportName] = new URL(referrerHeader).pathname.split('/');
+    if (!workspaceName) {
         context.res = addVaryHeaders({ status: 404 });
         return;
     }
-    const { workspaceName, reportName } = referrerMatch.groups;
-
     // extract user info from client principal header
     const clientPrincipalHeader = req.headers[clientPrincipalHeaderName];
     if (!clientPrincipalHeader) {
@@ -52,20 +50,22 @@ module.exports = async function (context, req) {
     const userReports = Object.keys(workspace ? workspace.reports : {}).filter(
         reportName => user && user.includes(reportName)
     );
-    const report = workspace ? (reportName ? workspace.reports[reportName] : userReports[0]) : undefined;
+
+    const reportKey = Object.keys(workspace.reports).find(r => slug(r) === reportName);
+    const report = workspace ? (reportName ? workspace.reports[reportKey] : userReports[0]) : undefined;
 
     if (!workspace || (reportName && !report)) {
         context.res = addVaryHeaders({ status: 404 });
         return;
     }
 
-    if (!user || (reportName && !user.includes(reportName))) {
+    if (!user || (reportName && !user.includes(reportKey))) {
         context.res = addVaryHeaders({ status: 403 });
         return;
     }
 
     // Get the details like Embed URL, Access token and Expiry
-    const embedInfo = reportName ? await embedToken.getEmbedInfo(workspace.id, report.id) : {};
+    const embedInfo = reportKey ? await embedToken.getEmbedInfo(workspace.id, report.id) : {};
     context.res = addVaryHeaders({
         status: embedInfo.status,
         body: {
