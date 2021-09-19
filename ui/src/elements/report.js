@@ -133,7 +133,7 @@ class Report extends connect(store)(LitElement) {
                 powerbi.bootstrap(reportContainer, { type: 'report' });
 
                 // Embed Power BI report when Access token and Embed URL are available
-                this.report = powerbi.load(reportContainer, reportLoadConfig);
+                this.report = powerbi.embed(reportContainer, reportLoadConfig);
 
                 // Clear any other loaded handler events
                 this.report.off('loaded');
