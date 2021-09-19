@@ -8,6 +8,9 @@ import slug from '../slug';
 class Nav extends connect(store)(LitElement) {
     static get styles() {
         return css`
+            :host {
+                border-right: 2px solid #ddd;
+            }
             div {
                 cursor: pointer;
                 font-family: 'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;
