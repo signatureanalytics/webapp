@@ -1,10 +1,11 @@
-import store from '../state/store';
 import { LitElement, html, css } from 'lit';
 import { connect } from 'pwa-helpers/connect-mixin';
+import * as pbi from 'powerbi-client';
+import store from '../state/store';
 import './header';
 import './nav';
 import './report';
-import * as pbi from 'powerbi-client';
+
 const models = pbi.models;
 
 class Main extends connect(store)(LitElement) {

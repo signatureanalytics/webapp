@@ -2,7 +2,8 @@ import * as pbi from 'powerbi-client';
 import store from '../state/store';
 import { LitElement, html, css } from 'lit';
 import { connect } from 'pwa-helpers/connect-mixin';
-import { setPages, setReports, selectReport, selectPage, loadReport } from '../state/slice';
+import { setPages, setReports, selectReport, selectPage, loadReport } from '../state/navSlice';
+import { navSelectors } from '../state/navSelectors';
 import slug from '../slug';
 
 const models = pbi.models;
@@ -36,18 +37,23 @@ class Report extends connect(store)(LitElement) {
             currentPage: { type: String },
             report: { type: Object },
             loadReport: { type: String },
+            currentReportSlug: { type: String },
+            pageNameBySlug: { type: Object },
+            reportBySlug: { type: Object },
+            slugForPageIndex: { type: Object },
+            slugForReportIndex: { type: Object },
         };
     }
 
     constructor() {
         super();
         window.addEventListener('popstate', e => {
-            if (slug(this.currentReport) === e.state.report) {
+            if (this.currentReportSlug === e.state.report) {
                 if (this.currentPage !== e.state.page) {
                     store.dispatch(selectPage({ page: e.state.page }));
                 }
             } else {
-                store.dispatch(loadReport({ report: this.reports.find(r => slug(r) === e.state.report) }));
+                store.dispatch(loadReport({ report: this.reportBySlug(e.state.report) }));
                 this.initReport();
             }
         });
@@ -58,17 +64,26 @@ class Report extends connect(store)(LitElement) {
     }
 
     stateChanged(state) {
-        if (state.nav.currentPage && state.nav.currentPage !== this.currentPage && this.report) {
-            this.report.setPage(state.nav.currentPage);
+        const priorPage = this.currentPage;
+        const priorLoadReport = this.loadReport;
+
+        this.reports = navSelectors.reports(state);
+        this.pages = navSelectors.pages(state);
+        this.currentPage = navSelectors.currentPage(state);
+        this.currentReport = navSelectors.currentReport(state);
+        this.loadReport = navSelectors.loadReport(state);
+        this.currentReportSlug = navSelectors.currentReportSlug(state);
+        this.pageNameBySlug = navSelectors.pageNameBySlug(state);
+        this.reportBySlug = navSelectors.reportBySlug(state);
+        this.slugForPageIndex = navSelectors.slugForPageIndex(state);
+        this.slugForReportIndex = navSelectors.slugForReportIndex(state);
+
+        if (this.currentPage && this.currentPage !== priorPage && this.report) {
+            this.report.setPage(this.currentPage);
         }
-        if (state.nav.loadReport !== this.loadReport && this.report) {
+        if (this.loadReport !== priorLoadReport && this.report) {
             this.initReport();
         }
-        this.reports = state.nav.reports;
-        this.pages = state.nav.pages;
-        this.currentPage = state.nav.currentPage;
-        this.currentReport = state.nav.currentReport;
-        this.loadReport = state.nav.loadReport;
     }
 
     firstUpdated() {
@@ -103,17 +118,17 @@ class Report extends connect(store)(LitElement) {
             });
 
             store.dispatch(setReports({ reports: response.reports }));
-            const [, workspaceName, reportName, pageName] = location.pathname.split('/');
+            const [, workspaceSlug, reportSlug, pageSlug] = location.pathname.split('/');
 
-            if (response.accessToken) {
+            if (response.report.accessToken) {
                 // Create a config object with type of the object, Embed details and Token Type
                 let reportLoadConfig = {
                     type: 'report',
                     tokenType: models.TokenType.Embed,
-                    accessToken: response.accessToken,
+                    accessToken: response.report.accessToken,
 
                     // Use other embed report config based on the requirement. We have used the first one for demo purpose
-                    embedUrl: response.embedUrl[0].embedUrl,
+                    embedUrl: response.report.embedUrl[0].embedUrl,
 
                     // Enable this setting to remove gray shoulders from embedded report
                     settings: {
@@ -144,21 +159,21 @@ class Report extends connect(store)(LitElement) {
 
                     store.dispatch(
                         selectReport({
-                            report: reportName ? this.reports.find(r => slug(r) === reportName) : this.reports[0],
+                            report: response.report.name,
                         })
                     );
                     store.dispatch(setPages({ pages: pages.map(({ name, displayName }) => ({ name, displayName })) }));
-                    if (!pageName) {
+                    if (!pageSlug) {
                         const page = pages[0].name;
-                        const encodedPageName = slug(pages[0].displayName);
-                        const encodedReportName = slug(reportName || this.reports[0]);
+                        const encodedPageName = this.slugForPageIndex(0);
+                        const encodedReportName = slug(response.report.name);
                         history.replaceState(
-                            { report: reportName, page },
+                            { report: reportSlug, page },
                             null,
-                            `${location.origin}/${workspaceName}/${encodedReportName}/${encodedPageName}`
+                            `${location.origin}/${workspaceSlug}/${encodedReportName}/${encodedPageName}`
                         );
                     } else {
-                        const page = this.pages.find(p => slug(p.displayName) === pageName).name;
+                        const page = this.pageNameBySlug(pageSlug);
                         store.dispatch(selectPage({ page }));
                     }
                 });

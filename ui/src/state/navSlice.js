@@ -4,7 +4,7 @@ const initialState = {
     reports: [],
     pages: [],
     currentReport: undefined,
-    currentPage: undefined,
+    currentPage: { name: undefined, displayName: undefined },
     loadReport: undefined,
 };
 
