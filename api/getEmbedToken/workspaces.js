@@ -23,7 +23,7 @@ const workspaces = {
         },
         users: {
             google: {
-                'rwaldin@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
+                'rwaldin@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market'],
                 'cwagner@signatureanalyics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
                 'dshannon@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
                 'arichards@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
@@ -55,7 +55,7 @@ const workspaces = {
         },
         users: {
             google: {
-                'rwaldin@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
+                'rwaldin@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market'],
                 'cwagner@signatureanalyics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
                 'dshannon@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
                 'arichards@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
