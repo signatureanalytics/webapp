@@ -1,6 +1,7 @@
-import store from '../state/store';
 import { LitElement, html, css } from 'lit';
 import { connect } from 'pwa-helpers/connect-mixin';
+import { navSelectors } from '../state/navSelectors';
+import store from '../state/store';
 
 class Header extends connect(store)(LitElement) {
     static get styles() {
@@ -16,36 +17,44 @@ class Header extends connect(store)(LitElement) {
                 position: relative;
                 display: inline-block;
                 margin-inline: 10px;
-                background-image: url(/assets/sa-logo.png);
-                background-size: contain;
                 width: 156px;
                 height: 50px;
             }
             .covantage-logo {
                 position: relative;
                 display: inline-block;
-                background-image: url(/assets/covantage-logo.png);
-                background-size: contain;
                 width: 400px;
                 height: 42px;
             }
+            h1 {
+                display: inline-block;
+            }
         `;
+    }
+    constructor() {
+        super();
     }
     static get properties() {
         return {
-            report: { type: String },
-            page: { type: Object },
+            currentReport: { type: String },
+            currentPage: { type: Object },
+            currentTitle: { type: String },
         };
     }
     stateChanged(state) {
-        this.report = state.nav.report;
+        this.currentReport = navSelectors.currentReport(state);
+        this.currentPage = navSelectors.currentPage(state);
+        this.currentTitle = navSelectors.currentTitle(state);
+        const documentTitle = `${this.currentTitle ? `${this.currentTitle} -` : ''} Co:Vantage™ by Signature Analytics`;
+        if (documentTitle !== document.title) {
+            document.title = documentTitle;
+        }
     }
     render() {
         return html`
             <header>
-                <div class="sa-logo"></div>
-                <div class="covantage-logo"></div>
-                <h1>${this.report}</h1>
+                <img class="sa-logo" src="/assets/sa-logo.png" />
+                <img class="covantage-logo" src="/assets/covantage-logo.png" />
             </header>
         `;
     }

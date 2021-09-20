@@ -1,91 +1,15 @@
-import store from '../state/store';
-import { selectPage, loadReport } from '../state/slice';
 import { LitElement, html, css } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { connect } from 'pwa-helpers/connect-mixin';
+import store from '../state/store';
+import { selectPage, loadReport } from '../state/navSlice';
+import { navSelectors } from '../state/navSelectors';
+import navStyles from './navStyles';
 import slug from '../slug';
 
 class Nav extends connect(store)(LitElement) {
     static get styles() {
-        return css`
-            :host {
-                border-right: 2px solid #ddd;
-            }
-            div {
-                cursor: pointer;
-                font-family: 'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;
-                margin-top: 5px;
-            }
-            div:hover:not(.loading):not(.current) {
-                text-decoration: underline;
-            }
-            .current {
-                font-weight: 600;
-            }
-            .report {
-                margin-left: 15px;
-                font-size: 18px;
-            }
-            .report.loading {
-                font-style: italic;
-            }
-            .report.loading::after {
-                content: '...';
-                animation: ellipsis 900ms linear infinite;
-                width: 20px;
-            }
-            .page {
-                margin-left: 30px;
-                font-size: 16px;
-            }
-            .page + .report {
-                margin-top: 10px;
-            }
-            @keyframes ellipsis {
-                0% {
-                    content: '...';
-                }
-                8% {
-                    content: ' ..';
-                }
-                16% {
-                    content: ' \\a0 .';
-                }
-                24% {
-                    content: '';
-                }
-                32% {
-                    content: ' \\a0 .';
-                }
-                40% {
-                    content: ' ..';
-                }
-                48% {
-                    content: '...';
-                }
-                54% {
-                    content: '..';
-                }
-                62% {
-                    content: '.';
-                }
-                70% {
-                    content: '';
-                }
-                76% {
-                    content: '';
-                }
-                84% {
-                    content: '.';
-                }
-                92% {
-                    content: '..';
-                }
-                100% {
-                    content: '...';
-                }
-            }
-        `;
+        return navStyles;
     }
     static get properties() {
         return {
@@ -94,15 +18,21 @@ class Nav extends connect(store)(LitElement) {
             currentReport: { type: String },
             currentPage: { type: String },
             loadReport: { type: String },
+            currentReportSlug: { type: String },
+            currentPageSlug: { type: String },
+            slugForPageName: { type: Object },
         };
     }
 
     stateChanged(state) {
-        this.reports = state.nav.reports;
-        this.pages = state.nav.pages;
-        this.currentPage = state.nav.currentPage;
-        this.currentReport = state.nav.currentReport;
-        this.loadReport = state.nav.loadReport;
+        this.reports = navSelectors.reports(state);
+        this.pages = navSelectors.pages(state);
+        this.currentPage = navSelectors.currentPage(state);
+        this.currentReport = navSelectors.currentReport(state);
+        this.loadReport = navSelectors.loadReport(state);
+        this.currentReportSlug = navSelectors.currentReportSlug(state);
+        this.currentPageSlug = navSelectors.currentPageSlug(state);
+        this.slugForPageName = navSelectors.slugForPageName(state);
     }
 
     // interactions
@@ -120,9 +50,11 @@ class Nav extends connect(store)(LitElement) {
         return e => {
             if (page !== this.currentPage) {
                 const [, workspace, report] = location.pathname.split('/');
-                const pageName = slug(this.pages.find(p => p.name === page).displayName);
-                const reportName = slug(report);
-                history.pushState({ report, page }, null, `${location.origin}/${workspace}/${reportName}/${pageName}`);
+                history.pushState(
+                    { report, page },
+                    null,
+                    `${location.origin}/${workspace}/${this.currentReportSlug}/${this.slugForPageName(page)}`
+                );
                 store.dispatch(selectPage({ page }));
             }
         };
