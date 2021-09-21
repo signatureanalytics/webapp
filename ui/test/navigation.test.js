@@ -35,7 +35,7 @@ test.describe('Authorization API', () => {
     test('should return 403 for unrecognized user', async ({ page }) => {
         await page.goto('http://localhost:4280/signatureanalytics');
         await page.waitForSelector('#userDetails');
-        await page.waitForTimeout(200);
+        await page.waitForTimeout(1000);
         await page.type('#userDetails', 'ray@waldin.net');
         await page.click('#submit');
         const apiResponse = await page.waitForResponse(response => {
@@ -47,7 +47,7 @@ test.describe('Authorization API', () => {
     test('should return 404 for unrecognized workspace', async ({ page }) => {
         await page.goto('http://localhost:4280/foo/');
         await page.waitForSelector('#userDetails');
-        await page.waitForTimeout(200);
+        await page.waitForTimeout(1000);
         await page.type('#userDetails', 'rwaldin@signatureanalytics.com');
         await page.click('#submit');
         const apiResponse = await page.waitForResponse(response => {
@@ -59,7 +59,7 @@ test.describe('Authorization API', () => {
     test('should return 200 for recognized user', async ({ page }) => {
         await page.goto('http://localhost:4280/signatureanalytics');
         await page.waitForSelector('#userDetails');
-        await page.waitForTimeout(200);
+        await page.waitForTimeout(1000);
         await page.type('#userDetails', 'rwaldin@signatureanalytics.com');
         await page.click('#submit');
         const apiResponse = await page.waitForResponse(response => {
@@ -73,7 +73,7 @@ test.describe('Authorization API', () => {
     }) => {
         await page.goto('http://localhost:4280/signatureanalytics/sales');
         await page.waitForSelector('#userDetails');
-        await page.waitForTimeout(200);
+        await page.waitForTimeout(1000);
         await page.type('#userDetails', 'rwaldin@signatureanalytics.com');
         await page.click('#submit');
         const apiResponse = await page.waitForResponse(response => {
@@ -88,7 +88,7 @@ test.describe('Authorization API', () => {
     test('should return 200 for unrecognized report and then redirected to first report/page', async ({ page }) => {
         await page.goto('http://localhost:4280/signatureanalytics/foo');
         await page.waitForSelector('#userDetails');
-        await page.waitForTimeout(200);
+        await page.waitForTimeout(1000);
         await page.type('#userDetails', 'rwaldin@signatureanalytics.com');
         await page.click('#submit');
         const apiResponse = await page.waitForResponse(response => {
