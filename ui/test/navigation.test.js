@@ -37,5 +37,20 @@ test.describe('Navigation', () => {
         }
     });
 
-    test.skip('should list all pages of current report from API', () => {});
+    test('should list all pages of current report', async ({ page }) => {
+        await login(page, 'rwaldin@signatureanalytics.com');
+        await page.goto('http://localhost:4280/signatureanalytics');
+        await page.waitForSelector('.page');
+        const pages = await page.evaluate(async _ => {
+            const main = document.querySelector('sa-main');
+            const report = main.shadowRoot.querySelector('sa-report').report;
+            const pages = await report.getPages();
+            return pages.map(({ name, displayName }) => ({ name, displayName }));
+        });
+        const pageElements = await page.$$('.page');
+        for (const pageElement of pageElements) {
+            const title = await pageElement.innerText();
+            expect(pages.map(p => p.displayName)).toContain(title);
+        }
+    });
 });

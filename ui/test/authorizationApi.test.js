@@ -54,9 +54,7 @@ test.describe('Authorization API', () => {
         expect(apiResponse.status()).toEqual(200);
     });
 
-    test('should return 200 for recognized user requesting disallowed report and redirect to first report/page', async ({
-        page,
-    }) => {
+    test('should return 200 and redirect to first report for disallowed report', async ({ page }) => {
         await page.goto('http://localhost:4280/signatureanalytics/sales');
         await page.waitForSelector('#userDetails');
         await enterUsername(page, 'rwaldin@signatureanalytics.com');
@@ -67,7 +65,7 @@ test.describe('Authorization API', () => {
         expect(apiResponse.status()).toEqual(200);
     });
 
-    test('should return 200 for unrecognized report and then redirected to first report/page', async ({ page }) => {
+    test('should return 200 and redirect to first report for unrecogied report', async ({ page }) => {
         await page.goto('http://localhost:4280/signatureanalytics/foo');
         await page.waitForSelector('#userDetails');
         await enterUsername(page, 'rwaldin@signatureanalytics.com');
