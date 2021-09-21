@@ -4,6 +4,7 @@ const config = {
             headless: process.env.HEADLESS !== 'false',
         },
     },
+    retries: 3,
 };
 
 module.exports = config;
