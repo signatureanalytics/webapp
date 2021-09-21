@@ -23,7 +23,7 @@ jobs:
               with:
                   node-version: '14.x'
             - run: 'cd api && npm ci'
-            - run: 'cd ui && npm ci && npm run build && npx playwright install-deps chromium && ls /home/runner/.cache/ms-playwright/ && npm test'
+            - run: 'cd ui && npm ci && npm run build && npx playwright install && npm test'
             - name: Build And Deploy
               id: builddeploy
               uses: Azure/static-web-apps-deploy@v1
