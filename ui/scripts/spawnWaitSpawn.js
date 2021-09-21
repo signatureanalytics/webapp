@@ -16,14 +16,15 @@ const spawnWaitForOutput = (cmdline, regex) => {
 };
 
 (async _ => {
-    let proc1;
+    let proc1, proc2;
     try {
         proc1 = await spawnWaitForOutput(cmdline1, new RegExp(regex));
         const [cmd, ...args] = cmdline2.split(' ');
-        const proc2 = childProcess.spawnSync(cmd, [...args, ...extraArgs], { stdio: 'inherit' });
+        proc2 = childProcess.spawnSync(cmd, [...args, ...extraArgs], { stdio: 'inherit' });
     } finally {
         if (proc1) {
             proc1.kill();
         }
+        process.exit(proc2.status || -1);
     }
 })();
