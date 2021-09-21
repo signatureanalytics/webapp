@@ -16,8 +16,7 @@ const spawnWaitForOutput = (cmdline, regex) => {
 
 const procs = {};
 test.beforeAll(async () => {
-    procs.snowpack = await spawnWaitForOutput('npx snowpack dev', /Server started in \d+ms/);
-    procs.swa = await spawnWaitForOutput('swa start http://localhost:8080 --api ../api', /emulator started/);
+    procs.swa = await spawnWaitForOutput('swa start build --api ../api', /emulator started/);
 });
 
 test.describe('Authorization API', () => {
