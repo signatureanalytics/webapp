@@ -23,7 +23,8 @@ jobs:
               with:
                   node-version: '14.x'
             - run: 'cd api && npm ci'
-            - run: 'cd ui && npm ci && npx playwright install-deps chromium'
+            - run: 'cd ui && npm ci'
+            - run: 'npx playwright install-deps chromium'
             - run: 'cd ui && npm test'
 
     build_and_deploy_job:
