@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 if [[ ! -d 'build' ]]; then
     npm run build
 fi 
