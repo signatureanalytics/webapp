@@ -5,7 +5,7 @@
     "main": "dashboard.js",
     "scripts": {
         "start": "scripts/start.sh",
-        "test": "npm run build && npx playwright test",
+        "test": "scripts/spawnWaitSpawn.js 'swa start build --api ../api' 'emulator started' 'npx playwright test'",
         "build": "npx snowpack build && mkdir _build && cp build/*.js build/*.html build/*.map _build && rm -rf build && mv _build build"
     },
     "dependencies": {

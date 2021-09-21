@@ -1,99 +1,41 @@
 const { test, expect } = require('@playwright/test');
-const childProcess = require('child_process');
-const StreamSnitch = require('stream-snitch');
 
-const spawnWaitForOutput = (cmdline, regex) => {
-    const snitch = new StreamSnitch(regex);
-    const [cmd, ...args] = cmdline.split(' ');
-    const proc = childProcess.spawn(cmd, args);
-    proc.stdout.setEncoding('utf8');
-    proc.stdout.pipe(snitch);
-    return new Promise((resolve, reject) => {
-        snitch.on('match', _ => resolve(proc));
-        snitch.on('close', _ => reject(`Process '${cmdline}' ended without matching: ${regex}`));
-    });
+const enterUsername = async (page, username) => {
+    // This page is poorly implemented. It requires the username to be type()d and not fill()ed.
+    // If this happens too soon after the selector appears the entered username is not captured
+    // completely. // Give it time to settle before type()ing the username.
+    await page.waitForSelector('#userDetails');
+    await page.waitForTimeout(500);
+    await page.type('#userDetails', username);
 };
 
-const procs = {};
-test.beforeAll(async () => {
-    procs.swa = await spawnWaitForOutput('swa start build --api ../api', /emulator started/);
-});
+const login = async (page, username) => {
+    await page.goto('http://localhost:4280/.auth/login/google');
+    await enterUsername(page, username);
+    await page.click('#submit');
+};
 
-test.describe('Authorization API', () => {
-    test('should return 401 for unauthorized user', async ({ page }) => {
-        const responseListener = response => {
+test.describe('Navigation', () => {
+    test('should list all reports from API', async ({ page }) => {
+        await login(page, 'rwaldin@signatureanalytics.com');
+        const reports = [];
+        const responseListener = async response => {
             if (response.url() === `http://localhost:4280/api/getEmbedToken`) {
-                expect(response.status()).toEqual(401);
+                const json = await response.json();
+                json.reports.forEach(r => reports.push(r));
                 page.off('response', responseListener);
             }
         };
+        await page.goto('http://localhost:4280/signatureanalytics');
         page.on('response', responseListener);
-        await page.goto('http://localhost:4280/signatureanalytics');
+        await page.waitForSelector('.report');
+        const reportElements = await page.$$('.report');
+        expect(reportElements).toHaveLength(reports.length);
+        for (const reportElement of reportElements) {
+            const title = await reportElement.innerText();
+            expect(reports).toContain(title.replace(/ Report$/, ''));
+        }
     });
 
-    test('should return 403 for unrecognized user', async ({ page }) => {
-        await page.goto('http://localhost:4280/signatureanalytics');
-        await page.waitForSelector('#userDetails');
-        await page.waitForTimeout(500);
-        await page.type('#userDetails', 'ray@waldin.net');
-        await page.click('#submit');
-        const apiResponse = await page.waitForResponse(response => {
-            return response.url() === `http://localhost:4280/api/getEmbedToken`;
-        });
-        expect(apiResponse.status()).toEqual(403);
-    });
-
-    test('should return 404 for unrecognized workspace', async ({ page }) => {
-        await page.goto('http://localhost:4280/foo/');
-        await page.waitForSelector('#userDetails');
-        await page.waitForTimeout(500);
-        await page.type('#userDetails', 'rwaldin@signatureanalytics.com');
-        await page.click('#submit');
-        const apiResponse = await page.waitForResponse(response => {
-            return response.url() === `http://localhost:4280/api/getEmbedToken`;
-        });
-        expect(apiResponse.status()).toEqual(404);
-    });
-
-    test('should return 200 for recognized user', async ({ page }) => {
-        await page.goto('http://localhost:4280/signatureanalytics');
-        await page.waitForSelector('#userDetails');
-        await page.waitForTimeout(500);
-        await page.type('#userDetails', 'rwaldin@signatureanalytics.com');
-        await page.click('#submit');
-        const apiResponse = await page.waitForResponse(response => {
-            return response.url() === `http://localhost:4280/api/getEmbedToken`;
-        });
-        expect(apiResponse.status()).toEqual(200);
-    });
-
-    test('should return 200 for recognized user requesting disallowed report and redirect to first report/page', async ({
-        page,
-    }) => {
-        await page.goto('http://localhost:4280/signatureanalytics/sales');
-        await page.waitForSelector('#userDetails');
-        await page.waitForTimeout(500);
-        await page.type('#userDetails', 'rwaldin@signatureanalytics.com');
-        await page.click('#submit');
-        const apiResponse = await page.waitForResponse(response => {
-            return response.url() === `http://localhost:4280/api/getEmbedToken`;
-        });
-        expect(apiResponse.status()).toEqual(200);
-    });
-
-    test('should return 200 for unrecognized report and then redirected to first report/page', async ({ page }) => {
-        await page.goto('http://localhost:4280/signatureanalytics/foo');
-        await page.waitForSelector('#userDetails');
-        await page.waitForTimeout(500);
-        await page.type('#userDetails', 'rwaldin@signatureanalytics.com');
-        await page.click('#submit');
-        const apiResponse = await page.waitForResponse(response => {
-            return response.url() === `http://localhost:4280/api/getEmbedToken`;
-        });
-        expect(apiResponse.status()).toEqual(200);
-    });
-});
-
-test.afterAll(() => {
-    Object.values(procs).forEach(p => p.kill());
+    test.skip('should list all pages of current report from API', () => {});
 });

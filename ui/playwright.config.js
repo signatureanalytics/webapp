@@ -1,7 +1,7 @@
 const config = {
     use: {
         launchOptions: {
-            // slowMo: 50,
+            headless: process.env.HEADLESS !== 'false',
         },
     },
 };
