@@ -4,7 +4,7 @@ const config = {
             headless: process.env.HEADLESS !== 'false',
         },
     },
-    retries: 3,
+    retries: 2,
     workers: 1,
 };
 
