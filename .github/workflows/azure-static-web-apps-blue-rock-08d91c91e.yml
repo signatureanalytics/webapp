@@ -10,10 +10,10 @@ on:
             - main
 
 jobs:
-    build_and_deploy_job:
+    test_job:
         if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
         runs-on: ubuntu-18.04
-        name: Build and Deploy Job
+        name: Test Job
         steps:
             - uses: actions/checkout@v2
               with:
@@ -24,7 +24,22 @@ jobs:
                   node-version: '14.x'
 
             - run: 'cd api && npm ci'
-            - run: 'cd ui && npm ci && npx playwright install-deps chromium && npm test'
+            - run: 'cd ui && npm ci && npx playwright install-deps chromium'
+            - run: 'cd ui && npm test'
+
+    build_and_deploy_job:
+        if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+        runs-on: ubuntu-18.04
+        name: Build and Deploy Job
+        needs: test_job
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  submodules: true
+            - name: Set up Node.js version
+              uses: actions/setup-node@v1
+              with:
+                  node-version: '14.x'
 
             - name: Build And Deploy
               id: builddeploy
