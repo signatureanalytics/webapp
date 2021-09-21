@@ -25,6 +25,6 @@ const spawnWaitForOutput = (cmdline, regex) => {
         if (proc1) {
             proc1.kill();
         }
-        process.exit(proc2.status || -1);
+        process.exit(proc2.status ?? -1);
     }
 })();
