@@ -55,8 +55,8 @@ class Header extends connect(store)(LitElement) {
     render() {
         return html`
             <header>
-                <img class="sa-logo" src=${saLogo} />
-                <img class="covantage-logo" src=${covantageLogo} />
+                <img class="sa-logo" src="${saLogo}" />
+                <img class="covantage-logo" src="${covantageLogo}" />
             </header>
         `;
     }
