@@ -24,13 +24,12 @@ jobs:
                   node-version: '14.x'
             - run: 'cd api && npm ci'
             - run: 'cd ui && npm ci && npm run build && npx playwright install && npm test -- --workers=1 --retries=2'
-            - name: Upload failed tests
+            - name: Upload screenshots
               if: ${{ failure() }}
-              uses: edunad/action-image@v1.0.0
+              uses: actions/upload-artifact@v1
               with:
-                  path: './ui/test-results/**/*.png'
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  title: 'Failed E2E tests 🙀'
+                  name: screenshots
+                  path: ./ui/test-results
             - name: Build And Deploy
               id: builddeploy
               uses: Azure/static-web-apps-deploy@v1
