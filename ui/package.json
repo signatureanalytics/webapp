@@ -23,7 +23,8 @@
         "rollup-plugin-terser": "^7.0.2",
         "snowpack": "^3.8.8",
         "snowpack-plugin-rollup-bundle": "^0.4.4",
-        "stream-snitch": "0.0.3"
+        "stream-snitch": "0.0.3",
+        "yargs": "^17.1.1"
     },
     "keywords": [],
     "author": "",
