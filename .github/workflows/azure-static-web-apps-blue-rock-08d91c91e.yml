@@ -28,7 +28,7 @@ jobs:
               if: ${{ failure() }}
               uses: edunad/action-image@v1.0.0
               with:
-                  path: './test-results/**/*.png'
+                  path: './ui/test-results/**/*.png'
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   title: 'Failed E2E tests 🙀'
             - name: Build And Deploy
