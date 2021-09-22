@@ -47,9 +47,7 @@ const spawnWaitForOutput = (cmdline, regex) => {
         const [cmd, ...args] = cmdline2.split(' ');
         proc2 = childProcess.spawnSync(cmd, [...args, ...extraArgs], { stdio: 'inherit' });
     } finally {
-        console.log(`proc1 ${proc1}`);
         if (proc1) {
-            console.log(`killing ${cmdline1}`);
             proc1.kill();
         }
         process.exit(proc2?.status ?? -1);
