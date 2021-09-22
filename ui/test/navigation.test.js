@@ -39,9 +39,16 @@ test.describe('Navigation', () => {
 
     test('should list all pages of current report', async ({ page }) => {
         await login(page, 'rwaldin@signatureanalytics.com');
-        await page.waitForTimeout(5000);
+        const reports = [];
+        const responseListener = async response => {
+            if (response.url() === `http://localhost:4280/api/getEmbedToken`) {
+                const json = await response.json();
+                json.reports.forEach(r => reports.push(r));
+                page.off('response', responseListener);
+            }
+        };
         await page.goto('http://localhost:4280/signatureanalytics');
-        await page.waitForTimeout(5000);
+        page.on('response', responseListener);
         await page.waitForSelector('.page');
         const pages = await page.evaluate(async _ => {
             const main = document.querySelector('sa-main');
