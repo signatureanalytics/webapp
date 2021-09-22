@@ -94,6 +94,7 @@ class Report extends connect(store)(LitElement) {
         const reportContainer = document.createElement('div');
         reportContainer.id = 'reportContainer';
         this.shadowRoot.getElementById('reportContainer').replaceWith(reportContainer);
+        powerbi.bootstrap(reportContainer, { type: 'report' });
 
         try {
             // AJAX request to get the report details from the API and pass it to the UI
@@ -145,7 +146,6 @@ class Report extends connect(store)(LitElement) {
                 // Refer https://aka.ms/RefreshEmbedToken
                 // tokenExpiry = embedData.expiry;
                 // Initialize iframe for embedding report
-                powerbi.bootstrap(reportContainer, { type: 'report' });
 
                 // Embed Power BI report when Access token and Embed URL are available
                 this.report = powerbi.embed(reportContainer, reportLoadConfig);
