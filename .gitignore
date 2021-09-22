@@ -125,3 +125,5 @@ local.settings.json
 # vscode settings
 
 .vscode
+
+test-results
