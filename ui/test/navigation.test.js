@@ -49,6 +49,7 @@ test.describe('Navigation', () => {
         };
         await page.goto('http://localhost:4280/signatureanalytics');
         page.on('response', responseListener);
+        await page.waitForSelector('.report');
         await page.waitForSelector('.page');
         const pages = await page.evaluate(async _ => {
             const main = document.querySelector('sa-main');
