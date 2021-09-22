@@ -40,7 +40,7 @@ test.describe('Navigation', () => {
     test('should list all pages of current report', async ({ page }) => {
         await login(page, 'rwaldin@signatureanalytics.com');
         await page.goto('http://localhost:4280/signatureanalytics');
-        await page.waitForTimeout(5000);
+        await page.waitForTimeout(10000);
         await page.waitForSelector('.page');
         const pages = await page.evaluate(async _ => {
             const main = document.querySelector('sa-main');
