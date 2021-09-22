@@ -4,6 +4,7 @@ const enterUsername = async (page, username) => {
     // This page is poorly implemented. It requires the username to be type()d and not fill()ed.
     // If this happens too soon after the selector appears the entered username is not captured
     // completely. // Give it time to settle before type()ing the username.
+    page.on('console', msg => console.log(msg.text()));
     await page.waitForSelector('#userDetails');
     await page.waitForTimeout(500);
     await page.type('#userDetails', username);
