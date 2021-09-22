@@ -148,13 +148,14 @@ class Report extends connect(store)(LitElement) {
                 const iframe = reportContainer.querySelector('iframe');
                 const iframeLoad = _ => {
                     // Embed Power BI report when Access token and Embed URL are available
-                    this.report = powerbi.embed(reportContainer, reportLoadConfig);
+                    this.report = powerbi.load(reportContainer, reportLoadConfig);
 
                     // Clear any other loaded handler events
                     this.report.off('loaded');
 
                     this.report.on('loaded', async _ => {
                         console.log('Report load successful');
+
                         const pages = await this.report.getPages();
 
                         store.dispatch(
@@ -178,6 +179,8 @@ class Report extends connect(store)(LitElement) {
                             const page = this.pageNameBySlug(pageSlug);
                             store.dispatch(selectPage({ page }));
                         }
+
+                        this.report.render();
                     });
 
                     // Clear any other rendered handler events
