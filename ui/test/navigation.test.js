@@ -22,9 +22,10 @@ test.describe('Navigation', () => {
         const reports = [];
         const responseListener = async response => {
             if (response.url() === `http://localhost:4280/api/getEmbedToken`) {
+                page.off('response', responseListener);
+                expect(await response.status()).toEqual(200);
                 const json = await response.json();
                 json.reports.forEach(r => reports.push(r));
-                page.off('response', responseListener);
             }
         };
         await page.goto('http://localhost:4280/signatureanalytics');
