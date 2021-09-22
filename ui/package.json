@@ -6,7 +6,7 @@
     "scripts": {
         "start": "scripts/start.sh",
         "test": "scripts/test.sh",
-        "build": "npx snowpack build && mkdir _build && cp build/*.js build/*.html build/*.map _build && rm -rf build && mv _build build"
+        "build": "scripts/build.sh"
     },
     "dependencies": {
         "@reduxjs/toolkit": "^1.6.1",
