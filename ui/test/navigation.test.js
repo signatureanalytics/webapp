@@ -24,18 +24,13 @@ test.describe('Navigation', () => {
         } catch (e) {}
         page.on('request', async request => {
             const headers = await request.allHeaders();
-            await fs.appendFile(
-                'test-results/http.log',
-                `${request.url()} ${Object.entries(headers).map(([key, val]) => `\n${key}: ${val}`)}\n`
-            );
+            await fs.appendFile('test-results/http.log', `${request.url()} ${JSON.stringify(headers, null, '  ')}\n`);
         });
         page.on('response', async response => {
             const headers = await response.allHeaders();
             await fs.appendFile(
                 'test-results/http.log',
-                `${response.status()} ${response.url()}  ${Object.entries(headers).map(
-                    ([key, val]) => `\n${key}: ${val}`
-                )}\n`
+                `${response.status()} ${response.url()}  ${JSON.stringify(headers, null, '  ')}\n`
             );
         });
         page.on('requestfailed', async request => {
