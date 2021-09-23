@@ -5,6 +5,8 @@ import store from '../state/store';
 import saLogo from '../assets/sa-logo.png';
 import covantageLogo from '../assets/covantage-logo.png';
 
+const fixAssetUrl = url => `${`/${url}`.replace('//', '/')}`;
+
 class Header extends connect(store)(LitElement) {
     static get styles() {
         return css`
@@ -55,8 +57,8 @@ class Header extends connect(store)(LitElement) {
     render() {
         return html`
             <header>
-                <img class="sa-logo" src="${saLogo}" />
-                <img class="covantage-logo" src="${covantageLogo}" />
+                <img class="sa-logo" src="${fixAssetUrl(saLogo)}" />
+                <img class="covantage-logo" src="${fixAssetUrl(covantageLogo)}" />
             </header>
         `;
     }

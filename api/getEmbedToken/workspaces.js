@@ -3,22 +3,22 @@ const workspaces = {
         id: 'f9b1241e-ef36-489b-bc2e-eba05b970c73',
         reports: {
             Engagement: {
-                id: 'b16e2006-8ee5-4c0d-981f-3d9bcc5e46a0',
+                id: '81309e92-a565-4923-b21a-db5a34e89ddf',
             },
             'Hours Detail': {
-                id: 'cdbed8c3-fcde-430b-89c2-c21f11d8ed0b',
+                id: '8923f976-8955-4bbe-a699-bcc32200ff93',
             },
             HR: {
-                id: '898d1c22-b3c4-4e98-af5c-9d15ea5b3984',
+                id: 'c33f6afb-6a37-41c5-873b-fa339a9edeb7',
             },
             Market: {
-                id: '8f111861-5cc5-43be-93f6-6913c7c38046',
+                id: '780e87ed-3bed-4de7-830b-da5e1464dbe0',
             },
             Revenue: {
-                id: '0764fbaf-f2f2-4524-afc7-f929f27c20d8',
+                id: '993e591f-cbe7-47a4-b285-087ae4b6e5ee',
             },
             Sales: {
-                id: '63395ed3-39f9-452d-8711-7b6d89741157',
+                id: '11c867d4-6dd5-452f-b2c1-943a1f2eb3bc',
             },
         },
         users: {
