@@ -19,26 +19,6 @@ const login = async (page, username) => {
 
 test.describe('Navigation', () => {
     test('should open specified report page', async ({ page }) => {
-        try {
-            await fs.mkdir('test-results');
-        } catch (e) {}
-        page.on('request', async request => {
-            const headers = await request.allHeaders();
-            await fs.appendFile('test-results/http.log', `${request.url()} ${JSON.stringify(headers, null, '  ')}\n`);
-        });
-        page.on('response', async response => {
-            const headers = await response.allHeaders();
-            await fs.appendFile(
-                'test-results/http.log',
-                `${response.status()} ${response.url()}  ${JSON.stringify(headers, null, '  ')}\n`
-            );
-        });
-        page.on('requestfailed', async request => {
-            await fs.appendFile(
-                'test-results/http.log',
-                `REQUEST FAILURE: ${request.url()} ${request.failure().errorText}\n`
-            );
-        });
         await login(page, 'rwaldin@signatureanalytics.com');
         await page.goto('http://localhost:4280/signatureanalytics/market/revenue-kpis');
         await page.waitForSelector('.page');
