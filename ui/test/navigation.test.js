@@ -38,7 +38,7 @@ test.describe('Navigation', () => {
                 )}\n`
             );
         });
-        page.on('requestfailed', request => {
+        page.on('requestfailed', async request => {
             await fs.appendFile(
                 'test-results/http.log',
                 `REQUEST FAILURE: ${request.url()} ${request.failure().errorText}`
