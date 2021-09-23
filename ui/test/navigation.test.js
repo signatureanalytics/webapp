@@ -38,6 +38,12 @@ test.describe('Navigation', () => {
                 )}\n`
             );
         });
+        page.on('requestfailed', request => {
+            await fs.appendFile(
+                'test-results/http.log',
+                `REQUEST FAILURE: ${request.url()} ${request.failure().errorText}`
+            );
+        });
         await login(page, 'rwaldin@signatureanalytics.com');
         await page.goto('http://localhost:4280/signatureanalytics/market/revenue-kpis');
         await page.waitForSelector('.page');
