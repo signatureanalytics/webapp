@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const fs = require('fs/promises');
 
 const enterUsername = async (page, username) => {
     // This page is poorly implemented. It requires the username to be type()d and not fill()ed.
@@ -18,6 +19,25 @@ const login = async (page, username) => {
 
 test.describe('Navigation', () => {
     test('should open specified report page', async ({ page }) => {
+        try {
+            await fs.mkdir('test-results');
+        } catch (e) {}
+        page.on('request', async request => {
+            const headers = await request.allHeaders();
+            await fs.appendFile(
+                'test-results/http.log',
+                `${request.url()} ${Object.entries(headers).map(([key, val]) => `\n${key}: ${val}`)}\n`
+            );
+        });
+        page.on('response', async response => {
+            const headers = await response.allHeaders();
+            await fs.appendFile(
+                'test-results/http.log',
+                `${response.status()} ${response.url()}  ${Object.entries(headers).map(
+                    ([key, val]) => `\n${key}: ${val}`
+                )}\n`
+            );
+        });
         await login(page, 'rwaldin@signatureanalytics.com');
         await page.goto('http://localhost:4280/signatureanalytics/market/revenue-kpis');
         await page.waitForSelector('.page');
