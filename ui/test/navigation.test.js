@@ -36,7 +36,7 @@ test.describe('Navigation', () => {
         page.on('requestfailed', async request => {
             await fs.appendFile(
                 'test-results/http.log',
-                `REQUEST FAILURE: ${request.url()} ${request.failure().errorText}`
+                `REQUEST FAILURE: ${request.url()} ${request.failure().errorText}\n`
             );
         });
         await login(page, 'rwaldin@signatureanalytics.com');
