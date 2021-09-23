@@ -17,12 +17,12 @@ const login = async (page, username) => {
 };
 
 test.describe('Navigation', () => {
-    test('should list all reports from API', async ({ page }) => {
+    test('should open specified report page', async ({ page }) => {
         await login(page, 'rwaldin@signatureanalytics.com');
         await page.goto('http://localhost:4280/signatureanalytics/market/revenue-kpis');
-        await page.waitForTimeout(3000);
-        await page.screenshot({ path: 'testScreenshot.png' });
-    }
+        await page.waitForTimeout(25000);
+        await page.screenshot({ path: 'test-results/testScreenshot.png' });
+    });
     test('should list all reports from API', async ({ page }) => {
         await login(page, 'rwaldin@signatureanalytics.com');
         const reports = [];
