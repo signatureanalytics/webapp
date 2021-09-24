@@ -1,0 +1,6 @@
+{
+    "navigationFallback": {
+        "rewrite": "/dashboard.html",
+        "exclude": ["/images/*.{png,jpg,gif}", "/css/*", "/.auth/*", "/../node_modules/*", "/api/*"]
+    }
+}
