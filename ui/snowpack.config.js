@@ -64,7 +64,7 @@ module.exports = {
         },
         {
             match: 'routes',
-            src: `^/(?!api)(?!\.auth)(?!node_modules).+`,
+            src: `^/(?!api)(?!\.auth)(?!node_modules)(?!assets).+`,
             dest: 'dashboard.html',
         },
     ],

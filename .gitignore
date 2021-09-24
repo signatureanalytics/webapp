@@ -125,7 +125,3 @@ local.settings.json
 # vscode settings
 
 .vscode
-
-# misc
-
-.prettierrc

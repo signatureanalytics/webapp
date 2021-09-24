@@ -9,9 +9,10 @@
         "build": "npx snowpack build && mkdir _build && cp build/*.js build/*.html build/*.map _build && rm -rf build && mv _build build"
     },
     "dependencies": {
+        "@reduxjs/toolkit": "^1.6.1",
         "lit": "^2.0.0-rc.4",
         "powerbi-client": "^2.18.5",
-        "redux": "^4.1.1"
+        "pwa-helpers": "^0.9.1"
     },
     "devDependencies": {
         "rollup": "^2.56.3",
