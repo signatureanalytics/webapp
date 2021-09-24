@@ -92,9 +92,8 @@ class Report extends connect(store)(LitElement) {
 
     async initReport() {
         const reportContainer = document.createElement('div');
-        reportContainer.id = 'reportContainer';
         this.shadowRoot.getElementById('reportContainer').replaceWith(reportContainer);
-
+        reportContainer.id = 'reportContainer';
         try {
             // AJAX request to get the report details from the API and pass it to the UI
             const response = await fetch('/api/getEmbedToken').then(async response => {
@@ -146,55 +145,63 @@ class Report extends connect(store)(LitElement) {
                 // tokenExpiry = embedData.expiry;
                 // Initialize iframe for embedding report
                 powerbi.bootstrap(reportContainer, { type: 'report' });
+                const iframe = reportContainer.querySelector('iframe');
+                const iframeLoad = _ => {
+                    // Embed Power BI report when Access token and Embed URL are available
+                    this.report = powerbi.load(reportContainer, reportLoadConfig);
 
-                // Embed Power BI report when Access token and Embed URL are available
-                this.report = powerbi.embed(reportContainer, reportLoadConfig);
+                    // Clear any other loaded handler events
+                    this.report.off('loaded');
 
-                // Clear any other loaded handler events
-                this.report.off('loaded');
+                    this.report.on('loaded', async _ => {
+                        console.log('Report load successful');
 
-                this.report.on('loaded', async _ => {
-                    console.log('Report load successful');
-                    const pages = await this.report.getPages();
+                        const pages = await this.report.getPages();
 
-                    store.dispatch(
-                        selectReport({
-                            report: response.report.name,
-                        })
-                    );
-                    store.dispatch(setPages({ pages: pages.map(({ name, displayName }) => ({ name, displayName })) }));
-                    if (!pageSlug) {
-                        const page = pages[0].name;
-                        const encodedPageName = this.slugForPageIndex(0);
-                        const encodedReportName = slug(response.report.name);
-                        history.replaceState(
-                            { report: reportSlug, page },
-                            null,
-                            `${location.origin}/${workspaceSlug}/${encodedReportName}/${encodedPageName}`
+                        store.dispatch(
+                            selectReport({
+                                report: response.report.name,
+                            })
                         );
-                    } else {
-                        const page = this.pageNameBySlug(pageSlug);
-                        store.dispatch(selectPage({ page }));
-                    }
-                });
+                        store.dispatch(
+                            setPages({ pages: pages.map(({ name, displayName }) => ({ name, displayName })) })
+                        );
+                        if (!pageSlug) {
+                            const page = pages[0].name;
+                            const encodedPageName = this.slugForPageIndex(0);
+                            const encodedReportName = slug(response.report.name);
+                            history.replaceState(
+                                { report: reportSlug, page },
+                                null,
+                                `${location.origin}/${workspaceSlug}/${encodedReportName}/${encodedPageName}`
+                            );
+                        } else {
+                            const page = this.pageNameBySlug(pageSlug);
+                            store.dispatch(selectPage({ page }));
+                        }
+                        this.report.render();
+                    });
 
-                // Clear any other rendered handler events
-                this.report.off('rendered');
+                    // Clear any other rendered handler events
+                    this.report.off('rendered');
 
-                // Triggers when a report is successfully embedded in UI
-                this.report.on('rendered', function () {
-                    console.log('Report render successful');
-                });
+                    // Triggers when a report is successfully embedded in UI
+                    this.report.on('rendered', function () {
+                        console.log('Report render successful');
+                    });
 
-                // Clear any other error handler events
-                this.report.off('error');
+                    // Clear any other error handler events
+                    this.report.off('error');
 
-                // Handle embed errors
-                this.report.on('error', function (event) {
-                    let errorMsg = event.detail;
-                    console.error(errorMsg);
-                    return;
-                });
+                    // Handle embed errors
+                    this.report.on('error', function (event) {
+                        let errorMsg = event.detail;
+                        console.error(errorMsg);
+                        return;
+                    });
+                };
+
+                iframe.addEventListener('load', iframeLoad, { once: true });
             } else {
                 const reportLinks = response.reports.map(
                     reportName => `<li><a href="${location}/${reportName}">${reportName} Report</a></li>`

@@ -4,9 +4,9 @@
     "description": "",
     "main": "dashboard.js",
     "scripts": {
-        "start": "(npx snowpack dev &) && swa start http://localhost:8080 --api ../api",
-        "test": "echo \"No tests yet...\"",
-        "build": "npx snowpack build && mkdir _build && cp build/*.js build/*.html build/*.map _build && rm -rf build && mv _build build"
+        "start": "scripts/start.sh",
+        "test": "scripts/test.sh",
+        "build": "scripts/build.sh"
     },
     "dependencies": {
         "@reduxjs/toolkit": "^1.6.1",
@@ -15,11 +15,16 @@
         "pwa-helpers": "^0.9.1"
     },
     "devDependencies": {
+        "@azure/static-web-apps-cli": "^0.7.1",
+        "@playwright/test": "^1.15.0",
+        "azure-functions-core-tools": "^3.0.3734",
         "rollup": "^2.56.3",
         "rollup-plugin-minify-html-literals": "^1.2.6",
         "rollup-plugin-terser": "^7.0.2",
         "snowpack": "^3.8.8",
-        "snowpack-plugin-rollup-bundle": "^0.4.4"
+        "snowpack-plugin-rollup-bundle": "^0.4.4",
+        "stream-snitch": "0.0.3",
+        "yargs": "^17.1.1"
     },
     "keywords": [],
     "author": "",

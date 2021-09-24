@@ -2,6 +2,10 @@ import { LitElement, html, css } from 'lit';
 import { connect } from 'pwa-helpers/connect-mixin';
 import { navSelectors } from '../state/navSelectors';
 import store from '../state/store';
+import saLogo from '../assets/sa-logo.png';
+import covantageLogo from '../assets/covantage-logo.png';
+
+const fixAssetUrl = url => `${`/${url}`.replace('//', '/')}`;
 
 class Header extends connect(store)(LitElement) {
     static get styles() {
@@ -53,8 +57,8 @@ class Header extends connect(store)(LitElement) {
     render() {
         return html`
             <header>
-                <img class="sa-logo" src="/assets/sa-logo.png" />
-                <img class="covantage-logo" src="/assets/covantage-logo.png" />
+                <img class="sa-logo" src="${fixAssetUrl(saLogo)}" />
+                <img class="covantage-logo" src="${fixAssetUrl(covantageLogo)}" />
             </header>
         `;
     }
