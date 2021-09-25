@@ -24,15 +24,16 @@ test.describe('Navigation', () => {
         await page.waitForSelector('.page');
         await page.screenshot({ path: 'test-results/testScreenshot.png' });
     });
+
     test('should list all reports from API', async ({ page }) => {
         await login(page, 'rwaldin@signatureanalytics.com');
         const reports = [];
         const responseListener = async response => {
-            if (response.url() === `http://localhost:4280/api/getEmbedToken`) {
+            if (response.url() === `http://localhost:4280/api/getWorkspaceToken`) {
                 page.off('response', responseListener);
                 expect(await response.status()).toEqual(200);
                 const json = await response.json();
-                json.reports.forEach(r => reports.push(r));
+                Object.keys(json.reports).forEach(r => reports.push(r));
             }
         };
         await page.goto('http://localhost:4280/signatureanalytics');

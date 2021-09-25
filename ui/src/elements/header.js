@@ -1,6 +1,6 @@
 import { LitElement, html, css } from 'lit';
 import { connect } from 'pwa-helpers/connect-mixin';
-import { navSelectors } from '../state/navSelectors';
+import { selectors } from '../state/selectors';
 import store from '../state/store';
 import saLogo from '../assets/sa-logo.png';
 import covantageLogo from '../assets/covantage-logo.png';
@@ -40,18 +40,29 @@ class Header extends connect(store)(LitElement) {
     }
     static get properties() {
         return {
-            currentReport: { type: String },
-            currentPage: { type: Object },
-            currentTitle: { type: String },
+            selectedReport: { type: String },
+            selectedPage: { type: Object },
+            workspace: { type: Object },
         };
     }
+
+    get title() {
+        const workspaceName = this.workspace?.name;
+        const reportName = this.selectedReport?.name;
+        const pageName = this.selectedPage?.name;
+        return `Co:Vantage™${
+            workspaceName
+                ? ` ${workspaceName}${reportName ? ` ${reportName} Report${pageName ? ` - ${pageName}` : ''}` : ''}`
+                : ''
+        }`;
+    }
+
     stateChanged(state) {
-        this.currentReport = navSelectors.currentReport(state);
-        this.currentPage = navSelectors.currentPage(state);
-        this.currentTitle = navSelectors.currentTitle(state);
-        const documentTitle = `${this.currentTitle ? `${this.currentTitle} -` : ''} Co:Vantage™ by Signature Analytics`;
-        if (documentTitle !== document.title) {
-            document.title = documentTitle;
+        this.selectedReport = selectors.selectedReport(state);
+        this.selectedPage = selectors.selectedPage(state);
+        this.workspace = selectors.workspace(state);
+        if (this.title !== document.title) {
+            document.title = this.title;
         }
     }
     render() {

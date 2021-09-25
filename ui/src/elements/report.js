@@ -2,11 +2,11 @@ import * as pbi from 'powerbi-client';
 import store from '../state/store';
 import { LitElement, html, css } from 'lit';
 import { connect } from 'pwa-helpers/connect-mixin';
-import { setPages, setReports, selectReport, selectPage, loadReport } from '../state/navSlice';
-import { navSelectors } from '../state/navSelectors';
-import slug from '../slug';
+import { setPages, setWorkspace, setWorkspaceToken, selectReport, selectPage, loadReport } from '../state/slice';
+import { selectors } from '../state/selectors';
 
 const models = pbi.models;
+const refreshTokenBeforeExpiresMs = 5 * 60 * 1000;
 
 class Report extends connect(store)(LitElement) {
     static get styles() {
@@ -31,72 +31,71 @@ class Report extends connect(store)(LitElement) {
 
     static get properties() {
         return {
-            reports: { type: Array },
+            loadingReport: { type: String },
+            pageById: { type: Object },
+            pageBySlug: { type: Object },
             pages: { type: Array },
-            currentReport: { type: String },
-            currentPage: { type: String },
+            pageSlug: { type: Object },
             report: { type: Object },
-            loadReport: { type: String },
-            currentReportSlug: { type: String },
-            pageNameBySlug: { type: Object },
+            reportById: { type: Object },
             reportBySlug: { type: Object },
-            slugForPageIndex: { type: Object },
-            slugForReportIndex: { type: Object },
+            reports: { type: Array },
+            reportSlug: { type: Object },
+            selectedPage: { type: String },
+            selectedReport: { type: String },
+            workspace: { type: Object },
         };
     }
 
     constructor() {
         super();
         window.addEventListener('popstate', e => {
-            if (this.currentReportSlug === e.state.report) {
-                if (this.currentPage !== e.state.page) {
-                    store.dispatch(selectPage({ page: e.state.page }));
-                }
-            } else {
-                store.dispatch(loadReport({ report: this.reportBySlug(e.state.report) }));
-                this.initReport();
+            if (this.selectedReport.id !== e.state.report) {
+                const report = this.reportById(e.state.report);
+                store.dispatch(loadReport({ report }));
+            } else if (this.selectedPage.id !== e.state.page) {
+                store.dispatch(selectPage({ page: this.pageById(e.state.page) }));
             }
         });
     }
 
-    disconnectedCallback() {
-        window.removeEventListener('popstate');
-    }
-
     stateChanged(state) {
-        const priorPage = this.currentPage;
-        const priorLoadReport = this.loadReport;
-
-        this.reports = navSelectors.reports(state);
-        this.pages = navSelectors.pages(state);
-        this.currentPage = navSelectors.currentPage(state);
-        this.currentReport = navSelectors.currentReport(state);
-        this.loadReport = navSelectors.loadReport(state);
-        this.currentReportSlug = navSelectors.currentReportSlug(state);
-        this.pageNameBySlug = navSelectors.pageNameBySlug(state);
-        this.reportBySlug = navSelectors.reportBySlug(state);
-        this.slugForPageIndex = navSelectors.slugForPageIndex(state);
-        this.slugForReportIndex = navSelectors.slugForReportIndex(state);
-
-        if (this.currentPage && this.currentPage !== priorPage && this.report) {
-            this.report.setPage(this.currentPage);
-        }
-        if (this.loadReport !== priorLoadReport && this.report) {
-            this.initReport();
-        }
+        this.workspace = selectors.workspace(state);
+        this.reports = selectors.reports(state);
+        this.pages = selectors.pages(state);
+        this.selectedPage = selectors.selectedPage(state);
+        this.selectedReport = selectors.selectedReport(state);
+        this.loadingReport = selectors.loadingReport(state);
+        this.pageBySlug = selectors.pageBySlug(state);
+        this.reportBySlug = selectors.reportBySlug(state);
+        this.reportById = selectors.reportById(state);
+        this.pageById = selectors.pageById(state);
+        this.reportSlug = selectors.reportSlug(state);
+        this.pageSlug = selectors.pageSlug(state);
     }
 
     firstUpdated() {
-        this.initReport();
+        this.loadWorkspace();
     }
 
-    async initReport() {
-        const reportContainer = document.createElement('div');
-        this.shadowRoot.getElementById('reportContainer').replaceWith(reportContainer);
-        reportContainer.id = 'reportContainer';
+    updated(changedProps) {
+        super.updated(changedProps);
+        if (changedProps.has('selectedPage') && this.report) {
+            this.report.setPage(this.selectedPage.id);
+        }
+        if (changedProps.has('loadingReport') && this.report) {
+            this.setReport(this.loadingReport);
+        }
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        window.removeEventListener('popstate');
+    }
+
+    async loadWorkspace() {
         try {
-            // AJAX request to get the report details from the API and pass it to the UI
-            const response = await fetch('/api/getEmbedToken').then(async response => {
+            const response = await fetch('/api/getWorkspaceToken').then(async response => {
                 if (!response.ok) {
                     switch (response.status) {
                         case 401:
@@ -107,146 +106,99 @@ class Report extends connect(store)(LitElement) {
                             break;
                         case 400:
                         default:
-                            const json = await response.json();
-                            // reportContainer.innerHTML = `<p class="error">${json.error}</p>`;
-                            return json;
+                            return await response.json();
                     }
                 } else {
                     return response.json();
                 }
             });
-
-            store.dispatch(setReports({ reports: response.reports }));
-            const [, workspaceSlug, reportSlug, pageSlug] = location.pathname.split('/');
-
-            if (response.report.accessToken) {
-                // Create a config object with type of the object, Embed details and Token Type
-                let reportLoadConfig = {
-                    type: 'report',
-                    tokenType: models.TokenType.Embed,
-                    accessToken: response.report.accessToken,
-
-                    // Use other embed report config based on the requirement. We have used the first one for demo purpose
-                    embedUrl: response.report.embedUrl[0].embedUrl,
-
-                    // Enable this setting to remove gray shoulders from embedded report
-                    settings: {
-                        // background: models.BackgroundType.Transparent,
-                        panes: {
-                            pageNavigation: {
-                                visible: false,
-                            },
-                        },
-                    },
-                };
-
-                // Use the token expiry to regenerate Embed token for seamless end user experience
-                // Refer https://aka.ms/RefreshEmbedToken
-                // tokenExpiry = embedData.expiry;
-                // Initialize iframe for embedding report
-                powerbi.bootstrap(reportContainer, { type: 'report' });
-                const iframe = reportContainer.querySelector('iframe');
-                const iframeLoad = _ => {
-                    // Embed Power BI report when Access token and Embed URL are available
-                    this.report = powerbi.load(reportContainer, reportLoadConfig);
-
-                    // Clear any other loaded handler events
-                    this.report.off('loaded');
-
-                    this.report.on('loaded', async _ => {
-                        console.log('Report load successful');
-
-                        const pages = await this.report.getPages();
-
-                        store.dispatch(
-                            selectReport({
-                                report: response.report.name,
-                            })
-                        );
-                        store.dispatch(
-                            setPages({ pages: pages.map(({ name, displayName }) => ({ name, displayName })) })
-                        );
-                        if (!pageSlug) {
-                            const page = pages[0].name;
-                            const encodedPageName = this.slugForPageIndex(0);
-                            const encodedReportName = slug(response.report.name);
-                            history.replaceState(
-                                { report: reportSlug, page },
-                                null,
-                                `${location.origin}/${workspaceSlug}/${encodedReportName}/${encodedPageName}`
-                            );
-                        } else {
-                            const page = this.pageNameBySlug(pageSlug);
-                            store.dispatch(selectPage({ page }));
-                        }
-                        this.report.render();
-                    });
-
-                    // Clear any other rendered handler events
-                    this.report.off('rendered');
-
-                    // Triggers when a report is successfully embedded in UI
-                    this.report.on('rendered', function () {
-                        console.log('Report render successful');
-                    });
-
-                    // Clear any other error handler events
-                    this.report.off('error');
-
-                    // Handle embed errors
-                    this.report.on('error', function (event) {
-                        let errorMsg = event.detail;
-                        console.error(errorMsg);
-                        return;
-                    });
-                };
-
-                iframe.addEventListener('load', iframeLoad, { once: true });
+            if (this.report) {
+                const { token, tokenId, tokenExpires } = response;
+                store.dispatch(setWorkspaceToken({ token, tokenId, tokenExpires }));
+                this.report.setAccessToken(response.token);
             } else {
-                const reportLinks = response.reports.map(
-                    reportName => `<li><a href="${location}/${reportName}">${reportName} Report</a></li>`
-                );
-
-                reportContainer.innerHTML = `
-                    <h2>Signature Analytics reports</h2>
-                    <ul class="reportList">${reportLinks.join('')}</ul>
-                `;
+                store.dispatch(setWorkspace({ workspace: response }));
+                const [, , reportSlug, pageSlug] = location.pathname.split('/');
+                const report = this.reportBySlug(reportSlug) ?? this.reports[0];
+                this.setReport(report, pageSlug);
             }
+            setTimeout(_ => this.loadWorkspace(), response.tokenExpires - refreshTokenBeforeExpiresMs);
         } catch (error) {
-            // // Show error container
-            // let errorContainer = $(".error-container");
-            // $(".embed-container").hide();
-            // errorContainer.show();
-
-            // Get the error message from err object
-            // let errorMsg = JSON.parse(error.responseText).error;
-
-            // // Split the message with \r\n delimiter to get the errors from the error message
-            // let errorLines = errorMsg.split("\r\n");
-
-            // // Create error header
-            // let errHeader = document.createElement("p");
-            // let strong = document.createElement("strong");
-            // let node = document.createTextNode("Error Details:");
-
-            // // Get the error container
-            // let errContainer = errorContainer.get(0);
-
-            // // Add the error header in the container
-            // strong.appendChild(node);
-            // errHeader.appendChild(strong);
-            // errContainer.appendChild(errHeader);
-
-            // // Create <p> as per the length of the array and append them to the container
-            // errorLines.forEach((element) => {
-            //     let errorContent = document.createElement("p");
-            //     let node = document.createTextNode(element);
-            //     errorContent.appendChild(node);
-            //     errContainer.appendChild(errorContent);
-            // });
-
             console.error(error);
         }
+    }
+
+    async setReport(report, pageSlug) {
+        const reportContainer = document.createElement('div');
+        this.shadowRoot.getElementById('reportContainer').replaceWith(reportContainer);
+        reportContainer.id = 'reportContainer';
+
+        // Create a config object with type of the object, Embed details and Token Type
+        let reportLoadConfig = {
+            type: 'report',
+            tokenType: models.TokenType.Embed,
+            accessToken: this.workspace.token,
+
+            // Use other embed report config based on the requirement. We have used the first one for demo purpose
+            embedUrl: `https://app.powerbi.com/reportEmbed?groupId=${this.workspace.id}&reportId=${report.id}`,
+
+            // Enable this setting to remove gray shoulders from embedded report
+            settings: {
+                // background: models.BackgroundType.Transparent,
+                panes: {
+                    pageNavigation: {
+                        visible: false,
+                    },
+                },
+            },
+        };
+
+        powerbi.bootstrap(reportContainer, { type: 'report' });
+        const iframe = reportContainer.querySelector('iframe');
+        const iframeLoad = _ => {
+            // Embed Power BI report when Access token and Embed URL are available
+            this.report = powerbi.load(reportContainer, reportLoadConfig);
+
+            // Clear any other loaded handler events
+            this.report.off('loaded');
+            this.report.on('loaded', async _ => {
+                console.log('Report load successful');
+
+                const pages = await this.report.getPages();
+
+                store.dispatch(selectReport({ report }));
+                store.dispatch(
+                    setPages({ pages: pages.map(({ name, displayName }) => ({ id: name, name: displayName })) })
+                );
+                if (pageSlug) {
+                    const pageName = this.pageBySlug(pageSlug).name;
+                    store.dispatch(selectPage({ page: this.pages.find(p => p.name === pageName) }));
+                } else {
+                    const [, workspaceSlug] = location.pathname.split('/');
+                    const page = this.pages[0];
+                    history.replaceState(
+                        { report: report.id, page: page.id },
+                        null,
+                        `${location.origin}/${workspaceSlug}/${this.reportSlug(report)}/${this.pageSlug(page)}`
+                    );
+                }
+                this.report.render();
+            });
+
+            this.report.off('rendered');
+            this.report.on('rendered', _ => {
+                console.log('Report render successful');
+            });
+
+            this.report.off('error');
+            this.report.on('error', event => {
+                let errorMsg = event.detail;
+                console.error(errorMsg);
+                return;
+            });
+        };
+
+        iframe.addEventListener('load', iframeLoad, { once: true });
     }
 
     render() {

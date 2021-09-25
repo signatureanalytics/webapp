@@ -2,10 +2,9 @@ import { LitElement, html, css } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { connect } from 'pwa-helpers/connect-mixin';
 import store from '../state/store';
-import { selectPage, loadReport } from '../state/navSlice';
-import { navSelectors } from '../state/navSelectors';
+import { selectPage, loadReport } from '../state/slice';
+import { selectors } from '../state/selectors';
 import navStyles from './navStyles';
-import slug from '../slug';
 
 class Nav extends connect(store)(LitElement) {
     static get styles() {
@@ -13,47 +12,53 @@ class Nav extends connect(store)(LitElement) {
     }
     static get properties() {
         return {
-            reports: { type: Array },
+            loadingReport: { type: Object },
+            pageById: { type: Object },
             pages: { type: Array },
-            currentReport: { type: String },
-            currentPage: { type: String },
-            loadReport: { type: String },
-            currentReportSlug: { type: String },
-            currentPageSlug: { type: String },
-            slugForPageName: { type: Object },
+            pageSlug: { type: Object },
+            reportById: { type: Object },
+            reports: { type: Array },
+            reportSlug: { type: Object },
+            selectedPage: { type: Object },
+            selectedReport: { type: Object },
         };
     }
 
     stateChanged(state) {
-        this.reports = navSelectors.reports(state);
-        this.pages = navSelectors.pages(state);
-        this.currentPage = navSelectors.currentPage(state);
-        this.currentReport = navSelectors.currentReport(state);
-        this.loadReport = navSelectors.loadReport(state);
-        this.currentReportSlug = navSelectors.currentReportSlug(state);
-        this.currentPageSlug = navSelectors.currentPageSlug(state);
-        this.slugForPageName = navSelectors.slugForPageName(state);
+        this.loadingReport = selectors.loadingReport(state);
+        this.pageById = selectors.pageById(state);
+        this.pages = selectors.pages(state);
+        this.pageSlug = selectors.pageSlug(state);
+        this.reportById = selectors.reportById(state);
+        this.reports = selectors.reports(state);
+        this.reportSlug = selectors.reportSlug(state);
+        this.selectedPage = selectors.selectedPage(state);
+        this.selectedReport = selectors.selectedReport(state);
     }
 
     // interactions
-    reportSelector(report) {
+    reportSelector(reportId) {
         return e => {
-            if (report !== this.currentReport) {
-                const [, workspace] = location.pathname.split('/');
-                history.pushState({}, null, `${location.origin}/${workspace}/${slug(report)}`);
+            if (reportId !== this.selectedReport.id) {
+                const report = this.reportById(reportId);
+                const reportSlug = this.reportSlug(report);
+                const [, workspaceSlug] = location.pathname.split('/');
+                history.pushState({}, null, `${location.origin}/${workspaceSlug}/${reportSlug}`);
                 store.dispatch(loadReport({ report }));
             }
         };
     }
 
-    pageSelector(page) {
+    pageSelector(pageId) {
         return e => {
-            if (page !== this.currentPage) {
-                const [, workspace, report] = location.pathname.split('/');
+            if (pageId !== this.selectedPage?.id) {
+                const page = this.pageById(pageId);
+                const pageSlug = this.pageSlug(page);
+                const [, workspaceSlug, reportSlug] = location.pathname.split('/');
                 history.pushState(
-                    { report, page },
+                    { report: this.selectedReport.id, page: pageId },
                     null,
-                    `${location.origin}/${workspace}/${this.currentReportSlug}/${this.slugForPageName(page)}`
+                    `${location.origin}/${workspaceSlug}/${reportSlug}/${pageSlug}`
                 );
                 store.dispatch(selectPage({ page }));
             }
@@ -63,25 +68,24 @@ class Nav extends connect(store)(LitElement) {
     // render
     renderReports() {
         return this.reports.map(report => {
-            const isCurrentReport = report === this.currentReport;
-            const isLoading = report === this.loadReport && report !== this.currentReport;
-            const reportClasses = { report: true, current: isCurrentReport, loading: isLoading };
+            const isSelectedReport = report === this.selectedReport;
+            const isLoading = report === this.loadingReport && report !== this.selectedReport;
+            const reportClasses = { report: true, selected: isSelectedReport, loading: isLoading };
             return html`
-                <div class="${classMap(reportClasses)}" @click=${this.reportSelector(report)}>${report} Report</div>
-                ${isCurrentReport ? this.renderPages() : ''}
+                <div class="${classMap(reportClasses)}" @click=${this.reportSelector(report.id)}>
+                    ${report.name} Report
+                </div>
+                ${isSelectedReport && !isLoading ? this.renderPages() : ''}
             `;
         });
     }
 
     renderPages() {
-        if (this.loadingReport) {
-            return;
-        }
         return this.pages.map(page => {
-            const isCurrentPage = page.name === this.currentPage;
-            const pageClasses = { page: true, current: isCurrentPage };
+            const isSelectedPage = page === this.selectedPage;
+            const pageClasses = { page: true, selected: isSelectedPage };
             return html`
-                <div class="${classMap(pageClasses)}" @click=${this.pageSelector(page.name)}>${page.displayName}</div>
+                <div class="${classMap(pageClasses)}" @click=${this.pageSelector(page.id)}>${page.name}</div>
             `;
         });
     }
