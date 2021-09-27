@@ -122,7 +122,8 @@ class Report extends connect(store)(LitElement) {
                 const report = this.reportBySlug(reportSlug) ?? this.reports[0];
                 this.setReport(report, pageSlug);
             }
-            setTimeout(_ => this.loadWorkspace(), response.tokenExpires - refreshTokenBeforeExpiresMs);
+            const tokenExpiresMs = new Date(response.tokenExpires).getTime() - Date.now();
+            setTimeout(_ => this.loadWorkspace(), tokenExpiresMs - refreshTokenBeforeExpiresMs);
         } catch (error) {
             console.error(error);
         }

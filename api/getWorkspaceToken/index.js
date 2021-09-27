@@ -32,7 +32,7 @@ module.exports = async (context, req) => {
         body: oAuthBody,
     });
 
-    // extract workspace name and optional report name from referrer header
+    // extract workspace name from referrer header
     const referrerHeader = req.headers[referrerHeaderName];
     const [, workspaceSlug] = new URL(referrerHeader).pathname.split('/');
     if (!workspaceSlug) {
@@ -54,27 +54,19 @@ module.exports = async (context, req) => {
     }
 
     const userInfo = JSON.parse(Buffer.from(clientPrincipalHeader, 'base64').toString('ascii'));
-    const users = workspace.users[userInfo.identityProvider];
-    const user = users ? users[userInfo.userDetails] : undefined;
+    const users = workspace.users[userInfo.identityProvider] || {};
+    const user = users[userInfo.userDetails].filter(reportName => Object.keys(workspace.reports).includes(reportName));
 
     if (!user) {
         context.res = { status: 403, headers: { vary } };
         return;
     }
 
-    const reports = Object.fromEntries(
-        Object.entries(workspace.reports)
-            .filter(([name]) => user.includes(name))
-            .map(([name, { id }]) => [name, id])
-    );
-
+    const reportsObj = Object.fromEntries(user.map(reportName => [reportName, workspace.reports[reportName].id]));
+    const uniqueDatasetIds = [...new Set(user.map(reportName => workspace.reports[reportName].dataset))];
     const getTokenBody = {
-        datasets: Object.keys(reports).map(report => ({
-            id: workspace.reports[report].dataset,
-        })),
-        reports: Object.keys(reports).map(report => ({
-            id: workspace.reports[report].id,
-        })),
+        datasets: uniqueDatasetIds.map(datasetId => ({ id: datasetId })),
+        reports: Object.values(reportsObj).map(reportId => ({ id: reportId })),
     };
 
     const oAuthJson = await oAuthPromise.then(checkResponse).then(res => res.json());
@@ -89,9 +81,7 @@ module.exports = async (context, req) => {
     });
 
     const getTokenJson = await getTokenPromise.then(checkResponse).then(res => res.json());
-
-    const now = Date.now();
-    const tokenExpiresMs = new Date(getTokenJson.expiration || now).getTime() - now;
+    const tokenExpiresMs = new Date(getTokenJson.expiration).getTime() - Date.now();
     const requestMaxAgeSeconds = Math.max(0, ~~((tokenExpiresMs - requestExpiresBeforeTokenExpiresMs) / 1000));
 
     context.res = {
@@ -106,8 +96,9 @@ module.exports = async (context, req) => {
             id: workspace.id,
             tokenId: getTokenJson.tokenId,
             token: getTokenJson.token,
-            tokenExpires: tokenExpiresMs,
-            reports,
+            tokenExpires: getTokenJson.expiration,
+            reports: reportsObj,
+            env: process.env,
         },
     };
 };
