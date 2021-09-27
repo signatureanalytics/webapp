@@ -104,7 +104,8 @@ class Report extends connect(store)(LitElement) {
                             location = `/.auth/login/google?post_login_redirect_uri=${location}`;
                             break;
                         case 403:
-                            location = new URL('..', location);
+                        case 404:
+                            location = '/';
                             break;
                         case 400:
                         default:

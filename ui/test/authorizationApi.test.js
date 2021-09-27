@@ -45,7 +45,7 @@ test.describe('Authorization API', () => {
     });
 
     test('should return 404 for unrecognized workspace', async ({ page }) => {
-        await page.goto('http://localhost:4280/foo/');
+        await page.goto('http://localhost:4280/foo');
         await page.waitForSelector('#userDetails');
         await enterUsername(page, 'rwaldin@signatureanalytics.com');
         await page.click('#submit');

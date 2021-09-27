@@ -43,25 +43,21 @@ module.exports = async (context, req) => {
                   .then(checkResponse)
                   .then(response => response.json());
 
-    // extract workspace name from referrer header
-    const referrerHeader = req.headers[referrerHeaderName];
-    const [, workspaceSlug] = new URL(referrerHeader).pathname.split('/');
-    if (!workspaceSlug) {
-        context.res = { status: 404, headers: { vary } };
-        return;
-    }
-    const workspace = workspaces[workspaceSlug];
-    if (!workspace) {
-        context.res = { status: 404, headers: { vary } };
-        return;
-    }
-
     // extract user info from client principal header
     const clientPrincipalHeader = req.headers[clientPrincipalHeaderName];
     if (!clientPrincipalHeader) {
         context.res = { status: 401, headers: { vary } };
         return;
     }
+
+    // extract workspace name from referrer header
+    const referrerHeader = req.headers[referrerHeaderName];
+    const [, workspaceSlug] = new URL(referrerHeader).pathname.split('/');
+    if (!workspaceSlug || !workspaces[workspaceSlug]) {
+        context.res = { status: 404, headers: { vary } };
+        return;
+    }
+    const workspace = workspaces[workspaceSlug];
 
     const userInfo = JSON.parse(Buffer.from(clientPrincipalHeader, 'base64').toString('ascii'));
     const users = workspace.users[userInfo.identityProvider] || {};
