@@ -55,9 +55,11 @@ module.exports = async (context, req) => {
 
     const userInfo = JSON.parse(Buffer.from(clientPrincipalHeader, 'base64').toString('ascii'));
     const users = workspace.users[userInfo.identityProvider] || {};
-    const user = users[userInfo.userDetails].filter(reportName => Object.keys(workspace.reports).includes(reportName));
+    const user = (users[userInfo.userDetails] || []).filter(reportName =>
+        Object.keys(workspace.reports).includes(reportName)
+    );
 
-    if (!user) {
+    if (!user || user.length === 0) {
         context.res = { status: 403, headers: { vary } };
         return;
     }
