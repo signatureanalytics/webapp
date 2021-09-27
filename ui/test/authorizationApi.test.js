@@ -21,7 +21,19 @@ test.describe('Authorization API', () => {
         await page.goto('http://localhost:4280/signatureanalytics');
     });
 
-    test('should return 403 for unrecognized user', async ({ page }) => {
+    test('should return 403 for unrecognized AAD user', async ({ page }) => {
+        await page.goto('http://localhost:4280/.auth/login/aad');
+        await page.waitForSelector('#userDetails');
+        await enterUsername(page, 'rwaldin@signatureanalytic.onmicrosoft.com');
+        await page.click('#submit');
+        await page.goto('http://localhost:4280/signatureanalytics');
+        const apiResponse = await page.waitForResponse(response => {
+            return response.url() === `http://localhost:4280/api/getWorkspaceToken`;
+        });
+        expect(apiResponse.status()).toEqual(403);
+    });
+
+    test('should return 403 for unrecognized Google user', async ({ page }) => {
         await page.goto('http://localhost:4280/signatureanalytics');
         await page.waitForSelector('#userDetails');
         await enterUsername(page, 'ray@waldin.net');
