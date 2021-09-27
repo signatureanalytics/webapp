@@ -2,7 +2,7 @@ import * as pbi from 'powerbi-client';
 import store from '../state/store';
 import { LitElement, html, css } from 'lit';
 import { connect } from 'pwa-helpers/connect-mixin';
-import { setPages, setWorkspace, setWorkspaceToken, selectReport, selectPage, loadReport } from '../state/slice';
+import { setWorkspace, setWorkspaceToken, selectReport, selectPage, loadReport } from '../state/slice';
 import { selectors } from '../state/selectors';
 
 const models = pbi.models;
@@ -39,6 +39,7 @@ class Report extends connect(store)(LitElement) {
             report: { type: Object },
             reportById: { type: Object },
             reportBySlug: { type: Object },
+            reportEmbedUrl: { type: String },
             reports: { type: Array },
             reportSlug: { type: Object },
             selectedPage: { type: String },
@@ -69,6 +70,7 @@ class Report extends connect(store)(LitElement) {
         this.pageBySlug = selectors.pageBySlug(state);
         this.reportBySlug = selectors.reportBySlug(state);
         this.reportById = selectors.reportById(state);
+        this.reportEmbedUrl = selectors.reportEmbedUrl(state);
         this.pageById = selectors.pageById(state);
         this.reportSlug = selectors.reportSlug(state);
         this.pageSlug = selectors.pageSlug(state);
@@ -141,7 +143,7 @@ class Report extends connect(store)(LitElement) {
             accessToken: this.workspace.token,
 
             // Use other embed report config based on the requirement. We have used the first one for demo purpose
-            embedUrl: `https://app.powerbi.com/reportEmbed?groupId=${this.workspace.id}&reportId=${report.id}`,
+            embedUrl: this.reportEmbedUrl(report.name),
 
             // Enable this setting to remove gray shoulders from embedded report
             settings: {
@@ -159,18 +161,13 @@ class Report extends connect(store)(LitElement) {
         const iframeLoad = _ => {
             // Embed Power BI report when Access token and Embed URL are available
             this.report = powerbi.load(reportContainer, reportLoadConfig);
+            store.dispatch(selectReport({ report }));
 
             // Clear any other loaded handler events
             this.report.off('loaded');
             this.report.on('loaded', async _ => {
                 console.log('Report load successful');
 
-                const pages = await this.report.getPages();
-
-                store.dispatch(selectReport({ report }));
-                store.dispatch(
-                    setPages({ pages: pages.map(({ name, displayName }) => ({ id: name, name: displayName })) })
-                );
                 if (pageSlug) {
                     const pageName = this.pageBySlug(pageSlug).name;
                     store.dispatch(selectPage({ page: this.pages.find(p => p.name === pageName) }));
@@ -182,6 +179,7 @@ class Report extends connect(store)(LitElement) {
                         null,
                         `${location.origin}/${workspaceSlug}/${this.reportSlug(report)}/${this.pageSlug(page)}`
                     );
+                    store.dispatch(selectPage({ page }));
                 }
                 this.report.render();
             });

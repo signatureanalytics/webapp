@@ -1,9 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-    workspace: { name: undefined, id: undefined, token: undefined, tokenId: undefined, tokenExpires: 0 },
-    reports: [],
-    pages: [],
+    workspace: { name: undefined, id: undefined, token: undefined, tokenId: undefined, tokenExpires: 0, reports: [] },
     selectedReport: { name: undefined, id: undefined },
     selectedPage: { name: undefined, id: undefined },
     loadingReport: undefined,
@@ -17,13 +15,7 @@ const slice = createSlice({
             state.workspace = { ...state.workspace, token, tokenId, tokenExpires };
         },
         setWorkspace(state, { payload: { workspace } }) {
-            const { reports, ...rest } = workspace;
-            state.reports = Object.entries(reports).map(([name, id]) => ({ id, name }));
-            state.workspace = rest;
-        },
-        setPages(state, { payload: { pages } }) {
-            state.pages = pages;
-            state.selectedPage = pages[0];
+            state.workspace = workspace;
         },
         selectReport(state, { payload: { report } }) {
             if (report !== state.selectedReport) {

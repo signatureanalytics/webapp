@@ -8,7 +8,7 @@ export default css`
         overflow-y: auto;
     }
     div {
-        cursor: default;
+        cursor: pointer;
         font-family: 'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;
         margin-top: 2px;
         padding: 3px;
@@ -19,9 +19,6 @@ export default css`
     }
     div:hover:not(.loading):not(.selected) {
         background-color: #ddd;
-    }
-    div:not(.selected) {
-        cursor: pointer;
     }
     .selected {
         font-weight: 600;
