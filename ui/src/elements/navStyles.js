@@ -39,9 +39,10 @@ export default css`
     .report {
         margin-left: 0px;
         font-size: 16px;
+        white-space: nowrap;
     }
     .page {
-        margin-left: 34px;
+        margin-left: 30px;
         font-size: 16px;
         overflow: hidden;
         max-height: 0;
