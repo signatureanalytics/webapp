@@ -39,7 +39,7 @@ test.describe('Navigation', () => {
         await page.goto('http://localhost:4280/signatureanalytics');
         page.on('response', responseListener);
         await page.waitForSelector('.report');
-        const reportElements = await page.$$('.report');
+        const reportElements = await page.$$('.report > .name');
         expect(reportElements).toHaveLength(reports.length);
         for (const reportElement of reportElements) {
             const title = await reportElement.innerText();
@@ -62,10 +62,6 @@ test.describe('Navigation', () => {
         const pageElements = await page.$$('.report.selected .page');
         for (const pageElement of pageElements) {
             const title = await pageElement.innerText();
-            console.log(
-                title,
-                pages.map(p => p.displayName)
-            );
             expect(pages.map(p => p.displayName)).toContain(title);
         }
     });
