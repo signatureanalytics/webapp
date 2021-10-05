@@ -7,6 +7,8 @@ import { selectors } from '../state/selectors';
 import navStyles from './navStyles';
 import caret from '../assets/caret.svg';
 
+const fixAssetUrl = url => `${`/${url}`.replace('//', '/')}`;
+
 class Nav extends connect(store)(LitElement) {
     static get styles() {
         return navStyles;
@@ -106,7 +108,7 @@ class Nav extends connect(store)(LitElement) {
                 <div class="${classMap(reportClasses)}" @click=${this.reportSelector(report.id)}>
                     <img
                         class="expander"
-                        src=${caret}
+                        src=${fixAssetUrl(caret)}
                         @click=${report.expanded ? this.reportCollapser(report.id) : this.reportExpander(report.id)}
                     /><span class="name">${report.name} Report</span>
                     ${this.renderPages(report)}
