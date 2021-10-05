@@ -2,11 +2,14 @@ import * as pbi from 'powerbi-client';
 import store from '../state/store';
 import { LitElement, html, css } from 'lit';
 import { connect } from 'pwa-helpers/connect-mixin';
-import { setWorkspace, setWorkspaceToken, selectReport, selectPage, loadReport } from '../state/slice';
+import { setWorkspace, setWorkspaceToken, selectReportId, selectPageId, loadPageId } from '../state/slice';
 import { selectors } from '../state/selectors';
+import slug from '../slug';
 
 const models = pbi.models;
-const refreshTokenBeforeExpiresMs = 5 * 60 * 1000;
+
+// Token refreshes between 1 and 9 minutes before it expires, randomized to prevent synchronization between clients.
+const refreshTokenMs = expires => new Date(expires) - Date.now() - ~~((Math.random() * 8 + 1) * 60 * 1000);
 
 class Report extends connect(store)(LitElement) {
     static get styles() {
@@ -31,7 +34,8 @@ class Report extends connect(store)(LitElement) {
 
     static get properties() {
         return {
-            loadingReport: { type: String },
+            loadingReportId: { type: String },
+            loadingPageId: { type: String },
             pageById: { type: Object },
             pageBySlug: { type: Object },
             pages: { type: Array },
@@ -42,8 +46,8 @@ class Report extends connect(store)(LitElement) {
             reportEmbedUrl: { type: String },
             reports: { type: Array },
             reportSlug: { type: Object },
-            selectedPage: { type: String },
-            selectedReport: { type: String },
+            selectedPageId: { type: String },
+            selectedReportId: { type: String },
             workspace: { type: Object },
         };
     }
@@ -51,12 +55,7 @@ class Report extends connect(store)(LitElement) {
     constructor() {
         super();
         window.addEventListener('popstate', e => {
-            if (this.selectedReport.id !== e.state.report) {
-                const report = this.reportById(e.state.report);
-                store.dispatch(loadReport({ report }));
-            } else if (this.selectedPage.id !== e.state.page) {
-                store.dispatch(selectPage({ page: this.pageById(e.state.page) }));
-            }
+            store.dispatch(loadPageId({ reportId: e.state.report, pageId: e.state.page }));
         });
     }
 
@@ -64,9 +63,10 @@ class Report extends connect(store)(LitElement) {
         this.workspace = selectors.workspace(state);
         this.reports = selectors.reports(state);
         this.pages = selectors.pages(state);
-        this.selectedPage = selectors.selectedPage(state);
-        this.selectedReport = selectors.selectedReport(state);
-        this.loadingReport = selectors.loadingReport(state);
+        this.selectedPageId = selectors.selectedPageId(state);
+        this.selectedReportId = selectors.selectedReportId(state);
+        this.loadingReportId = selectors.loadingReportId(state);
+        this.loadingPageId = selectors.loadingPageId(state);
         this.pageBySlug = selectors.pageBySlug(state);
         this.reportBySlug = selectors.reportBySlug(state);
         this.reportById = selectors.reportById(state);
@@ -82,11 +82,16 @@ class Report extends connect(store)(LitElement) {
 
     updated(changedProps) {
         super.updated(changedProps);
-        if (changedProps.has('selectedPage') && this.report) {
-            this.report.setPage(this.selectedPage.id);
-        }
-        if (changedProps.has('loadingReport') && this.report) {
-            this.setReport(this.loadingReport);
+        if (changedProps.has('selectedPageId') && this.report) {
+            this.report.setPage(this.selectedPageId);
+        } else if (changedProps.has('loadingReportId') && this.report) {
+            const report = this.reportById(this.loadingReportId);
+            const page = changedProps.has('loadingPageId')
+                ? report.pages.find(page => page.id === this.loadingPageId)
+                : report.pages[0];
+            this.setReport(report, page);
+        } else if (changedProps.has('loadingPageId')) {
+            store.dispatch(selectPageId({ pageId: this.loadingPageId }));
         }
     }
 
@@ -118,37 +123,31 @@ class Report extends connect(store)(LitElement) {
             if (this.report) {
                 const { token, tokenId, tokenExpires } = response;
                 store.dispatch(setWorkspaceToken({ token, tokenId, tokenExpires }));
-                this.report.setAccessToken(response.token);
+                await this.report.setAccessToken(response.token);
             } else {
                 store.dispatch(setWorkspace({ workspace: response }));
                 const [, , reportSlug, pageSlug] = location.pathname.split('/');
                 const report = this.reportBySlug(reportSlug) ?? this.reports[0];
-                this.setReport(report, pageSlug);
+                const page = report.pages.find(page => slug(page.name) === pageSlug);
+                await this.setReport(report, page);
             }
-            const tokenExpiresMs = new Date(response.tokenExpires).getTime() - Date.now();
-            setTimeout(_ => this.loadWorkspace(), tokenExpiresMs - refreshTokenBeforeExpiresMs);
+            setTimeout(_ => this.loadWorkspace(), refreshTokenMs(response.tokenExpires));
         } catch (error) {
             console.error(error);
         }
     }
 
-    async setReport(report, pageSlug) {
+    async setReport(report, page = report.pages[0]) {
         const reportContainer = document.createElement('div');
         this.shadowRoot.getElementById('reportContainer').replaceWith(reportContainer);
         reportContainer.id = 'reportContainer';
 
-        // Create a config object with type of the object, Embed details and Token Type
         let reportLoadConfig = {
             type: 'report',
             tokenType: models.TokenType.Embed,
             accessToken: this.workspace.token,
-
-            // Use other embed report config based on the requirement. We have used the first one for demo purpose
             embedUrl: this.reportEmbedUrl(report.name),
-
-            // Enable this setting to remove gray shoulders from embedded report
             settings: {
-                // background: models.BackgroundType.Transparent,
                 panes: {
                     pageNavigation: {
                         visible: false,
@@ -160,28 +159,20 @@ class Report extends connect(store)(LitElement) {
         powerbi.bootstrap(reportContainer, { type: 'report' });
         const iframe = reportContainer.querySelector('iframe');
         const iframeLoad = _ => {
-            // Embed Power BI report when Access token and Embed URL are available
             this.report = powerbi.load(reportContainer, reportLoadConfig);
-            store.dispatch(selectReport({ report }));
+            store.dispatch(selectReportId({ reportId: report.id }));
 
-            // Clear any other loaded handler events
             this.report.off('loaded');
             this.report.on('loaded', async _ => {
                 console.log('Report load successful');
 
-                if (pageSlug) {
-                    const pageName = this.pageBySlug(pageSlug).name;
-                    store.dispatch(selectPage({ page: this.pages.find(p => p.name === pageName) }));
-                } else {
-                    const [, workspaceSlug] = location.pathname.split('/');
-                    const page = this.pages[0];
-                    history.replaceState(
-                        { report: report.id, page: page.id },
-                        null,
-                        `${location.origin}/${workspaceSlug}/${this.reportSlug(report)}/${this.pageSlug(page)}`
-                    );
-                    store.dispatch(selectPage({ page }));
-                }
+                store.dispatch(selectPageId({ pageId: page.id }));
+                const [, workspaceSlug] = location.pathname.split('/');
+                history.replaceState(
+                    { report: report.id, page: page.id },
+                    null,
+                    `${location.origin}/${workspaceSlug}/${this.reportSlug(report)}/${this.pageSlug(page)}`
+                );
                 this.report.render();
             });
 

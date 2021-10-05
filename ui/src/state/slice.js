@@ -2,9 +2,9 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
     workspace: { name: undefined, id: undefined, token: undefined, tokenId: undefined, tokenExpires: 0, reports: [] },
-    selectedReport: { name: undefined, id: undefined },
-    selectedPage: { name: undefined, id: undefined },
-    loadingReport: undefined,
+    selectedReportId: undefined,
+    selectedPageId: undefined,
+    loadingReportId: undefined,
 };
 
 const slice = createSlice({
@@ -17,21 +17,45 @@ const slice = createSlice({
         setWorkspace(state, { payload: { workspace } }) {
             state.workspace = workspace;
         },
-        selectReport(state, { payload: { report } }) {
-            if (report !== state.selectedReport) {
-                state.selectedReport = report;
+        selectReportId(state, { payload: { reportId } }) {
+            if (reportId !== state.selectedReportId) {
+                state.selectedReportId = reportId;
+                Object.values(state.workspace.reports).find(
+                    report => report.id === state.selectedReportId
+                ).expanded = true;
             }
         },
-        selectPage(state, { payload: { page } }) {
-            if (page !== state.selectedPage) {
-                state.selectedPage = page;
+        selectPageId(state, { payload: { pageId } }) {
+            if (pageId !== state.selectedPageId) {
+                state.selectedPageId = pageId;
             }
         },
-        loadReport(state, { payload: { report } }) {
-            state.loadingReport = report;
+        loadReportId(state, { payload: { reportId } }) {
+            state.loadingReportId = reportId;
+        },
+        loadPageId(state, { payload: { pageId, reportId } }) {
+            state.loadingPageId = pageId;
+            if (reportId) {
+                state.loadingReportId = reportId;
+            }
+        },
+        collapseReport(state, { payload: { reportId } }) {
+            Object.values(state.workspace.reports).find(report => report.id === reportId).expanded = false;
+        },
+        expandReport(state, { payload: { reportId } }) {
+            Object.values(state.workspace.reports).find(report => report.id === reportId).expanded = true;
         },
     },
 });
 
-export const { setWorkspaceToken, setWorkspace, setPages, selectReport, selectPage, loadReport } = slice.actions;
+export const {
+    setWorkspaceToken,
+    setWorkspace,
+    selectReportId,
+    selectPageId,
+    loadReportId,
+    loadPageId,
+    collapseReport,
+    expandReport,
+} = slice.actions;
 export default slice.reducer;

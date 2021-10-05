@@ -59,9 +59,13 @@ test.describe('Navigation', () => {
             const pages = await report.getPages();
             return pages.map(({ name, displayName }) => ({ name, displayName }));
         });
-        const pageElements = await page.$$('.page');
+        const pageElements = await page.$$('.report.selected .page');
         for (const pageElement of pageElements) {
             const title = await pageElement.innerText();
+            console.log(
+                title,
+                pages.map(p => p.displayName)
+            );
             expect(pages.map(p => p.displayName)).toContain(title);
         }
     });

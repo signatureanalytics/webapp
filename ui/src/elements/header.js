@@ -21,8 +21,8 @@ class Header extends connect(store)(LitElement) {
                 position: relative;
                 display: inline-block;
                 margin-inline: 10px;
-                width: 156px;
-                height: 50px;
+                width: 188px;
+                height: 38px;
             }
             .covantage-logo {
                 position: relative;
@@ -35,21 +35,32 @@ class Header extends connect(store)(LitElement) {
             }
         `;
     }
-    constructor() {
-        super();
-    }
+
     static get properties() {
         return {
-            selectedReport: { type: String },
-            selectedPage: { type: Object },
+            selectedReportId: { type: String },
+            selectedPageId: { type: String },
             workspace: { type: Object },
+            pageById: { type: Object },
+            reportById: { type: Object },
         };
+    }
+
+    stateChanged(state) {
+        this.selectedReportId = selectors.selectedReportId(state);
+        this.selectedPageId = selectors.selectedPageId(state);
+        this.workspace = selectors.workspace(state);
+        this.pageById = selectors.pageById(state);
+        this.reportById = selectors.reportById(state);
+        if (this.title !== document.title) {
+            document.title = this.title;
+        }
     }
 
     get title() {
         const workspaceName = this.workspace?.name;
-        const reportName = this.selectedReport?.name;
-        const pageName = this.selectedPage?.name;
+        const reportName = this.reportById(this.selectedReportId)?.name;
+        const pageName = this.pageById(this.selectedPageId)?.name;
         return `Co:Vantage™${
             workspaceName
                 ? ` ${workspaceName}${reportName ? ` ${reportName} Report${pageName ? ` - ${pageName}` : ''}` : ''}`
@@ -57,14 +68,6 @@ class Header extends connect(store)(LitElement) {
         }`;
     }
 
-    stateChanged(state) {
-        this.selectedReport = selectors.selectedReport(state);
-        this.selectedPage = selectors.selectedPage(state);
-        this.workspace = selectors.workspace(state);
-        if (this.title !== document.title) {
-            document.title = this.title;
-        }
-    }
     render() {
         return html`
             <header>

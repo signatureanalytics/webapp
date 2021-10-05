@@ -2,9 +2,10 @@ import { LitElement, html, css } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { connect } from 'pwa-helpers/connect-mixin';
 import store from '../state/store';
-import { selectPage, loadReport } from '../state/slice';
+import { loadPageId, loadReportId, collapseReport, expandReport } from '../state/slice';
 import { selectors } from '../state/selectors';
 import navStyles from './navStyles';
+import caret from '../assets/caret.svg';
 
 class Nav extends connect(store)(LitElement) {
     static get styles() {
@@ -12,80 +13,116 @@ class Nav extends connect(store)(LitElement) {
     }
     static get properties() {
         return {
-            loadingReport: { type: Object },
+            loadingReportId: { type: String },
             pageById: { type: Object },
             pages: { type: Array },
             pageSlug: { type: Object },
             reportById: { type: Object },
             reports: { type: Array },
             reportSlug: { type: Object },
-            selectedPage: { type: Object },
-            selectedReport: { type: Object },
+            selectedPageId: { type: String },
+            selectedReportId: { type: String },
         };
     }
 
     stateChanged(state) {
-        this.loadingReport = selectors.loadingReport(state);
+        this.loadingReportId = selectors.loadingReportId(state);
         this.pageById = selectors.pageById(state);
         this.pages = selectors.pages(state);
         this.pageSlug = selectors.pageSlug(state);
         this.reportById = selectors.reportById(state);
         this.reports = selectors.reports(state);
         this.reportSlug = selectors.reportSlug(state);
-        this.selectedPage = selectors.selectedPage(state);
-        this.selectedReport = selectors.selectedReport(state);
+        this.selectedPageId = selectors.selectedPageId(state);
+        this.selectedReportId = selectors.selectedReportId(state);
     }
 
     // interactions
     reportSelector(reportId) {
         return e => {
-            if (reportId !== this.selectedReport.id) {
+            if (reportId !== this.selectedReportId) {
                 const report = this.reportById(reportId);
                 const reportSlug = this.reportSlug(report);
                 const [, workspaceSlug] = location.pathname.split('/');
                 history.pushState({}, null, `${location.origin}/${workspaceSlug}/${reportSlug}`);
-                store.dispatch(loadReport({ report }));
+                store.dispatch(loadReportId({ reportId }));
             }
+            e.preventDefault();
+            e.stopPropagation();
         };
     }
 
-    pageSelector(pageId) {
+    pageSelector(reportId, pageId) {
         return e => {
-            if (pageId !== this.selectedPage?.id) {
-                const page = this.pageById(pageId);
+            if (reportId !== this.selectedReportId || pageId !== this.selectedPageId) {
+                const report = this.reportById(reportId);
+                const page = report.pages.find(page => page.id === pageId);
                 const pageSlug = this.pageSlug(page);
-                const [, workspaceSlug, reportSlug] = location.pathname.split('/');
+                const reportSlug = this.reportSlug(report);
+                const [, workspaceSlug] = location.pathname.split('/');
                 history.pushState(
-                    { report: this.selectedReport.id, page: pageId },
+                    { report: reportId, page: pageId },
                     null,
                     `${location.origin}/${workspaceSlug}/${reportSlug}/${pageSlug}`
                 );
-                store.dispatch(selectPage({ page }));
+                if (this.selectedReportId !== reportId) {
+                    store.dispatch(loadPageId({ pageId, reportId }));
+                } else {
+                    store.dispatch(loadPageId({ pageId }));
+                }
             }
+            e.preventDefault();
+            e.stopPropagation();
         };
     }
 
+    reportCollapser(reportId) {
+        return e => {
+            store.dispatch(collapseReport({ reportId }));
+            e.preventDefault();
+            e.stopPropagation();
+        };
+    }
+
+    reportExpander(reportId) {
+        return e => {
+            store.dispatch(expandReport({ reportId }));
+            e.preventDefault();
+            e.stopPropagation();
+        };
+    }
     // render
     renderReports() {
         return this.reports.map(report => {
-            const isSelectedReport = report === this.selectedReport;
-            const isLoading = report === this.loadingReport && report !== this.selectedReport;
-            const reportClasses = { report: true, selected: isSelectedReport, loading: isLoading };
+            const isSelectedReport = report.id === this.selectedReportId;
+            const isLoading = report.id === this.loadingReportId && !isSelectedReport;
+            const reportClasses = {
+                report: true,
+                selected: isSelectedReport,
+                loading: isLoading,
+                expanded: report.expanded,
+            };
             return html`
                 <div class="${classMap(reportClasses)}" @click=${this.reportSelector(report.id)}>
-                    ${report.name} Report
+                    <img
+                        class="expander"
+                        src=${caret}
+                        @click=${report.expanded ? this.reportCollapser(report.id) : this.reportExpander(report.id)}
+                    /><span class="name">${report.name} Report</span>
+                    ${this.renderPages(report)}
                 </div>
-                ${isSelectedReport && !isLoading ? this.renderPages() : ''}
             `;
         });
     }
 
-    renderPages() {
-        return this.pages.map(page => {
-            const isSelectedPage = page === this.selectedPage;
+    renderPages(report) {
+        return report.pages.map(page => {
+            const isSelectedPage = report.id === this.selectedReportId && page.id === this.selectedPageId;
             const pageClasses = { page: true, selected: isSelectedPage };
             return html`
-                <div class="${classMap(pageClasses)}" @click=${this.pageSelector(page.id)}>${page.name}</div>
+                <div class="${classMap(pageClasses)}" @click=${this.pageSelector(report.id, page.id)}>
+                    <span class="name">${page.name}</span>
+                </div>
             `;
         });
     }

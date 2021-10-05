@@ -3,25 +3,28 @@ import slug from '../slug';
 
 export const createSelectors = state => {
     const workspace = createSelector([state], state => state.workspace);
-    const selectedReport = createSelector([state], state => state.selectedReport);
-    const selectedPage = createSelector([state], state => state.selectedPage);
-    const loadingReport = createSelector([state], state => state.loadingReport);
+    const selectedReportId = createSelector([state], state => state.selectedReportId);
+    const selectedPageId = createSelector([state], state => state.selectedPageId);
+    const loadingReportId = createSelector([state], state => state.loadingReportId);
+    const loadingPageId = createSelector([state], state => state.loadingPageId);
 
-    const reports = createSelector([workspace], workspace =>
-        Object.entries(workspace.reports)
-            .map(([name, { id }]) => ({ name, id }))
-            .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-    );
-
-    const pages = createSelector(
-        [workspace, selectedReport],
-        (workspace, selectedReport) => workspace.reports[selectedReport.name]?.pages ?? []
-    );
     const reportEmbedUrl = createSelector([workspace], workspace =>
         memoize(reportName => workspace.reports[reportName]?.embedUrl ?? '')
     );
-    const reportById = createSelector([reports], reports => memoize(id => reports.find(r => r.id === id)));
-    const pageById = createSelector([pages], pages => memoize(id => pages.find(p => p.id === id)));
+    const reports = createSelector([workspace], workspace =>
+        Object.entries(workspace.reports)
+            .map(([name, { id, pages, expanded }]) => ({ name, id, pages, expanded }))
+            .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+    );
+
+    const reportById = createSelector([reports], reports => memoize(id => reports.find(report => report.id === id)));
+
+    const pages = createSelector(
+        [reportById, selectedReportId],
+        (reportById, selectedReportId) => reportById(selectedReportId)?.pages ?? []
+    );
+    const pageById = createSelector([pages], pages => memoize(id => pages.find(page => page.id === id)));
+
     const reportBySlug = createSelector([reports], reports =>
         memoize(reportSlug => reports.find(r => slug(r.name) === reportSlug))
     );
@@ -32,18 +35,19 @@ export const createSelectors = state => {
     const pageSlug = createSelector([pages], pages => memoize(page => slug(page.name)));
 
     return {
-        loadingReport,
+        loadingReportId,
+        loadingPageId,
         pageById,
         pageBySlug,
         pages,
+        pageSlug,
         reportById,
         reportBySlug,
         reportEmbedUrl,
         reports,
-        selectedPage,
-        selectedReport,
         reportSlug,
-        pageSlug,
+        selectedPageId,
+        selectedReportId,
         workspace,
     };
 };

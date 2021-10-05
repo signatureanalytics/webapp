@@ -6,13 +6,16 @@ const referrerHeaderName = 'referer'; // [sic] see https://en.wikipedia.org/wiki
 const cookieHeaderName = 'cookie';
 const clientPrincipalHeaderName = 'x-ms-client-principal';
 const vary = [referrerHeaderName, clientPrincipalHeaderName, cookieHeaderName];
+const urlEncodedContentType = 'application/x-www-form-urlencoded';
+const jsonContentType = 'application/json';
 const requestExpiresBeforeTokenExpiresMs = 10 * 60 * 1000; // expire request 10 minutes before token expires
-const oAuthUrl = new URL(`/${config.tenantId}/oauth2/token?api-version=1.0`, new URL(config.authorityUri));
 const clientId = encodeURIComponent(config.clientId);
 const scope = encodeURIComponent(config.scope);
 const clientSecret = encodeURIComponent(config.clientSecret);
-const oAuthBody = `grant_type=client_credentials&client_id=${clientId}&resource=${scope}&client_secret=${clientSecret}`;
 const getTokenUrl = `${config.apiUrl}v1.0/myorg/GenerateToken`;
+const oAuthUrl = new URL(`/${config.tenantId}/oauth2/token?api-version=1.0`, new URL(config.authorityUri));
+const oAuthBody = `grant_type=client_credentials&client_id=${clientId}&resource=${scope}&client_secret=${clientSecret}`;
+const oAuthRequest = { method: 'POST', headers: { 'content-type': urlEncodedContentType }, body: oAuthBody };
 let oAuthToken = {};
 
 const checkResponse = async response => {
@@ -23,25 +26,19 @@ const checkResponse = async response => {
     return response;
 };
 
-const oAuthRequest = {
-    method: 'POST',
-    headers: {
-        'content-type': 'application/x-www-form-urlencoded',
-    },
-    body: oAuthBody,
-};
+const fetchOAuthToken = _ =>
+    fetch(oAuthUrl, oAuthRequest)
+        .then(checkResponse)
+        .then(response => response.json());
+
+setInterval(async _ => (oAuthToken = await fetchOAuthToken()), 10 * 60 * 1000);
 
 module.exports = async (context, req) => {
-    if (!oAuthToken.expires_on) {
-        console.log('cold start');
-    }
     // get OAuthToken if needed
     const oAuthTokenPromise =
-        new Date(oAuthToken.expires_on * 1000) >= new Date()
+        oAuthToken.expires_on * 1000 - Date.now() > oAuthToken.expires_in * 1000 * (5 / 6)
             ? Promise.resolve(oAuthToken)
-            : fetch(oAuthUrl, oAuthRequest)
-                  .then(checkResponse)
-                  .then(response => response.json());
+            : fetchOAuthToken();
 
     // extract user info from client principal header
     const clientPrincipalHeader = req.headers[clientPrincipalHeaderName];
@@ -52,7 +49,7 @@ module.exports = async (context, req) => {
 
     // extract workspace name from referrer header
     const referrerHeader = req.headers[referrerHeaderName];
-    const [, workspaceSlug] = new URL(referrerHeader).pathname.split('/');
+    const [, workspaceSlug, reportSlug] = new URL(referrerHeader).pathname.split('/');
     if (!workspaceSlug || !workspaces[workspaceSlug]) {
         context.res = { status: 404, headers: { vary } };
         return;
@@ -72,7 +69,7 @@ module.exports = async (context, req) => {
 
     const pbiRestHeaders = {
         authorization: `Bearer ${oAuthToken.access_token}`,
-        'content-type': 'application/json',
+        'content-type': jsonContentType,
     };
 
     const getReportsUrl = `https://api.powerbi.com/v1.0/myorg/groups/${workspace.id}/reports`;
@@ -128,7 +125,7 @@ module.exports = async (context, req) => {
     context.res = {
         status: getTokenJson.status,
         headers: {
-            'content-type': 'application/json',
+            'content-type': jsonContentType,
             'cache-control': `max-age=${requestMaxAgeSeconds}`,
             vary,
         },
