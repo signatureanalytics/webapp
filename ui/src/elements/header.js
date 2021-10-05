@@ -48,6 +48,7 @@ class Header extends connect(store)(LitElement) {
                 font-family: 'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;
                 font-size: 18px;
                 margin: auto;
+                padding-inline: 14px;
             }
         `;
     }

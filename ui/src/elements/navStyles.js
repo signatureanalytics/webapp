@@ -31,6 +31,7 @@ export default css`
     }
     .expander {
         height: 22px;
+        width: 22px;
         vertical-align: top;
         transition: transform 200ms ease-out;
         transform: rotate(-90deg);
