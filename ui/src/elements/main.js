@@ -40,7 +40,7 @@ class Main extends connect(store)(LitElement) {
             }
             sa-nav,
             sa-report {
-                margin: 10px;
+                padding: 5px;
             }
         `;
     }
