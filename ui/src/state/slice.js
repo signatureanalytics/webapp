@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
+    user: { email: undefined, identityProvider: undefined, id: undefined, roles: [] },
     workspace: { name: undefined, id: undefined, token: undefined, tokenId: undefined, tokenExpires: 0, reports: [] },
     selectedReportId: undefined,
     selectedPageId: undefined,
@@ -45,10 +46,14 @@ const slice = createSlice({
         expandReport(state, { payload: { reportId } }) {
             Object.values(state.workspace.reports).find(report => report.id === reportId).expanded = true;
         },
+        setUser(state, { payload: { email, id, identityProvider, roles } }) {
+            state.user = { email, id, identityProvider, roles };
+        },
     },
 });
 
 export const {
+    setUser,
     setWorkspaceToken,
     setWorkspace,
     selectReportId,

@@ -3,10 +3,12 @@ import * as pbi from 'powerbi-client';
 import './header';
 import './nav';
 import './report';
-
+import store from '../state/store';
+import { setUser } from '../state/slice';
+import { connect } from 'pwa-helpers';
 const models = pbi.models;
 
-class Main extends LitElement {
+class Main extends connect(store)(LitElement) {
     static get styles() {
         return css`
             *,
@@ -37,6 +39,28 @@ class Main extends LitElement {
                 grid-area: nav;
             }
         `;
+    }
+
+    constructor() {
+        super();
+        fetch('/.auth/me')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(response);
+                } else {
+                    return response;
+                }
+            })
+            .then(response => (response.ok ? response.json() : { clientPrincipal: {} }))
+            .then(json => {
+                const user = {
+                    email: json.clientPrincipal.userDetails,
+                    id: json.clientPrincipal.userId,
+                    roles: json.clientPrincipal.userRoles,
+                    identityProvider: json.clientPrincipal.identityProvider,
+                };
+                store.dispatch(setUser({ ...user }));
+            });
     }
 
     // interactions

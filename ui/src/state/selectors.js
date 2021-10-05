@@ -3,6 +3,7 @@ import slug from '../slug';
 
 export const createSelectors = state => {
     const workspace = createSelector([state], state => state.workspace);
+    const user = createSelector([state], state => state.user);
     const selectedReportId = createSelector([state], state => state.selectedReportId);
     const selectedPageId = createSelector([state], state => state.selectedPageId);
     const loadingReportId = createSelector([state], state => state.loadingReportId);
@@ -49,6 +50,7 @@ export const createSelectors = state => {
         selectedPageId,
         selectedReportId,
         workspace,
+        user,
     };
 };
 
