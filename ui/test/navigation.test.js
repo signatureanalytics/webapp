@@ -18,13 +18,6 @@ const login = async (page, username) => {
 };
 
 test.describe('Navigation', () => {
-    test('should open specified report page', async ({ page }) => {
-        await login(page, 'rwaldin@signatureanalytics.com');
-        await page.goto('http://localhost:4280/signatureanalytics/market/revenue-kpis');
-        await page.waitForSelector('.page');
-        await page.screenshot({ path: 'test-results/testScreenshot.png' });
-    });
-
     test('should list all reports from API', async ({ page }) => {
         await login(page, 'rwaldin@signatureanalytics.com');
         const reports = [];
