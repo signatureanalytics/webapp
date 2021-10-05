@@ -1,4 +1,16 @@
 const workspaces = {
+    signatureanalytics_prod: {
+        name: 'Signature Analytics',
+        id: '35ed6e2e-449a-4b06-a810-dbf0a10944c7',
+        users: {
+            google: {
+                'rwaldin@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
+                'cwagner@signatureanalyics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
+                'dshannon@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
+                'arichards@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
+            },
+        },
+    },
     signatureanalytics: {
         name: 'Signature Analytics',
         id: 'f9b1241e-ef36-489b-bc2e-eba05b970c73',
