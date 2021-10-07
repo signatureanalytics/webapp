@@ -2,4 +2,5 @@
 if [[ ! -d 'build' ]]; then
     npm run build
 fi 
-scripts/spawnWaitSpawn.js "swa start build --api ../api" "emulator started" "npx playwright test $*"
+export npx=$([ $OS == "Windows_NT" ] && echo "npx.cmd" || echo "npx")
+scripts/spawnWaitSpawn.js "$npx swa start build --api ../api" "emulator started" "$npx playwright test $*"
