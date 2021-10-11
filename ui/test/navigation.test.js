@@ -58,4 +58,13 @@ test.describe('Navigation', () => {
             expect(pages.map(p => p.displayName)).toContain(title);
         }
     });
+
+    test.skip('should list all pages of all reports', async ({ page }) => {
+
+    });
+
+    test.skip('should load first page when report is selected', async ({ page }) => {
+
+    });
+    
 });
