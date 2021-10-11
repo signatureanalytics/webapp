@@ -81,7 +81,7 @@ module.exports = async (context, req) => {
         return [report.name.replace(/ Report$/, ''), { id, dataset, embedUrl }];
     });
     const allReportsObj = Object.fromEntries(allReports);
-    const reportsObj = Object.fromEntries(
+    const reports = Object.fromEntries(
         user.map(reportName => {
             const { id, embedUrl } = allReportsObj[reportName];
             return [reportName, { id, embedUrl }];
@@ -102,7 +102,7 @@ module.exports = async (context, req) => {
     const uniqueDatasetIds = [...new Set(user.map(reportName => allReportsObj[reportName].dataset))];
     const getTokenBody = {
         datasets: uniqueDatasetIds.map(datasetId => ({ id: datasetId })),
-        reports: Object.values(reportsObj).map(({ id }) => ({ id })),
+        reports: Object.values(reports).map(({ id }) => ({ id })),
     };
 
     const getTokenPromise = fetch(getTokenUrl, {
@@ -117,7 +117,7 @@ module.exports = async (context, req) => {
     const requestMaxAgeSeconds = Math.max(0, ~~((tokenExpiresMs - requestExpiresBeforeTokenExpiresMs) / 1000));
 
     for await (const [name, { value: pages }] of getReportPagesPromises) {
-        reportsObj[name].pages = pages
+        reports[name].pages = pages
             .sort(({ order: a }, { order: b }) => a - b)
             .map(({ Name: id, displayName: name }) => ({ name, id }));
     }
@@ -135,8 +135,7 @@ module.exports = async (context, req) => {
             tokenId: getTokenJson.tokenId,
             token: getTokenJson.token,
             tokenExpires: getTokenJson.expiration,
-            reports: reportsObj,
-            env: process.env,
+            reports,
         },
     };
 };

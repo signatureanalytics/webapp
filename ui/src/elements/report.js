@@ -1,82 +1,38 @@
-import * as pbi from 'powerbi-client';
+import { models } from 'powerbi-client';
 import store from '../state/store';
 import { LitElement, html, css } from 'lit';
 import { connect } from 'pwa-helpers/connect-mixin';
 import { setWorkspace, setWorkspaceToken, selectReportId, selectPageId, loadPageId } from '../state/slice';
 import { selectors } from '../state/selectors';
 import slug from '../slug';
-
-const models = pbi.models;
+import reportStyles from './reportStyles';
 
 // Token refreshes between 1 and 9 minutes before it expires, randomized to prevent synchronization between clients.
 const refreshTokenMs = expires => new Date(expires) - Date.now() - ~~((Math.random() * 8 + 1) * 60 * 1000);
 
 class Report extends connect(store)(LitElement) {
-    static get styles() {
-        return css`
-            *,
-            :host,
-            *::before,
-            *::after {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
-            #reportContainer {
-                height: 100%;
-                width: 100%;
-            }
-            iframe {
-                border: 0;
-            }
-        `;
-    }
-
-    static get properties() {
-        return {
-            loadingReportId: { type: String },
-            loadingPageId: { type: String },
-            pageById: { type: Object },
-            pageBySlug: { type: Object },
-            pages: { type: Array },
-            pageSlug: { type: Object },
-            report: { type: Object },
-            reportById: { type: Object },
-            reportBySlug: { type: Object },
-            reportEmbedUrl: { type: String },
-            reports: { type: Array },
-            reportSlug: { type: Object },
-            selectedPageId: { type: String },
-            selectedReportId: { type: String },
-            workspace: { type: Object },
-        };
-    }
-
-    constructor() {
-        super();
-        window.addEventListener('popstate', e => {
-            store.dispatch(loadPageId({ reportId: e.state.report, pageId: e.state.page }));
-        });
-    }
+    static styles = reportStyles;
+    static properties = {
+        loadingReportId: String,
+        loadingPageId: String,
+        pages: Array,
+        reportById: Object,
+        reportBySlug: Object,
+        pageBySlugs: Object,
+        reportEmbedUrl: String,
+        reports: Array,
+        selectedPageId: String,
+        workspace: Object,
+    };
 
     stateChanged(state) {
-        this.workspace = selectors.workspace(state);
-        this.reports = selectors.reports(state);
-        this.pages = selectors.pages(state);
-        this.selectedPageId = selectors.selectedPageId(state);
-        this.selectedReportId = selectors.selectedReportId(state);
-        this.loadingReportId = selectors.loadingReportId(state);
-        this.loadingPageId = selectors.loadingPageId(state);
-        this.pageBySlug = selectors.pageBySlug(state);
-        this.reportBySlug = selectors.reportBySlug(state);
-        this.reportById = selectors.reportById(state);
-        this.reportEmbedUrl = selectors.reportEmbedUrl(state);
-        this.pageById = selectors.pageById(state);
-        this.reportSlug = selectors.reportSlug(state);
-        this.pageSlug = selectors.pageSlug(state);
+        for (const name in this.constructor.properties) {
+            this[name] = selectors[name](state);
+        }
     }
 
     firstUpdated() {
+        super.firstUpdated();
         this.loadWorkspace();
     }
 
@@ -95,14 +51,23 @@ class Report extends connect(store)(LitElement) {
         }
     }
 
+    popstateHandler = e => {
+        store.dispatch(loadPageId({ reportId: e.state.report, pageId: e.state.page }));
+    };
+
+    connectedCallback() {
+        super.connectedCallback();
+        window.addEventListener('popstate', this.popstateHandler);
+    }
+
     disconnectedCallback() {
+        window.removeEventListener('popstate', this.popstateHandler);
         super.disconnectedCallback();
-        window.removeEventListener('popstate');
     }
 
     async loadWorkspace() {
         try {
-            const response = await fetch('/api/getWorkspaceToken').then(async response => {
+            const workspace = await fetch('/api/workspace').then(async response => {
                 if (!response.ok) {
                     switch (response.status) {
                         case 401:
@@ -121,17 +86,17 @@ class Report extends connect(store)(LitElement) {
                 }
             });
             if (this.report) {
-                const { token, tokenId, tokenExpires } = response;
+                const { token, tokenId, tokenExpires } = workspace;
                 store.dispatch(setWorkspaceToken({ token, tokenId, tokenExpires }));
-                await this.report.setAccessToken(response.token);
+                await this.report.setAccessToken(workspace.token);
             } else {
-                store.dispatch(setWorkspace({ workspace: response }));
+                store.dispatch(setWorkspace({ workspace }));
                 const [, , reportSlug, pageSlug] = location.pathname.split('/');
                 const report = this.reportBySlug(reportSlug) ?? this.reports[0];
-                const page = report.pages.find(page => slug(page.name) === pageSlug);
+                const page = this.pageBySlugs(reportSlug, pageSlug);
                 await this.setReport(report, page);
             }
-            setTimeout(_ => this.loadWorkspace(), refreshTokenMs(response.tokenExpires));
+            setTimeout(_ => this.loadWorkspace(), refreshTokenMs(workspace.tokenExpires));
         } catch (error) {
             console.error(error);
         }
@@ -171,7 +136,7 @@ class Report extends connect(store)(LitElement) {
                 history.replaceState(
                     { report: report.id, page: page.id },
                     null,
-                    `${location.origin}/${workspaceSlug}/${this.reportSlug(report)}/${this.pageSlug(page)}`
+                    `${location.origin}/${workspaceSlug}/${slug(report.name)}/${slug(page.name)}`
                 );
                 this.report.render();
             });

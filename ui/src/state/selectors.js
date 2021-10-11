@@ -12,43 +12,62 @@ export const createSelectors = state => {
     const reportEmbedUrl = createSelector([workspace], workspace =>
         memoize(reportName => workspace.reports[reportName]?.embedUrl ?? '')
     );
+
     const reports = createSelector([workspace], workspace =>
         Object.entries(workspace.reports)
             .map(([name, { id, pages, expanded }]) => ({ name, id, pages, expanded }))
             .sort(({ name: a }, { name: b }) => a.localeCompare(b))
     );
-
     const reportById = createSelector([reports], reports => memoize(id => reports.find(report => report.id === id)));
+    const selectedReport = createSelector([selectedReportId, reportById], (selectedReportId, reportById) =>
+        reportById(selectedReportId)
+    );
 
     const pages = createSelector(
         [reportById, selectedReportId],
         (reportById, selectedReportId) => reportById(selectedReportId)?.pages ?? []
     );
     const pageById = createSelector([pages], pages => memoize(id => pages.find(page => page.id === id)));
+    const selectedPage = createSelector([selectedPageId, pageById], (selectedPageId, pageById) =>
+        pageById(selectedPageId)
+    );
 
     const reportBySlug = createSelector([reports], reports =>
         memoize(reportSlug => reports.find(r => slug(r.name) === reportSlug))
     );
-    const pageBySlug = createSelector([pages], pages =>
-        memoize(pageSlug => pages.find(p => slug(p.name) === pageSlug))
+    const pageBySlugs = createSelector([reportBySlug], reportBySlug =>
+        memoize((reportSlug, pageSlug) => reportBySlug(reportSlug)?.pages?.find(p => slug(p.name) === pageSlug))
     );
-    const reportSlug = createSelector([reports], reports => memoize(report => slug(report.name)));
-    const pageSlug = createSelector([pages], pages => memoize(page => slug(page.name)));
+
+    const title = createSelector(
+        [workspace, selectedReport, selectedPage],
+        (workspace, selectedReport, selectedPage) => {
+            const workspaceName = workspace?.name;
+            const reportName = selectedReport?.name;
+            const pageName = selectedPage?.name;
+            return `Co:Vantage™${
+                workspaceName
+                    ? ` ${workspaceName}${reportName ? ` ${reportName} Report${pageName ? ` - ${pageName}` : ''}` : ''}`
+                    : ''
+            }`;
+        }
+    );
 
     return {
         loadingReportId,
         loadingPageId,
         pageById,
-        pageBySlug,
         pages,
-        pageSlug,
         reportById,
         reportBySlug,
+        pageBySlugs,
         reportEmbedUrl,
         reports,
-        reportSlug,
+        selectedPage,
         selectedPageId,
+        selectedReport,
         selectedReportId,
+        title,
         workspace,
         user,
     };

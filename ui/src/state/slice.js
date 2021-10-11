@@ -6,6 +6,7 @@ const initialState = {
     selectedReportId: undefined,
     selectedPageId: undefined,
     loadingReportId: undefined,
+    loadingPageId: undefined,
 };
 
 const slice = createSlice({

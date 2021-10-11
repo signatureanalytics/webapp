@@ -22,7 +22,7 @@ test.describe('Navigation', () => {
         await login(page, 'rwaldin@signatureanalytics.com');
         const reports = [];
         const responseListener = async response => {
-            if (response.url() === `http://localhost:4280/api/getWorkspaceToken`) {
+            if (response.url() === `http://localhost:4280/api/workspace`) {
                 page.off('response', responseListener);
                 expect(await response.status()).toEqual(200);
                 const json = await response.json();

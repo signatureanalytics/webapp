@@ -5,15 +5,20 @@ export default css`
         border-right: 2px solid #ddd;
         overflow: hidden;
         position: relative;
+        user-select: none;
+        -webkit-user-select: none;
+        font-family: var(--font-body);
     }
     nav {
         overflow-y: auto;
         height: 100%;
     }
-    .report,
-    .page {
-        cursor: pointer;
-        font-family: 'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;
+    a,
+    a:visited,
+    a:active {
+        color: black;
+        text-decoration: none;
+        outline-offset: -2px;
     }
     .name {
         display: inline-block;
@@ -24,10 +29,11 @@ export default css`
         white-space: nowrap;
     }
     :not(.loading):not(.selected) > .name:hover {
-        background-color: #ddd;
+        background-color: #eee;
     }
-    .selected > .name {
-        font-weight: 600;
+    .selected.page > .name,
+    .selected.report:not(.expanded) > .name {
+        background-color: #ddd;
     }
     .expander {
         height: 22px;
@@ -35,6 +41,7 @@ export default css`
         vertical-align: top;
         transition: transform 200ms ease-out;
         transform: rotate(-90deg);
+        cursor: pointer;
     }
     .report {
         margin-left: 0px;
