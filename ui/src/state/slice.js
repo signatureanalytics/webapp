@@ -1,39 +1,67 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-    reports: [],
-    pages: [],
-    currentReport: undefined,
-    currentPage: undefined,
-    loadReport: undefined,
+    user: { email: undefined, identityProvider: undefined, id: undefined, roles: [] },
+    workspace: { name: undefined, id: undefined, token: undefined, tokenId: undefined, tokenExpires: 0, reports: [] },
+    selectedReportId: undefined,
+    selectedPageId: undefined,
+    loadingReportId: undefined,
+    loadingPageId: undefined,
 };
 
-const navSlice = createSlice({
-    name: 'nav',
+const slice = createSlice({
+    name: 'app',
     initialState,
     reducers: {
-        selectReport(state, { payload: { report } }) {
-            if (report !== state.currentReport) {
-                state.currentReport = report;
+        setWorkspaceToken(state, { payload: { token, tokenId, tokenExpires } }) {
+            state.workspace = { ...state.workspace, token, tokenId, tokenExpires };
+        },
+        setWorkspace(state, { payload: { workspace } }) {
+            state.workspace = workspace;
+        },
+        selectReportId(state, { payload: { reportId } }) {
+            if (reportId !== state.selectedReportId) {
+                state.selectedReportId = reportId;
+                Object.values(state.workspace.reports).find(
+                    report => report.id === state.selectedReportId
+                ).expanded = true;
             }
         },
-        loadReport(state, { payload: { report } }) {
-            state.loadReport = report;
-        },
-        selectPage(state, { payload: { page } }) {
-            if (page !== state.currentPage) {
-                state.currentPage = page;
+        selectPageId(state, { payload: { pageId } }) {
+            if (pageId !== state.selectedPageId) {
+                state.selectedPageId = pageId;
             }
         },
-        setReports(state, { payload: { reports } }) {
-            state.reports = reports;
+        loadReportId(state, { payload: { reportId } }) {
+            state.loadingReportId = reportId;
         },
-        setPages(state, { payload: { pages } }) {
-            state.pages = pages;
-            state.currentPage = pages[0].name;
+        loadPageId(state, { payload: { pageId, reportId } }) {
+            state.loadingPageId = pageId;
+            if (reportId) {
+                state.loadingReportId = reportId;
+            }
+        },
+        collapseReport(state, { payload: { reportId } }) {
+            Object.values(state.workspace.reports).find(report => report.id === reportId).expanded = false;
+        },
+        expandReport(state, { payload: { reportId } }) {
+            Object.values(state.workspace.reports).find(report => report.id === reportId).expanded = true;
+        },
+        setUser(state, { payload: { email, id, identityProvider, roles } }) {
+            state.user = { email, id, identityProvider, roles };
         },
     },
 });
 
-export const { selectReport, selectPage, setReports, setPages, loadReport } = navSlice.actions;
-export default navSlice.reducer;
+export const {
+    setUser,
+    setWorkspaceToken,
+    setWorkspace,
+    selectReportId,
+    selectPageId,
+    loadReportId,
+    loadPageId,
+    collapseReport,
+    expandReport,
+} = slice.actions;
+export default slice.reducer;

@@ -3,44 +3,68 @@ import { css } from 'lit';
 export default css`
     :host {
         border-right: 2px solid #ddd;
+        overflow: hidden;
+        position: relative;
+        user-select: none;
+        -webkit-user-select: none;
+        font-family: var(--font-body);
     }
     nav {
         overflow-y: auto;
+        height: 100%;
     }
-    div {
-        cursor: auto;
-        font-family: 'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;
-        margin-top: 2px;
-        padding: 3px;
+    a,
+    a:visited,
+    a:active {
+        color: black;
+        text-decoration: none;
+        outline-offset: -2px;
+    }
+    .name {
+        display: inline-block;
         width: 225px;
+        padding: 3px;
         text-overflow: ellipsis;
         overflow-x: hidden;
         white-space: nowrap;
     }
-    div:hover:not(.loading):not(.current) {
+    :not(.loading):not(.selected) > .name:hover {
+        background-color: #eee;
+    }
+    .selected.page > .name,
+    .selected.report:not(.expanded) > .name {
         background-color: #ddd;
     }
-    div:not(.current) {
+    .expander {
+        height: 22px;
+        width: 22px;
+        vertical-align: top;
+        transition: transform 200ms ease-out;
+        transform: rotate(-90deg);
         cursor: pointer;
     }
-    .current {
-        font-weight: 600;
-    }
     .report {
-        margin-left: 12px;
+        margin-left: 0px;
         font-size: 16px;
+        white-space: nowrap;
     }
-    .report.loading::after {
+    .page {
+        margin-left: 30px;
+        font-size: 16px;
+        overflow: hidden;
+        max-height: 0;
+        transition: max-height 200ms ease-out;
+    }
+    .report.expanded .page {
+        max-height: 26px;
+    }
+    .report.expanded .expander {
+        transform: rotate(0deg);
+    }
+    .loading > .name::after {
         content: '...';
         animation: ellipsis 900ms linear infinite;
         width: 20px;
-    }
-    .page {
-        margin-left: 24px;
-        font-size: 16px;
-    }
-    .page + .report {
-        margin-top: 10px;
     }
     @keyframes ellipsis {
         0% {

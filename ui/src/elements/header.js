@@ -1,64 +1,45 @@
 import { LitElement, html, css } from 'lit';
 import { connect } from 'pwa-helpers/connect-mixin';
-import { navSelectors } from '../state/navSelectors';
+import { selectors } from '../state/selectors';
 import store from '../state/store';
-import saLogo from '../assets/sa-logo.png';
-import covantageLogo from '../assets/covantage-logo.png';
+import logo from '../assets/sa-covantage-logo.png';
+import headerStyles from './headerStyles';
 
 const fixAssetUrl = url => `${`/${url}`.replace('//', '/')}`;
 
 class Header extends connect(store)(LitElement) {
-    static get styles() {
-        return css`
-            header {
-                box-sizing: border-box;
-                position: relative;
-                height: 100%;
-                padding: 10px;
-                border-bottom: 2px solid #ddd;
-            }
-            .sa-logo {
-                position: relative;
-                display: inline-block;
-                margin-inline: 10px;
-                width: 156px;
-                height: 50px;
-            }
-            .covantage-logo {
-                position: relative;
-                display: inline-block;
-                width: 400px;
-                height: 42px;
-            }
-            h1 {
-                display: inline-block;
-            }
-        `;
-    }
-    constructor() {
-        super();
-    }
-    static get properties() {
-        return {
-            currentReport: { type: String },
-            currentPage: { type: Object },
-            currentTitle: { type: String },
-        };
-    }
+    static styles = headerStyles;
+    static properties = {
+        selectedReport: Object,
+        selectedPage: Object,
+        user: Object,
+        workspace: Object,
+        title: String,
+    };
+
     stateChanged(state) {
-        this.currentReport = navSelectors.currentReport(state);
-        this.currentPage = navSelectors.currentPage(state);
-        this.currentTitle = navSelectors.currentTitle(state);
-        const documentTitle = `${this.currentTitle ? `${this.currentTitle} -` : ''} Co:Vantage™ by Signature Analytics`;
-        if (documentTitle !== document.title) {
-            document.title = documentTitle;
+        for (const name in this.constructor.properties) {
+            this[name] = selectors[name](state);
         }
     }
+
+    updated(changedProps) {
+        super.updated(changedProps);
+        document.title = this.title;
+    }
+
     render() {
+        const workspaceName = this.workspace?.name;
+        const reportName = this.selectedReport?.name;
+        const pageName = this.selectedPage?.name;
         return html`
             <header>
-                <img class="sa-logo" src="${fixAssetUrl(saLogo)}" />
-                <img class="covantage-logo" src="${fixAssetUrl(covantageLogo)}" />
+                <img class="logo" src="${fixAssetUrl(logo)}" />
+                <div class="title">
+                    <h1>${reportName ? `${workspaceName} - ${reportName} Report` : ''}</h1>
+                    <h2>${pageName}</h2>
+                </div>
+                <div class="userinfo">${this.user.email}</div>
             </header>
         `;
     }

@@ -12,7 +12,7 @@ const enterUsername = async (page, username) => {
 test.describe('Authorization API', () => {
     test('should return 401 for unauthorized user', async ({ page }) => {
         const responseListener = response => {
-            if (response.url() === `http://localhost:4280/api/getEmbedToken`) {
+            if (response.url() === `http://localhost:4280/api/workspace`) {
                 expect(response.status()).toEqual(401);
                 page.off('response', responseListener);
             }
@@ -21,24 +21,36 @@ test.describe('Authorization API', () => {
         await page.goto('http://localhost:4280/signatureanalytics');
     });
 
-    test('should return 403 for unrecognized user', async ({ page }) => {
+    test('should return 403 for unrecognized AAD user', async ({ page }) => {
+        await page.goto('http://localhost:4280/.auth/login/aad');
+        await page.waitForSelector('#userDetails');
+        await enterUsername(page, 'rwaldin@signatureanalytic.onmicrosoft.com');
+        await page.click('#submit');
+        await page.goto('http://localhost:4280/signatureanalytics');
+        const apiResponse = await page.waitForResponse(response => {
+            return response.url() === `http://localhost:4280/api/workspace`;
+        });
+        expect(apiResponse.status()).toEqual(403);
+    });
+
+    test('should return 403 for unrecognized Google user', async ({ page }) => {
         await page.goto('http://localhost:4280/signatureanalytics');
         await page.waitForSelector('#userDetails');
         await enterUsername(page, 'ray@waldin.net');
         await page.click('#submit');
         const apiResponse = await page.waitForResponse(response => {
-            return response.url() === `http://localhost:4280/api/getEmbedToken`;
+            return response.url() === `http://localhost:4280/api/workspace`;
         });
         expect(apiResponse.status()).toEqual(403);
     });
 
     test('should return 404 for unrecognized workspace', async ({ page }) => {
-        await page.goto('http://localhost:4280/foo/');
+        await page.goto('http://localhost:4280/foo');
         await page.waitForSelector('#userDetails');
         await enterUsername(page, 'rwaldin@signatureanalytics.com');
         await page.click('#submit');
         const apiResponse = await page.waitForResponse(response => {
-            return response.url() === `http://localhost:4280/api/getEmbedToken`;
+            return response.url() === `http://localhost:4280/api/workspace`;
         });
         expect(apiResponse.status()).toEqual(404);
     });
@@ -49,7 +61,7 @@ test.describe('Authorization API', () => {
         await enterUsername(page, 'rwaldin@signatureanalytics.com');
         await page.click('#submit');
         const apiResponse = await page.waitForResponse(response => {
-            return response.url() === `http://localhost:4280/api/getEmbedToken`;
+            return response.url() === `http://localhost:4280/api/workspace`;
         });
         expect(apiResponse.status()).toEqual(200);
     });
@@ -60,7 +72,7 @@ test.describe('Authorization API', () => {
         await enterUsername(page, 'rwaldin@signatureanalytics.com');
         await page.click('#submit');
         const apiResponse = await page.waitForResponse(response => {
-            return response.url() === `http://localhost:4280/api/getEmbedToken`;
+            return response.url() === `http://localhost:4280/api/workspace`;
         });
         expect(apiResponse.status()).toEqual(200);
     });
@@ -71,7 +83,7 @@ test.describe('Authorization API', () => {
         await enterUsername(page, 'rwaldin@signatureanalytics.com');
         await page.click('#submit');
         const apiResponse = await page.waitForResponse(response => {
-            return response.url() === `http://localhost:4280/api/getEmbedToken`;
+            return response.url() === `http://localhost:4280/api/workspace`;
         });
         expect(apiResponse.status()).toEqual(200);
     });
