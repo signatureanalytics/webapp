@@ -12,6 +12,7 @@ const workspaces = {
                 'ibarnett@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
                 'jpederson@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
                 'bness@signatureanalytics.com': ['HR', 'Revenue', 'Engagement', 'Hours Detail', 'Market', 'Sales'],
+                'rkhanna@signatureanalytics.com': ['Engagement', 'Hours Detail', 'Market'],
             },
         },
     },
