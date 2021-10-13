@@ -35,7 +35,7 @@ class Report extends connect(store)(LitElement) {
         super.firstUpdated();
         this.loadWorkspace();
     }
-    css;
+
     updated(changedProps) {
         super.updated(changedProps);
         if (changedProps.has('selectedPageId') && this.report) {
