@@ -1,9 +1,10 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html } from 'lit';
 import { connect } from 'pwa-helpers/connect-mixin';
-import { selectors } from '../state/selectors';
-import store from '../state/store';
-import logo from '../assets/sa-covantage-logo.png';
+
 import headerStyles from './headerStyles';
+import logo from '../assets/sa-covantage-logo.png';
+import store from '../state/store';
+import { selectors } from '../state/selectors';
 
 const fixAssetUrl = url => `${`/${url}`.replace('//', '/')}`;
 

@@ -1,14 +1,13 @@
-import { LitElement, html, css } from 'lit';
-import * as pbi from 'powerbi-client';
 import './header';
 import './nav';
 import './report';
+
+import { LitElement, html } from 'lit';
+import { connect } from 'pwa-helpers';
+
+import mainStyles from './mainStyles';
 import store from '../state/store';
 import { setUser } from '../state/slice';
-import { connect } from 'pwa-helpers';
-import mainStyles from './mainStyles';
-
-const models = pbi.models;
 
 class Main extends connect(store)(LitElement) {
     static styles = mainStyles;
@@ -18,7 +17,7 @@ class Main extends connect(store)(LitElement) {
         fetch('/.auth/me')
             .then(response => {
                 if (!response.ok) {
-                    throw new Error(response);
+                    throw new Error(response.toString());
                 } else {
                     return response;
                 }
