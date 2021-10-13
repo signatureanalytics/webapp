@@ -1,13 +1,17 @@
 // Snowpack Configuration File
 // See all supported options: https://www.snowpack.dev/reference/configuration
 
-/** @type {import("snowpack").SnowpackUserConfig } */
 const minifyHTML = require('rollup-plugin-minify-html-literals').default;
 const terser = require('rollup-plugin-terser').terser;
+const replace = require('@rollup/plugin-replace');
 
+/** @type {import("snowpack").SnowpackUserConfig } */
 module.exports = {
     mount: {
         src: '/',
+    },
+    optimize: {
+        treeshake: true,
     },
     plugins: [
         [
@@ -38,20 +42,24 @@ module.exports = {
                     config.inputOptions.plugins.push(
                         terser({
                             compress: {
-                                passes: 2,
+                                passes: 1,
                             },
                         })
                     );
+
+                    config.outputOptions.sourcemap = process.env.NODE_ENV !== 'production';
+
                     return config;
                 },
             },
         ],
     ],
     packageOptions: {
-        /* ... */
+        knownEntrypoints: ['lit-html', 'lit-html/directive.js', 'lit-html/directives/class-map.js'],
     },
     devOptions: {
         open: 'none',
+        output: 'stream',
     },
     buildOptions: {
         out: 'build',

@@ -126,4 +126,6 @@ local.settings.json
 
 .vscode
 
+# misc
 test-results
+.DS_Store
