@@ -19,6 +19,9 @@ class Header extends connect(store)(LitElement) {
     };
 
     stateChanged(state) {
+        if (!state) {
+            throw new Error();
+        }
         for (const name in this.constructor.properties) {
             this[name] = selectors[name](state);
         }
