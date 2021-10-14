@@ -2,11 +2,41 @@ const import_ = require('esm-wallaby')(module);
 const importDefault_ = m => import_(m).default;
 
 const chai = require('chai');
-const { isRDLEmbed } = require('util');
 const should = chai.should();
 const { selectors } = import_('../../src/state/selectors.js');
 
 describe('selectors', () => {
+    describe('reportEmbedUrl()', () => {
+        it('returns undefined with no workspace', () => {
+            const reportEmbedUrl = selectors.reportEmbedUrl({});
+            const url = reportEmbedUrl('foo');
+            should.not.exist(url);
+        });
+        it('returns undefined with empty workspace', () => {
+            const workspace = {};
+            const reportEmbedUrl = selectors.reportEmbedUrl({ workspace });
+            const url = reportEmbedUrl('foo');
+            should.not.exist(url);
+        });
+        it('returns undefined with no reports', () => {
+            const workspace = { reports: {} };
+            const reportEmbedUrl = selectors.reportEmbedUrl({ workspace });
+            const url = reportEmbedUrl('foo');
+            should.not.exist(url);
+        });
+        it('returns undefined for non-existant report', () => {
+            const workspace = { reports: { bar: { embedUrl: 'http://bar/' } } };
+            const reportEmbedUrl = selectors.reportEmbedUrl({ workspace });
+            const url = reportEmbedUrl('foo');
+            should.not.exist(url);
+        });
+        it('returns embedUrl for existing report', () => {
+            const workspace = { reports: { foo: { embedUrl: 'http://foo/' } } };
+            const reportEmbedUrl = selectors.reportEmbedUrl({ workspace });
+            const url = reportEmbedUrl('foo');
+            url.should.equal('http://foo/');
+        });
+    });
     describe('reports()', () => {
         it('handles 0 reports', () => {
             const workspace = { reports: {} };

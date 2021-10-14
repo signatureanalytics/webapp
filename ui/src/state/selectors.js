@@ -13,8 +13,8 @@ export const createSelectors = state => {
     const loadingReportId = createSelector(state, state => state.loadingReportId);
     const loadingPageId = createSelector(state, state => state.loadingPageId);
 
-    const reportEmbedUrl = createSelector(workspace, ({ reports }) =>
-        memoize(reportName => reports[reportName]?.embedUrl ?? '')
+    const reportEmbedUrl = createSelector(workspace, workspace =>
+        memoize(reportName => workspace?.reports?.[reportName]?.embedUrl)
     );
 
     const reports = createSelector(workspace, workspace => {
