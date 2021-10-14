@@ -13,15 +13,15 @@ export const createSelectors = state => {
     const loadingReportId = createSelector(state, state => state.loadingReportId);
     const loadingPageId = createSelector(state, state => state.loadingPageId);
 
-    const reportEmbedUrl = createSelector(workspace, ({ reports }) =>
-        memoize(reportName => reports[reportName]?.embedUrl ?? '')
+    const reportEmbedUrl = createSelector(workspace, workspace =>
+        memoize(reportName => workspace?.reports?.[reportName]?.embedUrl)
     );
 
-    const reports = createSelector(workspace, ({ reports }) =>
-        Object.entries(reports)
+    const reports = createSelector(workspace, workspace => {
+        return Object.entries(workspace?.reports ?? {})
             .map(([name, { id, pages, expanded }]) => ({ name, id, pages, expanded }))
-            .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-    );
+            .sort(({ name: a }, { name: b }) => a.localeCompare(b));
+    });
     const reportById = createSelector(reports, reports => memoize(id => reports.find(report => report.id === id)));
     const selectedReport = createSelector(selectedReportId, reportById, (id, reportById) => reportById(id));
     const selectedPage = createSelector(selectedPageId, selectedReport, (id, report) =>
