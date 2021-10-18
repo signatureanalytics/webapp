@@ -1,17 +1,16 @@
-import { LitElement, html } from 'lit';
-import { connect } from 'pwa-helpers/connect-mixin';
+import { html } from 'lit';
 import { models } from 'powerbi-client';
 
 import reportStyles from './reportStyles';
 import slug from '../slug';
-import store from '../state/store';
+import { ConnectedLitElement, store } from '../state/store';
 import { loadPageId, selectPageId, selectReportId, setWorkspace, setWorkspaceToken } from '../state/slice';
 import { selectors } from '../state/selectors';
 
 // Token refreshes between 1 and 9 minutes before it expires, randomized to prevent synchronization between clients.
 const refreshTokenMs = expires => new Date(expires) - Date.now() - ~~((Math.random() * 8 + 1) * 60 * 1000);
 
-class Report extends connect(store)(LitElement) {
+class Report extends ConnectedLitElement {
     static styles = reportStyles;
     static properties = {
         loadingReportId: String,

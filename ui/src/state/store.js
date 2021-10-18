@@ -1,10 +1,12 @@
+import { LitElement } from 'lit';
 import { configureStore } from '@reduxjs/toolkit';
+import { connect } from 'pwa-helpers/connect-mixin';
 
 import reducer from './slice';
 
-const store = configureStore({
+export const store = configureStore({
     reducer,
     devTools: import.meta.env.NODE_ENV === 'development',
 });
 
-export default store;
+export const ConnectedLitElement = connect(store)(LitElement);

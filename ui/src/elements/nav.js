@@ -1,17 +1,16 @@
-import { LitElement, html } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
-import { connect } from 'pwa-helpers/connect-mixin';
+import { html } from 'lit';
 
 import caret from '../assets/caret.svg';
 import navStyles from './navStyles';
 import slug from '../slug';
-import store from '../state/store';
+import { ConnectedLitElement, store } from '../state/store';
 import { collapseReport, expandReport, loadPageId, loadReportId } from '../state/slice';
 import { selectors } from '../state/selectors';
 
 const fixAssetUrl = url => `${`/${url}`.replace('//', '/')}`;
 
-class Nav extends connect(store)(LitElement) {
+class Nav extends ConnectedLitElement {
     static styles = navStyles;
     static properties = {
         loadingReportId: String,
