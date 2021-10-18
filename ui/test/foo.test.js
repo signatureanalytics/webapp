@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
-test('my test', async ({ page }) => {
+// Sample tests from PLAYWRIGHT page
+test.skip('my test', async ({ page }) => {
   await page.goto('https://playwright.dev/');
 
   // Expect a title "to contain" a substring.
@@ -18,15 +19,30 @@ test('my test', async ({ page }) => {
 
   // Compare screenshot with a stored reference.
   expect(await page.screenshot()).toMatchSnapshot('get-started.png');
+
+  
+  // Count number of div nodes
+  const list = page.locator('.themedImage_1VuW');
+  await expect(list).toHaveCount(2);
+
 });
 
-test('my test 2', async ({ page }) => {
+test('SA page Menu iten should contain text "solutions" ', async ({ page }) => {
     await page.goto('https://signatureanalytics.com/');
   
     // Expect an attribute "to be strictly equal" to the value.
     await expect(page.locator('#top-menu [href="/our-approach/"]')).toContainText("Solutions");
   
-  });
+});
+  
+
+test('SA page should have 241 div elements ', async ({ page }) => {
+        await page.goto('https://signatureanalytics.com/');
+      
+        // Expect an attribute "to be strictly equal" to the value.
+        await expect(page.locator('div')).toHaveCount(241);
+});
+
 
   const enterUsername = async (page, username) => {
     // This page is poorly implemented. It requires the username to be type()d and not fill()ed.
@@ -45,7 +61,7 @@ const login = async (page, username) => {
 };
 
 test.describe('Navigation', () => {
-    test('should list all reports from API', async ({ page }) => {
+    test.skip('should list all reports from API', async ({ page }) => {
         await login(page, 'rwaldin@signatureanalytics.com');
         const reports = [];
         const responseListener = async response => {
@@ -67,7 +83,7 @@ test.describe('Navigation', () => {
         }
     });
 
-    test('should list all pages of current report', async ({ page }) => {
+    test.skip('should list all pages of current report', async ({ page }) => {
         await login(page, 'rwaldin@signatureanalytics.com');
         await page.goto('http://localhost:4280/signatureanalytics');
         await page.waitForSelector('.report');
@@ -86,12 +102,32 @@ test.describe('Navigation', () => {
         }
     });
 
+    //Only one page and one report should be selected 
+    test('should count exactly 2 selected nodes ', async ({ page }) => {
+        await login(page, 'rwaldin@signatureanalytics.com');
+        await page.goto('http://localhost:4280/signatureanalytics');
+
+        await expect(page.locator(' .selected')).toHaveCount(2);
+    });
+
     test.skip('should list all pages of all reports', async ({ page }) => {
+        // List of all  pages via getWorkspaceToken API should match list of all pages in HTML 
 
     });
 
     test.skip('should load first page when report is selected', async ({ page }) => {
+        // First page child of report.selected should have .selected class
+        // No other page should have .selected 
+        // Exactly one report should have .selected 
+        // Is selected report always expanded?  
+        // Elements with .selected should be exactly 2 
+
+        //const content = await page.textContent('nav:first-child');
+        //expect(content).toBe('home');
+
 
     });
+
+    
     
 });
