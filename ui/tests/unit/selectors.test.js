@@ -51,7 +51,7 @@ describe('selectors', () => {
                 },
             };
 
-            const names = Object.keys(workspace.reports).sort();
+            const names = Object.keys(workspace.reports);
             const reports = selectors.reports({ workspace });
             reports.should.have.lengthOf(2);
             reports.every((report, i) => {
