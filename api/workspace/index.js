@@ -76,12 +76,11 @@ module.exports = async (context, req) => {
     const getReportsJson = await getReportsPromise.then(response => checkResponse(response).json());
 
     const reports = Object.fromEntries(
-        getReportsJson.value
-            .map(report => {
-                const { id, datasetId: dataset, embedUrl } = report;
-                return [report.name.replace(/ Report$/, ''), { id, dataset, embedUrl }];
-            })
-            .filter(([name]) => user.includes(name))
+        user.map(name => {
+            const report = getReportsJson.value.find(report => `${name} Report` === report.name);
+            const { id, datasetId: dataset, embedUrl } = report;
+            return [name, { id, dataset, embedUrl }];
+        })
     );
 
     const getReportPagesPromises = Object.entries(reports).map(([reportName, { id }]) =>

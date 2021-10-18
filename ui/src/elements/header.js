@@ -1,14 +1,13 @@
-import { LitElement, html } from 'lit';
-import { connect } from 'pwa-helpers/connect-mixin';
+import { html } from 'lit';
 
 import headerStyles from './headerStyles';
 import logo from '../assets/sa-covantage-logo.png';
-import store from '../state/store';
+import { ConnectedLitElement } from '../state/store';
 import { selectors } from '../state/selectors';
 
 const fixAssetUrl = url => `${`/${url}`.replace('//', '/')}`;
 
-class Header extends connect(store)(LitElement) {
+class Header extends ConnectedLitElement {
     static styles = headerStyles;
     static properties = {
         selectedReport: Object,

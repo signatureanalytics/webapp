@@ -18,9 +18,12 @@ export const createSelectors = state => {
     );
 
     const reports = createSelector(workspace, workspace => {
-        return Object.entries(workspace?.reports ?? {})
-            .map(([name, { id, pages, expanded }]) => ({ name, id, pages, expanded }))
-            .sort(({ name: a }, { name: b }) => a.localeCompare(b));
+        return Object.entries(workspace?.reports ?? {}).map(([name, { id, pages, expanded }]) => ({
+            name,
+            id,
+            pages,
+            expanded,
+        }));
     });
     const reportById = createSelector(reports, reports => memoize(id => reports.find(report => report.id === id)));
     const selectedReport = createSelector(selectedReportId, reportById, (id, reportById) => reportById(id));

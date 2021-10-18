@@ -2,14 +2,13 @@ import './header';
 import './nav';
 import './report';
 
-import { LitElement, html } from 'lit';
-import { connect } from 'pwa-helpers';
+import { html } from 'lit';
 
 import mainStyles from './mainStyles';
-import store from '../state/store';
+import { ConnectedLitElement, store } from '../state/store';
 import { setUser } from '../state/slice';
 
-class Main extends connect(store)(LitElement) {
+class Main extends ConnectedLitElement {
     static styles = mainStyles;
 
     constructor() {
