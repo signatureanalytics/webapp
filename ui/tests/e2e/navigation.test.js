@@ -32,8 +32,8 @@ test.describe('Navigation', () => {
                 Object.keys(json.reports).forEach(r => reports.push(r));
             }
         };
-        await page.goto('http://localhost:4280/signatureanalytics');
         page.on('response', responseListener);
+        await page.goto('http://localhost:4280/signatureanalytics');
         await page.waitForSelector('.report');
         const reportElements = await page.$$('.report > .name');
         expect(reportElements).toHaveLength(reports.length);
