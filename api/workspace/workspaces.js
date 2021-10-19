@@ -3,7 +3,7 @@ const workspaces = {
         name: 'Signature Analytics',
         id: 'f9b1241e-ef36-489b-bc2e-eba05b970c73',
         users: {
-            google: {
+            auth0: {
                 'rwaldin@signatureanalytics.com': ['Market', 'Hours Detail', 'Revenue', 'Sales', 'HR', 'Engagement'],
                 'cwagner@signatureanalyics.com': ['Market', 'Hours Detail', 'Revenue', 'Sales', 'HR', 'Engagement'],
                 'dshannon@signatureanalytics.com': ['Market', 'Hours Detail', 'Revenue', 'Sales', 'HR', 'Engagement'],

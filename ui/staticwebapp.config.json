@@ -2,5 +2,26 @@
     "navigationFallback": {
         "rewrite": "/dashboard.html",
         "exclude": ["/assets/*.{png,jpg,gif,svg}", "/.auth/*", "/api/*"]
+    },
+    "auth": {
+        "identityProviders": {
+            "customOpenIdConnectProviders": {
+                "auth0": {
+                    "registration": {
+                        "clientIdSettingName": "AUTH0_ID",
+                        "clientCredential": {
+                            "clientSecretSettingName": "AUTH0_SECRET"
+                        },
+                        "openIdConnectConfiguration": {
+                            "wellKnownOpenIdConfiguration": "https://dev-gc9mp-kv.us.auth0.com/.well-known/openid-configuration"
+                        }
+                    },
+                    "login": {
+                        "nameClaimType": "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
+                        "scopes": ["profile"]
+                    }
+                }
+            }
+        }
     }
 }
