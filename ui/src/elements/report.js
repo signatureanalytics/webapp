@@ -70,7 +70,7 @@ class Report extends ConnectedLitElement {
                 if (!response.ok) {
                     switch (response.status) {
                         case 401:
-                            location = `/.auth/login/google?post_login_redirect_uri=${location}`;
+                            location = `/.auth/login/auth0?post_login_redirect_uri=${location}`;
                             break;
                         case 403:
                         case 404:

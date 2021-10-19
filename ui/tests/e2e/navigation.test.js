@@ -11,7 +11,7 @@ const enterUsername = async (page, username) => {
 };
 
 const login = async (page, username) => {
-    await page.goto('http://localhost:4280/.auth/login/google');
+    await page.goto('http://localhost:4280/.auth/login/auth0');
     await enterUsername(page, username);
     await page.click('#submit');
 };
