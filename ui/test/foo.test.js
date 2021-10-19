@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
-// Sample tests from PLAYWRIGHT page
-test.skip('my test', async ({ page }) => {
+// Sample tests from PLAYWRIGHT page - exercising simple functions 
+test('Testing SA public website', async ({ page }) => {
   await page.goto('https://playwright.dev/');
 
   // Expect a title "to contain" a substring.
@@ -20,14 +20,13 @@ test.skip('my test', async ({ page }) => {
   // Compare screenshot with a stored reference.
   expect(await page.screenshot()).toMatchSnapshot('get-started.png');
 
-  
   // Count number of div nodes
   const list = page.locator('.themedImage_1VuW');
   await expect(list).toHaveCount(2);
 
 });
 
-test('SA page Menu iten should contain text "solutions" ', async ({ page }) => {
+test('SA page menu element with specific ID should contain text "solutions" ', async ({ page }) => {
     await page.goto('https://signatureanalytics.com/');
   
     // Expect an attribute "to be strictly equal" to the value.
@@ -104,7 +103,7 @@ test.describe('Navigation', () => {
 
     //Only one page and one report should be selected 
     test('should count exactly 2 selected nodes ', async ({ page }) => {
-        await login(page, 'rwaldin@signatureanalytics.com');
+        await login(page, 'dshannon@signatureanalytics.com');
         await page.goto('http://localhost:4280/signatureanalytics');
 
         await expect(page.locator(' .selected')).toHaveCount(2);
@@ -117,6 +116,8 @@ test.describe('Navigation', () => {
 
     test.skip('should load first page when report is selected', async ({ page }) => {
         // First page child of report.selected should have .selected class
+        // Get first child selector? 
+
         // No other page should have .selected 
         // Exactly one report should have .selected 
         // Is selected report always expanded?  
@@ -124,10 +125,6 @@ test.describe('Navigation', () => {
 
         //const content = await page.textContent('nav:first-child');
         //expect(content).toBe('home');
-
-
     });
-
-    
     
 });
