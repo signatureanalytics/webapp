@@ -10,8 +10,8 @@ const vary = [referrerHeaderName, clientPrincipalHeaderName, cookieHeaderName];
 const urlEncodedContentType = 'application/x-www-form-urlencoded';
 const jsonContentType = 'application/json';
 const requestExpiresBeforeTokenExpiresMs = 10 * 60 * 1000; // expire request 10 minutes before token expires
-const clientId = encodeURIComponent(config.clientId);
 const scope = encodeURIComponent(config.scope);
+const clientId = process.env.WEBAPP_CLIENT_ID;
 const clientSecret = process.env.WEBAPP_CLIENT_SECRET;
 const getTokenUrl = `${config.apiUrl}GenerateToken`;
 const oAuthUrl = `${config.authorityUrl}${config.tenantId}/oauth2/token?api-version=1.0`;

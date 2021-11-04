@@ -8,7 +8,6 @@
     },
     "dependencies": {
         "dotenv": "^10.0.0",
-        "dotenv-keyvault": "^0.1.1",
         "node-fetch": "^2.6.2"
     },
     "keywords": [],

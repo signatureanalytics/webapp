@@ -17,7 +17,7 @@
     },
     "devDependencies": {
         "@azure/static-web-apps-cli": "^0.8.0",
-        "@playwright/test": "^1.15.2",
+        "@playwright/test": "^1.16.3",
         "@rollup/plugin-replace": "^3.0.0",
         "azure-functions-core-tools": "^3.0.3785",
         "chai": "^4.3.4",

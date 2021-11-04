@@ -18,15 +18,15 @@ test.describe('Authorization API', () => {
             }
         };
         page.on('response', responseListener);
-        await page.goto('http://localhost:4280/signatureanalytics');
+        await page.goto('http://localhost:4280/automatedtesting');
     });
 
-    test('should return 403 for unrecognized AAD user', async ({ page }) => {
+    test.skip('should return 403 for unrecognized AAD user', async ({ page }) => {
         await page.goto('http://localhost:4280/.auth/login/aad');
         await page.waitForSelector('#userDetails');
-        await enterUsername(page, 'rwaldin@signatureanalytic.onmicrosoft.com');
+        await enterUsername(page, 'rwaldin@signatureanalytics.onmicrosoft.com');
         await page.click('#submit');
-        await page.goto('http://localhost:4280/signatureanalytics');
+        await page.goto('http://localhost:4280/automatedtesting');
         const apiResponse = await page.waitForResponse(response => {
             return response.url() === `http://localhost:4280/api/workspace`;
         });
@@ -34,7 +34,7 @@ test.describe('Authorization API', () => {
     });
 
     test('should return 403 for unrecognized Google user', async ({ page }) => {
-        await page.goto('http://localhost:4280/signatureanalytics');
+        await page.goto('http://localhost:4280/automatedtesting');
         await page.waitForSelector('#userDetails');
         await enterUsername(page, 'ray@waldin.net');
         await page.click('#submit');
@@ -56,7 +56,7 @@ test.describe('Authorization API', () => {
     });
 
     test('should return 200 for recognized user', async ({ page }) => {
-        await page.goto('http://localhost:4280/signatureanalytics');
+        await page.goto('http://localhost:4280/automatedtesting');
         await page.waitForSelector('#userDetails');
         await enterUsername(page, 'rwaldin@signatureanalytics.com');
         await page.click('#submit');
@@ -67,7 +67,7 @@ test.describe('Authorization API', () => {
     });
 
     test('should return 200 and redirect to first report for disallowed report', async ({ page }) => {
-        await page.goto('http://localhost:4280/signatureanalytics/sales');
+        await page.goto('http://localhost:4280/automatedtesting/sales');
         await page.waitForSelector('#userDetails');
         await enterUsername(page, 'rwaldin@signatureanalytics.com');
         await page.click('#submit');
@@ -78,7 +78,7 @@ test.describe('Authorization API', () => {
     });
 
     test('should return 200 and redirect to first report for unrecognized report', async ({ page }) => {
-        await page.goto('http://localhost:4280/signatureanalytics/foo');
+        await page.goto('http://localhost:4280/automatedtesting/foo');
         await page.waitForSelector('#userDetails');
         await enterUsername(page, 'rwaldin@signatureanalytics.com');
         await page.click('#submit');
