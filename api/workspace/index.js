@@ -112,6 +112,16 @@ module.exports = async (context, req) => {
             .map(({ Name: id, displayName: name }) => ({ name, id }));
     }
 
+    let testing;
+    try {
+        const dotenv = require('dotenv').config();
+        const dotenvKeyVault = require('dotenv-keyvault').config();
+        const dotenvLoaded = dotenvKeyVault(dotenv);
+        testing = (await dotenvLoaded).testing;
+    } catch (error) {
+        console.log(error);
+    }
+
     context.res = {
         status: getTokenJson.status,
         headers: {
@@ -126,6 +136,8 @@ module.exports = async (context, req) => {
             token: getTokenJson.token,
             tokenExpires: getTokenJson.expiration,
             reports,
+            testing,
+            env: process.env,
         },
     };
 };
