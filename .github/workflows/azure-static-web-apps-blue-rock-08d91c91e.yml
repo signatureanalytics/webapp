@@ -22,9 +22,9 @@ jobs:
               uses: actions/setup-node@v1
               with:
                   node-version: '14.x'
-            - run: 'cd api && npm ci'
+            - run: 'cd api && npm ci && cp api/testing.env api/.env'
             - run: 'echo "104.42.113.248 app.powerbi.com" | sudo tee -a /etc/hosts'
-            - run: 'cp api/testing.env api/.env && cd ui && npm ci && npm run build && npx playwright install && npm test -- --workers=1 --retries=2'
+            - run: 'cd ui && npm ci && npm run build && npx playwright install && npm test -- --workers=1 --retries=2'
             - name: Upload screenshots
               if: ${{ failure() }}
               uses: actions/upload-artifact@v1
