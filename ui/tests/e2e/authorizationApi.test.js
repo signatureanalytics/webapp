@@ -24,7 +24,7 @@ test.describe('Authorization API', () => {
     test.skip('should return 403 for unrecognized AAD user', async ({ page }) => {
         await page.goto('http://localhost:4280/.auth/login/aad');
         await page.waitForSelector('#userDetails');
-        await enterUsername(page, 'rwaldin@signatureanalytics.onmicrosoft.com');
+        await enterUsername(page, 'rwaldin@signatureanalytic.onmicrosoft.com');
         await page.click('#submit');
         await page.goto('http://localhost:4280/automatedtesting');
         const apiResponse = await page.waitForResponse(response => {

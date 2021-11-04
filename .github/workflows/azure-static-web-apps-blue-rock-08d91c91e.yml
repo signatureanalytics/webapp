@@ -25,6 +25,7 @@ jobs:
             - run: 'cd api && npm ci && cp testing.env .env'
             - run: 'echo "104.42.113.248 app.powerbi.com" | sudo tee -a /etc/hosts'
             - run: 'cd ui && npm ci && npm run build && npx playwright install && npm test -- --workers=1 --retries=2'
+            - run: 'rm api/.env'
             - name: Upload screenshots
               if: ${{ failure() }}
               uses: actions/upload-artifact@v1
