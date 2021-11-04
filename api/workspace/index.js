@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 const config = require('./config.json');
 const workspaces = require('./workspaces.js');
+const dotenv = require('dotenv').config();
 
 const referrerHeaderName = 'referer'; // [sic] see https://en.wikipedia.org/wiki/HTTP_referer#Etymology
 const cookieHeaderName = 'cookie';
@@ -11,7 +12,7 @@ const jsonContentType = 'application/json';
 const requestExpiresBeforeTokenExpiresMs = 10 * 60 * 1000; // expire request 10 minutes before token expires
 const clientId = encodeURIComponent(config.clientId);
 const scope = encodeURIComponent(config.scope);
-const clientSecret = encodeURIComponent(config.clientSecret);
+const clientSecret = process.env.WEBAPP_CLIENT_SECRET;
 const getTokenUrl = `${config.apiUrl}GenerateToken`;
 const oAuthUrl = `${config.authorityUrl}${config.tenantId}/oauth2/token?api-version=1.0`;
 const oAuthBody = `grant_type=client_credentials&client_id=${clientId}&resource=${scope}&client_secret=${clientSecret}`;
@@ -112,16 +113,6 @@ module.exports = async (context, req) => {
             .map(({ Name: id, displayName: name }) => ({ name, id }));
     }
 
-    let testing;
-    try {
-        const dotenv = require('dotenv').config();
-        const dotenvKeyVault = require('dotenv-keyvault').config();
-        const dotenvLoaded = dotenvKeyVault(dotenv);
-        testing = (await dotenvLoaded).testing;
-    } catch (error) {
-        console.log(error);
-    }
-
     context.res = {
         status: getTokenJson.status,
         headers: {
@@ -136,7 +127,6 @@ module.exports = async (context, req) => {
             token: getTokenJson.token,
             tokenExpires: getTokenJson.expiration,
             reports,
-            testing,
             env: process.env,
         },
     };

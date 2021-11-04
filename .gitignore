@@ -124,3 +124,4 @@ local.settings.json
 # misc
 test-results
 .DS_Store
+.env
