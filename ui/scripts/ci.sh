@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-set -e
+set -ex
 echo 104.42.113.248 app.powerbi.com | sudo tee -a /etc/hosts
 
 cd api
