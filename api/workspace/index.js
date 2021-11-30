@@ -2,7 +2,9 @@ const fetch = require('node-fetch');
 const config = require('./config.json');
 const dotenv = require('dotenv').config();
 const { load: parseYaml } = require('js-yaml');
-const { readFile } = require('fs/promises');
+const fs = require('fs');
+const { promisify } = require('util');
+const readFile = promisify(fs.readFile);
 
 const referrerHeaderName = 'referer'; // [sic] see https://en.wikipedia.org/wiki/HTTP_referer#Etymology
 const cookieHeaderName = 'cookie';
