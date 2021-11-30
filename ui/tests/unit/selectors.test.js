@@ -24,7 +24,7 @@ describe('selectors', () => {
             const url = reportEmbedUrl('foo');
             should.not.exist(url);
         });
-        it('returns undefined for non-existant report', () => {
+        it('returns undefined for non-existent report', () => {
             const workspace = { reports: { bar: { embedUrl: 'http://bar/' } } };
             const reportEmbedUrl = selectors.reportEmbedUrl({ workspace });
             const url = reportEmbedUrl('foo');
@@ -61,7 +61,7 @@ describe('selectors', () => {
         });
     });
     describe('reportById()', () => {
-        it('returns undefined for non-existant report', () => {
+        it('returns undefined for non-existent report', () => {
             const workspace = { reports: { bar: { id: 'bar', pages: [], expanded: false } } };
             const reportById = selectors.reportById({ workspace });
             const report = reportById('foo');
@@ -195,7 +195,7 @@ describe('selectors', () => {
                 },
             };
             const reportBySlug = selectors.reportBySlug({ workspace });
-            const report = reportBySlug('this-report-doesn-t-exist');
+            const report = reportBySlug('this-report-does-not-exist');
             should.not.exist(report);
         });
         it('returns report with matching slug', () => {
@@ -221,7 +221,7 @@ describe('selectors', () => {
                 },
             };
             const reportBySlug = selectors.pageBySlugs({ workspace });
-            const report = reportBySlug('this-report-doesn-t-exist', 'this-is-a-page-name');
+            const report = reportBySlug('this-report-does-not-exist', 'this-is-a-page-name');
             should.not.exist(report);
         });
         it('returns undefined when no page has a matching slug', () => {
@@ -235,7 +235,7 @@ describe('selectors', () => {
                 },
             };
             const pageBySlugs = selectors.pageBySlugs({ workspace });
-            const page = pageBySlugs('this-is-a-report-name', 'this-page-doesn-t-exist');
+            const page = pageBySlugs('this-is-a-report-name', 'this-page-does-not-exist');
             should.not.exist(page);
         });
         it('returns page matching report slug and page slug', () => {
@@ -254,24 +254,24 @@ describe('selectors', () => {
         });
     });
     describe('title()', () => {
-        it('works with no workpace, report, or page', () => {
+        it('works with no workspace, report, or page', () => {
             const title = selectors.title({});
-            title.should.matches(/^Co:Vantage™$/);
+            title.should.equal('Co:Vantage™');
         });
-        it('works with no workpace name, report, or page', () => {
+        it('works with no workspace name, report, or page', () => {
             const title = selectors.title({ workspace: {} });
-            title.should.matches(/^Co:Vantage™$/);
+            title.should.equal('Co:Vantage™');
         });
         it('works with no report, or page', () => {
             const title = selectors.title({ workspace: { name: 'WorkspaceName' } });
-            title.should.matches(/^Co:Vantage™ WorkspaceName$/);
+            title.should.equal('Co:Vantage™ WorkspaceName');
         });
         it('works with no page', () => {
             const title = selectors.title({
                 selectedReportId: 'report',
                 workspace: { name: 'WorkspaceName', reports: { ReportName: { id: 'report' } } },
             });
-            title.should.matches(/^Co:Vantage™ WorkspaceName ReportName Report$/);
+            title.should.equal('Co:Vantage™ WorkspaceName ReportName Report');
         });
         it('works with no page name', () => {
             const title = selectors.title({
@@ -282,7 +282,7 @@ describe('selectors', () => {
                     reports: { ReportName: { id: 'report', pages: [{ id: 'page' }] } },
                 },
             });
-            title.should.matches(/^Co:Vantage™ WorkspaceName ReportName Report$/);
+            title.should.equal('Co:Vantage™ WorkspaceName ReportName Report');
         });
         it('works with workspace, report, and page', () => {
             const title = selectors.title({
@@ -293,7 +293,7 @@ describe('selectors', () => {
                     reports: { ReportName: { id: 'report', pages: [{ id: 'page', name: 'PageName' }] } },
                 },
             });
-            title.should.matches(/^Co:Vantage™ WorkspaceName ReportName Report - PageName$/);
+            title.should.equal('Co:Vantage™ WorkspaceName ReportName Report - PageName');
         });
     });
 });

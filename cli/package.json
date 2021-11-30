@@ -1,0 +1,23 @@
+{
+    "name": "cli",
+    "version": "1.0.0",
+    "description": "",
+    "main": "src/covantage.js",
+    "type": "module",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "colors": "^1.4.0",
+        "commander": "^8.3.0",
+        "diff": "^5.0.0",
+        "diff-so-fancy": "^1.4.3",
+        "dotenv": "^10.0.0",
+        "js-yaml": "^4.1.0",
+        "node-fetch": "^3.1.0",
+        "open": "^8.4.0"
+    }
+}

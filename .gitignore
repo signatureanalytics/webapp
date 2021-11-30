@@ -125,3 +125,5 @@ local.settings.json
 test-results
 .DS_Store
 .env
+api/workspace/yaml
+*.rest
