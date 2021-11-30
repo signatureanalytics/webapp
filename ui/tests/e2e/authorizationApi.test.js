@@ -18,7 +18,7 @@ test.describe('Authorization API', () => {
             }
         };
         page.on('response', responseListener);
-        await page.goto('http://localhost:4280/signatureanalytics');
+        await page.goto('http://localhost:4280/automatedtesting');
     });
 
     test('should return 403 for unrecognized AAD user', async ({ page }) => {
@@ -26,22 +26,29 @@ test.describe('Authorization API', () => {
         await page.waitForSelector('#userDetails');
         await enterUsername(page, 'rwaldin@signatureanalytic.onmicrosoft.com');
         await page.click('#submit');
-        await page.goto('http://localhost:4280/signatureanalytics');
-        const apiResponse = await page.waitForResponse(response => {
-            return response.url() === `http://localhost:4280/api/workspace`;
-        });
-        expect(apiResponse.status()).toEqual(403);
+        const responseListener = async response => {
+            if (response.url() === `http://localhost:4280/api/workspace`) {
+                page.off('response', responseListener);
+                expect(await response.status()).toEqual(403);
+            }
+        };
+        page.on('response', responseListener);
+        await page.goto('http://localhost:4280/automatedtesting');
     });
 
     test('should return 403 for unrecognized Google user', async ({ page }) => {
-        await page.goto('http://localhost:4280/signatureanalytics');
+        await page.goto('http://localhost:4280/automatedtesting');
         await page.waitForSelector('#userDetails');
         await enterUsername(page, 'ray@waldin.net');
         await page.click('#submit');
-        const apiResponse = await page.waitForResponse(response => {
-            return response.url() === `http://localhost:4280/api/workspace`;
-        });
-        expect(apiResponse.status()).toEqual(403);
+        const responseListener = async response => {
+            if (response.url() === `http://localhost:4280/api/workspace`) {
+                page.off('response', responseListener);
+                expect(await response.status()).toEqual(403);
+            }
+        };
+        page.on('response', responseListener);
+        await page.goto('http://localhost:4280/automatedtesting');
     });
 
     test('should return 404 for unrecognized workspace', async ({ page }) => {
@@ -49,42 +56,58 @@ test.describe('Authorization API', () => {
         await page.waitForSelector('#userDetails');
         await enterUsername(page, 'rwaldin@signatureanalytics.com');
         await page.click('#submit');
-        const apiResponse = await page.waitForResponse(response => {
-            return response.url() === `http://localhost:4280/api/workspace`;
-        });
-        expect(apiResponse.status()).toEqual(404);
+        const responseListener = async response => {
+            if (response.url() === `http://localhost:4280/api/workspace`) {
+                page.off('response', responseListener);
+                expect(await response.status()).toEqual(404);
+            }
+        };
+        page.on('response', responseListener);
+        await page.goto('http://localhost:4280/automatedtesting');
     });
 
     test('should return 200 for recognized user', async ({ page }) => {
-        await page.goto('http://localhost:4280/signatureanalytics');
+        await page.goto('http://localhost:4280/automatedtesting');
         await page.waitForSelector('#userDetails');
         await enterUsername(page, 'rwaldin@signatureanalytics.com');
         await page.click('#submit');
-        const apiResponse = await page.waitForResponse(response => {
-            return response.url() === `http://localhost:4280/api/workspace`;
-        });
-        expect(apiResponse.status()).toEqual(200);
+        const responseListener = async response => {
+            if (response.url() === `http://localhost:4280/api/workspace`) {
+                page.off('response', responseListener);
+                expect(await response.status()).toEqual(200);
+            }
+        };
+        page.on('response', responseListener);
+        await page.goto('http://localhost:4280/automatedtesting');
     });
 
     test('should return 200 and redirect to first report for disallowed report', async ({ page }) => {
-        await page.goto('http://localhost:4280/signatureanalytics/sales');
+        await page.goto('http://localhost:4280/automatedtesting/sales');
         await page.waitForSelector('#userDetails');
         await enterUsername(page, 'rwaldin@signatureanalytics.com');
         await page.click('#submit');
-        const apiResponse = await page.waitForResponse(response => {
-            return response.url() === `http://localhost:4280/api/workspace`;
-        });
-        expect(apiResponse.status()).toEqual(200);
+        const responseListener = async response => {
+            if (response.url() === `http://localhost:4280/api/workspace`) {
+                page.off('response', responseListener);
+                expect(await response.status()).toEqual(200);
+            }
+        };
+        page.on('response', responseListener);
+        await page.goto('http://localhost:4280/automatedtesting');
     });
 
     test('should return 200 and redirect to first report for unrecognized report', async ({ page }) => {
-        await page.goto('http://localhost:4280/signatureanalytics/foo');
+        await page.goto('http://localhost:4280/automatedtesting/foo');
         await page.waitForSelector('#userDetails');
         await enterUsername(page, 'rwaldin@signatureanalytics.com');
         await page.click('#submit');
-        const apiResponse = await page.waitForResponse(response => {
-            return response.url() === `http://localhost:4280/api/workspace`;
-        });
-        expect(apiResponse.status()).toEqual(200);
+        const responseListener = async response => {
+            if (response.url() === `http://localhost:4280/api/workspace`) {
+                page.off('response', responseListener);
+                expect(await response.status()).toEqual(200);
+            }
+        };
+        page.on('response', responseListener);
+        await page.goto('http://localhost:4280/automatedtesting');
     });
 });

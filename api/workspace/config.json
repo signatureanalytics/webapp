@@ -3,7 +3,5 @@
     "authorityUrl": "https://login.microsoftonline.com/",
     "scope": "https://analysis.windows.net/powerbi/api",
     "apiUrl": "https://api.powerbi.com/v1.0/myorg/",
-    "clientId": "2d803105-6b8d-43fb-8453-e3fe7abf6521",
-    "clientSecret": "-8~Lndj.rSgx0.GOU4pih7fnyu9Q~F~gRL",
     "tenantId": "3bedf19d-8c85-4d31-bd65-385b1f083812"
 }
