@@ -155,14 +155,14 @@ const setAppSettings = async (branch, settings) => {
     });
 };
 
-const program = new Command('covantage.js');
+const program = new Command('covantage.js').option('-v, --verbose', 'show stack trace on error');
 
 program
     .command('login')
     .description('log in to Azure hosting environment')
     .action(async _ => {
         await authenticate();
-        logIfNotRedir('logged in.');
+        logIfNotRedir('logged in');
     });
 
 program
@@ -173,7 +173,7 @@ program
         delete config.accessToken;
         delete config.accessTokenExpires;
         await writeAccessToken(config);
-        logIfNotRedir('logged out.');
+        logIfNotRedir('logged out');
     });
 
 program
@@ -221,16 +221,37 @@ program
     });
 
 program
+    .command('create <workspace> <filename> [branch]')
+    .description('create workspace by uploading specified filename on optional branch (defaults to main branch)')
+    .action(async (workspaceSlug, filename, branchName) => {
+        const settings = await getAppSettings(branchName);
+        const workspaceEnv = `WORKSPACE_${workspaceSlug.toUpperCase()}`;
+        if (workspaceEnv in settings.properties) {
+            throw new Error(`Workspace "${workspaceSlug}" already exists.`);
+        }
+        settings.properties[workspaceEnv] = unparseYaml(parseYaml(await readFile(filename)), {
+            flowLevel: 0,
+        });
+        const response = await setAppSettings(branchName, settings);
+        if (response.ok) {
+            logIfNotRedir(`${filename} uploaded`);
+        } else {
+            throw new Error(`Error uploading workspace: ${response.status} ${response.statusCode}`);
+        }
+    });
+
+program
     .command('upload <filename> <workspace> [branch]')
     .description('upload filename to specified workspace on optional branch (defaults to main branch)')
     .action(async (filename, workspaceSlug, branchName) => {
         const settings = await getAppSettings(branchName);
-        settings.properties[`WORKSPACE_${workspaceSlug.toUpperCase()}`] = unparseYaml(
-            parseYaml(await readFile(filename)),
-            {
-                flowLevel: 0,
-            }
-        );
+        const workspaceEnv = `WORKSPACE_${workspaceSlug.toUpperCase()}`;
+        if (!(workspaceEnv in settings.properties)) {
+            throw new Error(`Workspace "${workspaceSlug}" does not exist.`);
+        }
+        settings.properties[workspaceEnv] = unparseYaml(parseYaml(await readFile(filename)), {
+            flowLevel: 0,
+        });
         const response = await setAppSettings(branchName, settings);
         if (response.ok) {
             logIfNotRedir(`${filename} uploaded`);
@@ -270,8 +291,13 @@ program
                 process.stdout.write((part.removed ? '\u001b[9m' : '') + part.value[color] + '\u001b[0m');
             });
         } else {
-            logIfNotRedir('No differences.');
+            logIfNotRedir('No differences');
         }
     });
+
+process.on('unhandledRejection', error => {
+    console.error('Error:', program.opts().verbose ? error : error.message);
+    console.error();
+});
 
 program.parseAsync(process.argv);
