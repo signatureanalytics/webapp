@@ -17,6 +17,8 @@ import { config } from './config.js';
 
 dotenv.config();
 
+const logIfNotRedir = process.stdout.isTTY ? console.log : _ => {};
+
 const { apiVersion, subscription, resourceGroup, site, redirect, tenant, client } = config;
 const secret = process.env.CLIENT_SECRET;
 const oauthUrl = new URL(`https://login.microsoftonline.com/${tenant}/oauth2/`);
@@ -36,7 +38,6 @@ const accessTokenParams = {
 };
 
 const accessTokenFile = path.join(homedir(), '.covantage');
-const logIfNotRedir = process.stdout.isTTY ? console.log : _ => {};
 const readAccessToken = async _ => {
     try {
         const yaml = await readFile(accessTokenFile, 'utf8');
@@ -112,7 +113,7 @@ const buildForBranch = async branch => {
     const branchMap = await getBranchMap();
     const build = branchMap[branch]?.build;
     if (!build) {
-        throw new Error(`Invalid branch: ${branch}`);
+        throw new Error(`invalid branch name: ${branch}`);
     }
     return build;
 };
@@ -157,6 +158,9 @@ const setAppSettings = async (branch, settings) => {
 
 const program = new Command('covantage.js').option('-v, --verbose', 'show stack trace on error');
 
+program.showSuggestionAfterError(true);
+program.showHelpAfterError(true);
+
 program
     .command('login')
     .description('log in to Azure hosting environment')
@@ -178,20 +182,23 @@ program
 
 program
     .command('branches')
+    .alias('b')
     .description('list branches and their corresponding staging environments')
     .action(async _ => {
         const branchMap = await getBranchMap();
         const branches = Object.entries(branchMap).map(([branch, { hostname }]) => `${branch}: ${hostname}`);
         logIfNotRedir();
-        logIfNotRedir('Branch: URL');
-        logIfNotRedir('-----------');
+        logIfNotRedir('branch: staging environment');
+        logIfNotRedir('---------------------------');
         console.log(branches.sort().join('\n'));
         logIfNotRedir();
     });
 
 program
-    .command('workspaces [branch]')
-    .description('list workspaces on optional branch (defaults to main branch)')
+    .command('workspaces')
+    .alias('w')
+    .argument('[branch]', 'name of branch', 'main')
+    .description('list workspaces')
     .action(async branchName => {
         const settings = await getAppSettings(branchName);
         const workspaces = Object.keys(settings.properties)
@@ -199,85 +206,92 @@ program
             .filter(Boolean);
 
         logIfNotRedir();
-        logIfNotRedir(`Workspaces on "${branchName ?? 'main'}" branch`);
-        logIfNotRedir('-'.repeat(23 + (branchName ?? 'main').length));
+        logIfNotRedir(`workspaces on "${branchName}" branch`);
+        logIfNotRedir('-'.repeat(23 + branchName.length));
         console.log(workspaces.sort().join('\n'));
         logIfNotRedir();
     });
 
 program
-    .command('list <workspace> [branch]')
-    .description('list contents of specified workspace on optional branch (defaults to main branch)')
+    .command('show')
+    .alias('s')
+    .argument('<workspace>', 'name of workspace to show')
+    .argument('[branch]', 'name of branch', 'main')
+    .description('show contents of specified workspace')
     .action(async (workspaceSlug, branchName) => {
         const settings = await getAppSettings(branchName);
         const setting = await getWorkspaceSetting(settings, workspaceSlug);
         const yaml = parseYaml(setting);
 
         logIfNotRedir();
-        logIfNotRedir(`workspace "${workspaceSlug}" on "${branchName ?? 'main'}" branch`);
-        logIfNotRedir('-'.repeat(25 + (branchName ?? 'main').length + workspaceSlug.length));
+        logIfNotRedir(`workspace "${workspaceSlug}" on "${branchName}" branch`);
+        logIfNotRedir('-'.repeat(25 + branchName.length + workspaceSlug.length));
         console.log(unparseYaml(yaml, { flowLevel: 3 }));
         logIfNotRedir();
     });
 
 program
-    .command('create <workspace> <filename> [branch]')
-    .description('create workspace by uploading specified filename on optional branch (defaults to main branch)')
+    .command('create')
+    .alias('c')
+    .argument('<workspace>', 'name of workspace to create')
+    .argument('<filename>', 'name of file to upload for new workspace')
+    .argument('[branch]', 'name of branch', 'main')
+    .description('create workspace by uploading file')
     .action(async (workspaceSlug, filename, branchName) => {
         const settings = await getAppSettings(branchName);
         const workspaceEnv = `WORKSPACE_${workspaceSlug.toUpperCase()}`;
         if (workspaceEnv in settings.properties) {
-            throw new Error(`Workspace "${workspaceSlug}" already exists.`);
+            throw new Error(`workspace "${workspaceSlug}" already exists.`);
         }
         settings.properties[workspaceEnv] = unparseYaml(parseYaml(await readFile(filename)), {
             flowLevel: 0,
         });
         const response = await setAppSettings(branchName, settings);
         if (response.ok) {
-            logIfNotRedir(`${filename} uploaded`);
+            logIfNotRedir(`workspace "${workspaceSlug}" created`);
         } else {
-            throw new Error(`Error uploading workspace: ${response.status} ${response.statusCode}`);
+            throw new Error(`workspace creation failed: ${response.status} ${response.statusCode}`);
         }
     });
 
 program
-    .command('upload <filename> <workspace> [branch]')
-    .description('upload filename to specified workspace on optional branch (defaults to main branch)')
-    .action(async (filename, workspaceSlug, branchName) => {
+    .command('update')
+    .alias('u')
+    .argument('<workspace>', 'name of workspace to update')
+    .argument('<filename>', 'name of file with updated workspace')
+    .argument('[branch]', 'name of branch', 'main')
+    .description('update workspace with contents of file')
+    .action(async (workspaceSlug, filename, branchName) => {
         const settings = await getAppSettings(branchName);
         const workspaceEnv = `WORKSPACE_${workspaceSlug.toUpperCase()}`;
         if (!(workspaceEnv in settings.properties)) {
-            throw new Error(`Workspace "${workspaceSlug}" does not exist.`);
+            throw new Error(`workspace "${workspaceSlug}" does not exist.`);
         }
         settings.properties[workspaceEnv] = unparseYaml(parseYaml(await readFile(filename)), {
             flowLevel: 0,
         });
         const response = await setAppSettings(branchName, settings);
         if (response.ok) {
-            logIfNotRedir(`${filename} uploaded`);
+            logIfNotRedir(`workspace "${workspaceSlug}" updated`);
         } else {
-            throw new Error(`Error uploading workspace: ${response.status} ${response.statusCode}`);
+            throw new Error(`workspace update failed: ${response.status} ${response.statusCode}`);
         }
     });
 
 program
-    .command('download <workspace> <filename> [branch]')
-    .description('download workspace on optional branch (defaults to main branch) to specified filename')
+    .command('diff')
+    .alias('d')
+    .argument('<workspace>', 'name of workspace to diff')
+    .argument('<filename>', 'name of file to diff')
+    .argument('[branch]', 'name of branch', 'main')
+    .description('diff workspace with contents of file')
     .action(async (workspaceSlug, filename, branchName) => {
         const settings = await getAppSettings(branchName);
-        const workspace = unparseYaml(parseYaml(settings.properties[`WORKSPACE_${workspaceSlug.toUpperCase()}`]), {
-            flowLevel: 3,
-        });
-        await writeFile(filename, workspace);
-        logIfNotRedir(`${filename} downloaded`);
-    });
-
-program
-    .command('diff <filename> <workspace> [branch]')
-    .description('diff filename with specified workspace on optional branch (defaults to main branch)')
-    .action(async (filename, workspaceSlug, branchName) => {
-        const settings = await getAppSettings(branchName);
-        const workspace = unparseYaml(parseYaml(settings.properties[`WORKSPACE_${workspaceSlug.toUpperCase()}`]), {
+        const workspaceEnv = `WORKSPACE_${workspaceSlug.toUpperCase()}`;
+        if (!(workspaceEnv in settings.properties)) {
+            throw new Error(`workspace "${workspaceSlug}" does not exist.`);
+        }
+        const workspace = unparseYaml(parseYaml(workspaceEnv), {
             flowLevel: 3,
         });
         const fileWorkspace = unparseYaml(parseYaml(await readFile(filename)), { flowLevel: 3 });
@@ -296,7 +310,10 @@ program
     });
 
 process.on('unhandledRejection', error => {
-    console.error('Error:', program.opts().verbose ? error : error.message);
+    console.error('error:', error.message);
+    if (program.opts().verbose) {
+        console.error(error.stack.split('\n').slice(1).join('\n'));
+    }
     console.error();
 });
 
