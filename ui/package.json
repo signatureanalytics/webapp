@@ -5,14 +5,14 @@
     "scripts": {
         "start": "bash -C scripts/start.sh",
         "test": "bash -C scripts/test.sh",
-        "build": "bash -C scripts/build.sh"
+        "build": "bash -C scripts/build.sh",
+        "getWorkspace": "scripts/getWorkspace.js $*"
     },
     "dependencies": {
         "@reduxjs/toolkit": "^1.6.2",
         "lit": "^2.0.2",
         "nano-memoize": "^1.2.1",
-        "powerbi-client": "^2.18.6",
-        "pwa-helpers": "^0.9.1"
+        "powerbi-client": "^2.18.6"
     },
     "devDependencies": {
         "@azure/static-web-apps-cli": "^0.8.0",

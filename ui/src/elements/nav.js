@@ -1,12 +1,11 @@
-import { classMap } from 'lit/directives/class-map.js';
 import { html } from 'lit';
-
+import { classMap } from 'lit/directives/class-map.js';
 import caret from '../assets/caret.svg';
-import navStyles from './navStyles';
 import slug from '../slug';
-import { ConnectedLitElement, store } from '../state/store';
-import { collapseReport, expandReport, loadPageId, loadReportId } from '../state/slice';
 import { selectors } from '../state/selectors';
+import { collapseReport, expandReport, loadPageId, loadReportId } from '../state/slice';
+import { ConnectedLitElement, store } from '../state/store';
+import navStyles from './navStyles';
 
 const fixAssetUrl = url => `${`/${url}`.replace('//', '/')}`;
 
@@ -27,7 +26,7 @@ class Nav extends ConnectedLitElement {
     }
 
     // interactions
-    reportSelector(reportId) {
+    #reportSelector(reportId) {
         return e => {
             if (reportId !== this.selectedReportId) {
                 const report = this.reportById(reportId);
@@ -41,7 +40,7 @@ class Nav extends ConnectedLitElement {
         };
     }
 
-    pageSelector(reportId, pageId) {
+    #pageSelector(reportId, pageId) {
         return e => {
             if (reportId !== this.selectedReportId || pageId !== this.selectedPageId) {
                 const report = this.reportById(reportId);
@@ -61,7 +60,7 @@ class Nav extends ConnectedLitElement {
         };
     }
 
-    reportExpander(report) {
+    #reportExpander(report) {
         return e => {
             const reportId = report.id;
             store.dispatch(report.expanded ? collapseReport({ reportId }) : expandReport({ reportId }));
@@ -71,7 +70,7 @@ class Nav extends ConnectedLitElement {
     }
 
     // render
-    renderReport(report) {
+    #renderReport(report) {
         const [, workspaceSlug] = location.pathname.split('/');
         const isSelectedReport = report.id === this.selectedReportId;
         const isLoading = report.id === this.loadingReportId && !isSelectedReport;
@@ -83,17 +82,17 @@ class Nav extends ConnectedLitElement {
         const reportSlug = slug(report.name);
         const url = `${location.origin}/${workspaceSlug}/${reportSlug}`;
         return html`
-            <div class="report ${classMap(reportClasses)}" @click=${this.reportSelector(report.id)}>
-                <img class="expander" src=${fixAssetUrl(caret)} @click=${this.reportExpander(report)} /><a
+            <div class="report ${classMap(reportClasses)}" @click=${this.#reportSelector(report.id)}>
+                <img class="expander" src=${fixAssetUrl(caret)} @click=${this.#reportExpander(report)} /><a
                     class="name"
                     href="${url}"
                     >${report.name} Report</a
-                >${report.pages.map(page => this.renderPage(report, page))}
+                >${report.pages.map(page => this.#renderPage(report, page))}
             </div>
         `;
     }
 
-    renderPage(report, page) {
+    #renderPage(report, page) {
         const [, workspaceSlug] = location.pathname.split('/');
         const reportSlug = slug(report.name);
         const tabindex = report.expanded ? 0 : -1;
@@ -102,14 +101,14 @@ class Nav extends ConnectedLitElement {
         const pageSlug = slug(page.name);
         const url = `${location.origin}/${workspaceSlug}/${reportSlug}/${pageSlug}`;
         return html`
-            <div class="page ${classMap(pageClasses)}" @click=${this.pageSelector(report.id, page.id)}>
+            <div class="page ${classMap(pageClasses)}" @click=${this.#pageSelector(report.id, page.id)}>
                 <a tabindex=${tabindex} class="name" href="${url}">${page.name}</a>
             </div>
         `;
     }
 
     render() {
-        return html`<nav>${this.reports.map(report => this.renderReport(report))}</nav> `;
+        return html`<nav>${this.reports.map(report => this.#renderReport(report))}</nav> `;
     }
 }
 

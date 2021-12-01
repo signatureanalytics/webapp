@@ -73,4 +73,5 @@ export const {
     collapseReport,
     expandReport,
 } = slice.actions;
+
 export default slice.reducer;

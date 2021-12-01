@@ -1,6 +1,5 @@
 import memoize from 'nano-memoize';
 import { createSelectorCreator } from 'reselect';
-
 import slug from '../slug';
 
 const createSelector = createSelectorCreator(memoize);

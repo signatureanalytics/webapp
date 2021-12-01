@@ -1,9 +1,8 @@
 import { html } from 'lit';
-
-import headerStyles from './headerStyles';
 import logo from '../assets/sa-covantage-logo.png';
-import { ConnectedLitElement } from '../state/store';
 import { selectors } from '../state/selectors';
+import { ConnectedLitElement } from '../state/store';
+import headerStyles from './headerStyles';
 
 const fixAssetUrl = url => `${`/${url}`.replace('//', '/')}`;
 

@@ -1,11 +1,10 @@
 import { html } from 'lit';
 import { models } from 'powerbi-client';
-
-import reportStyles from './reportStyles';
 import slug from '../slug';
-import { ConnectedLitElement, store } from '../state/store';
-import { loadPageId, selectPageId, selectReportId, setWorkspace, setWorkspaceToken } from '../state/slice';
 import { selectors } from '../state/selectors';
+import { loadPageId, selectPageId, selectReportId, setWorkspace, setWorkspaceToken } from '../state/slice';
+import { ConnectedLitElement, store } from '../state/store';
+import reportStyles from './reportStyles';
 
 // Token refreshes between 1 and 9 minutes before it expires, randomized to prevent synchronization between clients.
 const refreshTokenMs = expires => new Date(expires) - Date.now() - ~~((Math.random() * 8 + 1) * 60 * 1000);

@@ -7,6 +7,7 @@ const enterUsername = async (page, username) => {
     await page.waitForSelector('#userDetails');
     await page.waitForTimeout(500);
     await page.type('#userDetails', username);
+    await page.waitForSelector('#userRoles');
 };
 
 test.describe('Authorization API', () => {

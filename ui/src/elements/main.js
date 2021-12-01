@@ -1,12 +1,10 @@
+import { html } from 'lit';
+import { setUser } from '../state/slice';
+import { ConnectedLitElement, store } from '../state/store';
 import './header';
+import mainStyles from './mainStyles';
 import './nav';
 import './report';
-
-import { html } from 'lit';
-
-import mainStyles from './mainStyles';
-import { ConnectedLitElement, store } from '../state/store';
-import { setUser } from '../state/slice';
 
 class Main extends ConnectedLitElement {
     static styles = mainStyles;

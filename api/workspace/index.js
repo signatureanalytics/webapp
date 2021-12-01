@@ -1,7 +1,10 @@
 const fetch = require('node-fetch');
 const config = require('./config.json');
-const workspaces = require('./workspaces.js');
 const dotenv = require('dotenv').config();
+const { load: parseYaml } = require('js-yaml');
+const fs = require('fs');
+const { promisify } = require('util');
+const readFile = promisify(fs.readFile);
 
 const referrerHeaderName = 'referer'; // [sic] see https://en.wikipedia.org/wiki/HTTP_referer#Etymology
 const cookieHeaderName = 'cookie';
@@ -31,13 +34,27 @@ const fetchOAuthToken = _ => fetch(oAuthUrl, oAuthRequest).then(response => chec
 
 setInterval(async _ => (oAuthToken = await fetchOAuthToken()), 10 * 60 * 1000);
 
+const getWorkspace = async (context, workspaceSlug) => {
+    const envWorkspaceYaml = process.env[`WORKSPACE_${workspaceSlug.toUpperCase()}`];
+    const workspaceYaml = `workspace/yaml/${workspaceSlug}.yaml`;
+    try {
+        if (envWorkspaceYaml) {
+            return parseYaml(envWorkspaceYaml);
+        }
+
+        return await readFile(workspaceYaml, 'utf-8').then(parseYaml);
+    } catch (error) {
+        console.error(`Error loading ${workspaceYaml}: ${error}`);
+        context.res = { status: 404, headers: { vary } };
+    }
+};
+
 module.exports = async (context, req) => {
     // get OAuthToken if needed
     const oAuthTokenPromise =
         oAuthToken.expires_on * 1000 - Date.now() > oAuthToken.expires_in * 1000 * (5 / 6)
             ? Promise.resolve(oAuthToken)
             : fetchOAuthToken();
-
     // extract user info from client principal header
     const clientPrincipalHeader = req.headers[clientPrincipalHeaderName];
     if (!clientPrincipalHeader) {
@@ -47,18 +64,28 @@ module.exports = async (context, req) => {
 
     // extract workspace name from referrer header
     const referrerHeader = req.headers[referrerHeaderName];
-    const [, workspaceSlug, reportSlug] = new URL(referrerHeader).pathname.split('/');
-    if (!workspaceSlug || !workspaces[workspaceSlug]) {
+    const [, workspaceSlug, _reportSlug] = new URL(referrerHeader).pathname.split('/');
+    if (!workspaceSlug) {
         context.res = { status: 404, headers: { vary } };
         return;
     }
-    const workspace = workspaces[workspaceSlug];
+
+    const workspace = await getWorkspace(context, workspaceSlug);
+
+    if (context.res.status === 404) {
+        return;
+    }
 
     const userInfo = JSON.parse(Buffer.from(clientPrincipalHeader, 'base64').toString('ascii'));
+    const reportRoles = workspace.reports;
     const users = workspace.users[userInfo.identityProvider] || {};
-    const user = users[userInfo.userDetails];
+    const userRoles = users[userInfo.userDetails] || [];
 
-    if (!user || user.length === 0) {
+    const userReportNames = Object.entries(reportRoles)
+        .filter(([, roles]) => roles.some(role => userRoles.includes(role)))
+        .map(([name]) => name);
+
+    if (userReportNames.length === 0) {
         context.res = { status: 403, headers: { vary } };
         return;
     }
@@ -77,7 +104,7 @@ module.exports = async (context, req) => {
     const getReportsJson = await getReportsPromise.then(response => checkResponse(response).json());
 
     const reports = Object.fromEntries(
-        user.map(name => {
+        userReportNames.map(name => {
             const report = getReportsJson.value.find(report => `${name} Report` === report.name);
             const { id, datasetId: dataset, embedUrl } = report;
             return [name, { id, dataset, embedUrl }];

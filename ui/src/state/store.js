@@ -1,7 +1,5 @@
-import { LitElement } from 'lit';
 import { configureStore } from '@reduxjs/toolkit';
-import { connect } from 'pwa-helpers/connect-mixin';
-
+import { LitElement } from 'lit';
 import reducer from './slice';
 
 export const store = configureStore({
@@ -9,4 +7,17 @@ export const store = configureStore({
     devTools: import.meta.env.NODE_ENV === 'development',
 });
 
-export const ConnectedLitElement = connect(store)(LitElement);
+export class ConnectedLitElement extends LitElement {
+    connectedCallback() {
+        super.connectedCallback();
+        this._storeUnsubscribe = store.subscribe(() => this.stateChanged(store.getState()));
+        this.stateChanged(store.getState());
+    }
+
+    disconnectedCallback() {
+        this._storeUnsubscribe();
+        super.disconnectedCallback();
+    }
+
+    stateChanged(_state) {}
+}
