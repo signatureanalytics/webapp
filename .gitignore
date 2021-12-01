@@ -125,5 +125,5 @@ local.settings.json
 test-results
 .DS_Store
 .env
-/api/workspace/workspaces/*
+api/workspace/workspaces/*
 *.rest
