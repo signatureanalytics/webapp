@@ -185,7 +185,7 @@ program
         logIfNotRedir();
         logIfNotRedir('Branch: URL');
         logIfNotRedir('-----------');
-        console.log(branches.join('\n'));
+        console.log(branches.sort().join('\n'));
         logIfNotRedir();
     });
 
@@ -201,7 +201,7 @@ program
         logIfNotRedir();
         logIfNotRedir(`Workspaces on "${branchName ?? 'main'}" branch`);
         logIfNotRedir('-'.repeat(23 + (branchName ?? 'main').length));
-        console.log(workspaces.join('\n'));
+        console.log(workspaces.sort().join('\n'));
         logIfNotRedir();
     });
 
