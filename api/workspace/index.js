@@ -2,9 +2,9 @@ const fetch = require('node-fetch');
 const config = require('./config.json');
 const dotenv = require('dotenv').config();
 const { load: parseYaml } = require('js-yaml');
-const fs = require('fs');
 const { promisify } = require('util');
-const readFile = promisify(fs.readFile);
+const { readFile: rf } = require('fs');
+const readFile = promisify(rf);
 
 const referrerHeaderName = 'referer'; // [sic] see https://en.wikipedia.org/wiki/HTTP_referer#Etymology
 const cookieHeaderName = 'cookie';
@@ -36,7 +36,7 @@ setInterval(async _ => (oAuthToken = await fetchOAuthToken()), 10 * 60 * 1000);
 
 const getWorkspace = async (context, workspaceSlug) => {
     const envWorkspaceYaml = process.env[`WORKSPACE_${workspaceSlug.toUpperCase()}`];
-    const workspaceYaml = `workspace/yaml/${workspaceSlug}.yaml`;
+    const workspaceYaml = `workspace/workspaces/${workspaceSlug}.yaml`;
     try {
         if (envWorkspaceYaml) {
             return parseYaml(envWorkspaceYaml);
