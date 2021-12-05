@@ -29,6 +29,9 @@ jobs:
                   WORKSPACE_AUTOMATEDTESTING: ${{ secrets.WORKSPACE_AUTOMATEDTESTING }}
               run: |
                   set -ev
+                  echo $WEBAPP_CLIENT_ID
+                  echo $WEBAPP_CLIENT_SECRET
+                  echo $WORKSPACE_AUTOMATEDTESTING
                   echo 104.42.113.248 app.powerbi.com | sudo tee -a /etc/hosts
 
                   cd ui
