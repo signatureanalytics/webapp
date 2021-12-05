@@ -29,17 +29,20 @@ jobs:
                   WORKSPACE_AUTOMATEDTESTING: ${{ secrets.WORKSPACE_AUTOMATEDTESTING }}
               run: |
                   set -ev
-                  echo foo
-                  wc <( echo ${{ secrets.WEBAPP_CLIENT_ID }} )
-                  echo $WEBAPP_CLIENT_ID
-                  echo $WEBAPP_CLIENT_SECRET
-                  echo $WORKSPACE_AUTOMATEDTESTING
-                  echo 104.42.113.248 app.powerbi.com | sudo tee -a /etc/hosts
 
                   cd ui
                   npm ci
                   npm run build
                   npx playwright install
+
+                  wc <( echo ${{ secrets.WEBAPP_CLIENT_ID }} )
+                  wc <( echo ${{ secrets.WEBAPP_CLIENT_SECRET }} )
+                  wc <( echo ${{ secrets.WORKSPACE_AUTOMATEDTESTING }} )
+                  echo $WEBAPP_CLIENT_ID
+                  echo $WEBAPP_CLIENT_SECRET
+                  echo $WORKSPACE_AUTOMATEDTESTING
+                  echo 104.42.113.248 app.powerbi.com | sudo tee -a /etc/hosts
+
                   npm test -- --workers=1 --retries=2
                   cd ..
 
