@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 set -ev
 echo 104.42.113.248 app.powerbi.com | sudo tee -a /etc/hosts
+dig app.powerbi.com
 
 cd api
 npm ci
