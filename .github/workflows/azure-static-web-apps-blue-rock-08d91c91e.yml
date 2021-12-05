@@ -30,8 +30,7 @@ jobs:
               run: |
                   set -ev
                   echo foo
-                  echo ${{ secrets.WEBAPP_CLIENT_ID }}
-                  echo ${{ secrets.FOO }}
+                  wc <( echo ${{ secrets.WEBAPP_CLIENT_ID }} )
                   echo $WEBAPP_CLIENT_ID
                   echo $WEBAPP_CLIENT_SECRET
                   echo $WORKSPACE_AUTOMATEDTESTING
