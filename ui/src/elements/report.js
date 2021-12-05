@@ -69,7 +69,8 @@ class Report extends ConnectedLitElement {
                 if (!response.ok) {
                     switch (response.status) {
                         case 401:
-                            location = `/.auth/login/google?post_login_redirect_uri=${location}`;
+                            const { identityProvider } = await response.json();
+                            location = `/.auth/login/${identityProvider}?post_login_redirect_uri=${location}`;
                             break;
                         case 403:
                         case 404:

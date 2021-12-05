@@ -22,7 +22,22 @@ jobs:
               uses: actions/setup-node@v1
               with:
                   node-version: '14.x'
-            - run: 'ui/scripts/ci.sh'
+            - name: build and test
+              env:
+                  WEBAPP_CLIENT_ID: ${{ secrets.WEBAPP_CLIENT_ID }}
+                  WEBAPP_CLIENT_SECRET: ${{ secrets.WEBAPP_CLIENT_SECRET }}
+                  WORKSPACE_AUTOMATEDTESTING: ${{ secrets.WORKSPACE_AUTOMATEDTESTING }}
+              run: |
+                  set -ev
+                  echo 104.42.113.248 app.powerbi.com | sudo tee -a /etc/hosts
+
+                  cd ui
+                  npm ci
+                  npm run build
+                  npx playwright install
+                  npm test -- --workers=1 --retries=2
+                  cd ..
+
             - name: Upload screenshots
               if: ${{ failure() }}
               uses: actions/upload-artifact@v1

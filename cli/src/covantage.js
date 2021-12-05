@@ -21,15 +21,15 @@ const logIfNotRedir = process.stdout.isTTY ? console.log : _ => {};
 
 const { apiVersion, subscription, resourceGroup, site, redirect, tenant, client } = config;
 const secret = process.env.CLIENT_SECRET;
-const oauthUrl = new URL(`https://login.microsoftonline.com/${tenant}/oauth2/`);
-const codeGrantUrl = new URL(`authorize?client_id=${client}&response_type=code&redirect_uri=${redirect}`, oauthUrl);
+const oAuthUrl = new URL(`https://login.microsoftonline.com/${tenant}/oauth2/`);
+const codeGrantUrl = new URL(`authorize?client_id=${client}&response_type=code&redirect_uri=${redirect}`, oAuthUrl);
 const managementUrl = new URL('https://management.azure.com/');
 const siteManagementUrl = new URL(
     `subscriptions/${subscription}/resourceGroups/${resourceGroup}/providers/Microsoft.Web/staticSites/${site}/`,
     managementUrl
 );
-const accessTokenUrl = new URL('token', oauthUrl);
-const accessTokenParams = {
+const authorizeUrl = new URL('token', oAuthUrl);
+const authorizeParams = {
     grant_type: 'authorization_code',
     client_id: client,
     client_secret: secret,
@@ -38,7 +38,7 @@ const accessTokenParams = {
 };
 
 const accessTokenFile = path.join(homedir(), '.covantage');
-const readAccessToken = async _ => {
+const readCredentials = async _ => {
     try {
         const yaml = await readFile(accessTokenFile, 'utf8');
         const token = parseYaml(yaml);
@@ -69,42 +69,38 @@ export const decrypt = (content, secret) => {
     return decipher.update(decompressed.slice(32), 'hex', 'utf8') + decipher.final('utf8');
 };
 
-const authenticate = async _ => {
-    const token = await readAccessToken();
-    if (token.accessToken && token.accessTokenExpires && Date.now() < new Date(token.accessTokenExpires)) {
-        return Promise.resolve(token.accessToken);
-    }
-
-    return new Promise((resolve, reject) => {
-        const server = createServer(async (req, res) => {
-            const url = new URL(req.url, redirect);
+const authenticate = _ =>
+    new Promise(async (resolve, reject) => {
+        const creds = await readCredentials();
+        if (creds.accessToken && creds.accessTokenExpires && Date.now() < new Date(creds.accessTokenExpires)) {
+            return resolve(creds.accessToken);
+        }
+        const server = createServer(async (request, response) => {
+            const url = new URL(request.url, redirect);
             if (url.pathname !== '/') {
-                res.end();
-                return;
+                return response.end();
             }
             server.close();
             const code = url.searchParams.get('code');
-            const accessTokenResponse = await fetch(accessTokenUrl, {
+            const authorizeResponse = await fetch(authorizeUrl, {
                 method: 'POST',
-                body: new URLSearchParams({ ...accessTokenParams, code }),
+                body: new URLSearchParams({ ...authorizeParams, code }),
             });
-            if (!accessTokenResponse.ok) {
-                const errorMsg = `Unexpected access token response: ${accessTokenResponse.status} ${accessTokenResponse.statusText}`;
+            if (!authorizeResponse.ok) {
+                const errorMsg = `Unexpected access token response: ${authorizeResponse.status} ${authorizeResponse.statusText}`;
                 reject(new Error(errorMsg));
-                res.end(errorMsg);
-                return;
+                return response.end(errorMsg);
             }
-            const accessTokenJson = await accessTokenResponse.json();
-            token.accessToken = accessTokenJson.access_token;
-            token.accessTokenExpires = new Date(Date.now() + accessTokenJson.expires_in * 1000);
-            await writeAccessToken(token);
-            resolve(token.accessToken);
-            res.end('You are logged in. Close this window and return to the CoVantage CLI.');
+            const authorizeJson = await authorizeResponse.json();
+            creds.accessToken = authorizeJson.access_token;
+            creds.accessTokenExpires = new Date(Date.now() + authorizeJson.expires_in * 1000);
+            await writeAccessToken(creds);
+            resolve(creds.accessToken);
+            response.end('You are logged in. Close this window and return to the CoVantage CLI.');
         }).listen(33333);
         server.keepAliveTimeout = 1;
         open(codeGrantUrl.toString());
     });
-};
 
 const buildForBranch = async branch => {
     if (!branch) {
@@ -173,7 +169,7 @@ program
     .command('logout')
     .description('log out of Azure hosting environment')
     .action(async _ => {
-        const config = await readAccessToken();
+        const config = await readCredentials();
         delete config.accessToken;
         delete config.accessTokenExpires;
         await writeAccessToken(config);
