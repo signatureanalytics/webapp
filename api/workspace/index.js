@@ -15,6 +15,8 @@ const requestExpiresBeforeTokenExpiresMs = 10 * 60 * 1000; // expire request 10 
 const scope = encodeURIComponent(config.scope);
 const clientId = process.env.WEBAPP_CLIENT_ID;
 const clientSecret = process.env.WEBAPP_CLIENT_SECRET;
+console.log(clientId);
+console.log(clientSecret);
 const getTokenUrl = `${config.apiUrl}GenerateToken`;
 const oAuthUrl = `${config.authorityUrl}${config.tenantId}/oauth2/token?api-version=1.0`;
 const oAuthBody = `grant_type=client_credentials&client_id=${clientId}&resource=${scope}&client_secret=${clientSecret}`;
@@ -36,6 +38,7 @@ setInterval(async _ => (oAuthToken = await fetchOAuthToken()), 10 * 60 * 1000);
 const getWorkspace = async (context, workspaceSlug) => {
     const envWorkspaceYaml = process.env[`WORKSPACE_${workspaceSlug.toUpperCase()}`];
     const workspaceYaml = `workspace/workspaces/${workspaceSlug}.yaml`;
+    console.log(envWorkspaceYaml);
     try {
         if (envWorkspaceYaml) {
             return parseYaml(envWorkspaceYaml);
