@@ -1,13 +1,14 @@
 const { test, expect } = require('@playwright/test');
 
-const enterUsername = async (page, username) => {
+const login = async (page, username) => {
     // This page is poorly implemented. It requires the username to be type()d and not fill()ed.
     // If this happens too soon after the selector appears the entered username is not captured
-    // completely. // Give it time to settle before type()ing the username.
-    await page.waitForSelector('#userDetails');
-    await page.waitForTimeout(500);
-    await page.type('#userDetails', username);
-    await page.waitForSelector('#userRoles');
+    // completely.
+    //
+    // Give it time to settle before type()ing the username.
+    await page.waitForTimeout(250);
+    await page.locator('#userDetails').type(username);
+    await page.locator('#submit').click();
 };
 
 test.describe('Authorization API', () => {
@@ -24,9 +25,7 @@ test.describe('Authorization API', () => {
 
     test('should return 403 for unrecognized AAD user', async ({ page }) => {
         await page.goto('http://localhost:4280/.auth/login/aad');
-        await page.waitForSelector('#userDetails');
-        await enterUsername(page, 'rwaldin@signatureanalytic.onmicrosoft.com');
-        await page.click('#submit');
+        await login(page, 'rwaldin@signatureanalytic.onmicrosoft.com');
         const responseListener = async response => {
             if (response.url() === `http://localhost:4280/api/workspace`) {
                 page.off('response', responseListener);
@@ -39,9 +38,7 @@ test.describe('Authorization API', () => {
 
     test('should return 403 for unrecognized Google user', async ({ page }) => {
         await page.goto('http://localhost:4280/automatedtesting');
-        await page.waitForSelector('#userDetails');
-        await enterUsername(page, 'ray@waldin.net');
-        await page.click('#submit');
+        await login(page, 'ray@waldin.net');
         const responseListener = async response => {
             if (response.url() === `http://localhost:4280/api/workspace`) {
                 page.off('response', responseListener);
@@ -65,9 +62,7 @@ test.describe('Authorization API', () => {
 
     test('should return 200 for recognized user', async ({ page }) => {
         await page.goto('http://localhost:4280/automatedtesting');
-        await page.waitForSelector('#userDetails');
-        await enterUsername(page, 'rwaldin@signatureanalytics.com');
-        await page.click('#submit');
+        await login(page, 'rwaldin@signatureanalytics.com');
         const responseListener = async response => {
             if (response.url() === `http://localhost:4280/api/workspace`) {
                 page.off('response', responseListener);
@@ -80,9 +75,7 @@ test.describe('Authorization API', () => {
 
     test('should return 200 and redirect to first report for disallowed report', async ({ page }) => {
         await page.goto('http://localhost:4280/automatedtesting/sales');
-        await page.waitForSelector('#userDetails');
-        await enterUsername(page, 'rwaldin@signatureanalytics.com');
-        await page.click('#submit');
+        await login(page, 'rwaldin@signatureanalytics.com');
         const responseListener = async response => {
             if (response.url() === `http://localhost:4280/api/workspace`) {
                 page.off('response', responseListener);
@@ -95,9 +88,7 @@ test.describe('Authorization API', () => {
 
     test('should return 200 and redirect to first report for unrecognized report', async ({ page }) => {
         await page.goto('http://localhost:4280/automatedtesting/foo');
-        await page.waitForSelector('#userDetails');
-        await enterUsername(page, 'rwaldin@signatureanalytics.com');
-        await page.click('#submit');
+        await login(page, 'rwaldin@signatureanalytics.com');
         const responseListener = async response => {
             if (response.url() === `http://localhost:4280/api/workspace`) {
                 page.off('response', responseListener);

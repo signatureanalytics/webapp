@@ -1,19 +1,14 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('fs/promises');
 
-const enterUsername = async (page, username) => {
+const login = async (page, username) => {
+    await page.goto('http://localhost:4280/.auth/login/google');
     // This page is poorly implemented. It requires the username to be type()d and not fill()ed.
     // If this happens too soon after the selector appears the entered username is not captured
     // completely. // Give it time to settle before type()ing the username.
-    await page.waitForSelector('#userDetails');
     await page.waitForTimeout(500);
-    await page.type('#userDetails', username);
-};
-
-const login = async (page, username) => {
-    await page.goto('http://localhost:4280/.auth/login/google');
-    await enterUsername(page, username);
-    await page.click('#submit');
+    await page.locator('#userDetails').type(username);
+    await page.locator('#submit').click();
 };
 
 test.beforeEach(({ page }) => {
