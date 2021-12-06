@@ -34,7 +34,7 @@ test.describe('Navigation', () => {
         };
         page.on('response', responseListener);
         await page.goto('http://localhost:4280/automatedtesting');
-        await page.waitForSelector('.report');
+        await page.locator('.report.selected').waitFor();
         const reportElements = await page.$$('.report > .name');
         expect(reportElements).toHaveLength(reports.length);
         for (const reportElement of reportElements) {
@@ -46,9 +46,8 @@ test.describe('Navigation', () => {
     test('should list all pages of current report', async ({ page }) => {
         await login(page, 'rwaldin@signatureanalytics.com');
         await page.goto('http://localhost:4280/automatedtesting');
-        await page.waitForSelector('.report');
-        await page.waitForSelector('.page');
-        await page.waitForTimeout(4000);
+        const selectedReportPages = await page.locator('.report.selected .page.selected');
+        await selectedReportPages.waitFor();
         const pages = await page.evaluate(async _ => {
             const main = document.querySelector('sa-main');
             const report = main.shadowRoot.querySelector('sa-report').report;
