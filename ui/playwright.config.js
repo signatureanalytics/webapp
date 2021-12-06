@@ -1,6 +1,6 @@
 const config = {
     testDir: 'tests/e2e',
-    outputDir: '../../test-results/playwright',
+    outputDir: 'test-results/playwright',
     use: {
         screenshot: 'only-on-failure',
         launchOptions: {

@@ -1,19 +1,14 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('fs/promises');
 
-const enterUsername = async (page, username) => {
+const login = async (page, username) => {
+    await page.goto('http://localhost:4280/.auth/login/google');
     // This page is poorly implemented. It requires the username to be type()d and not fill()ed.
     // If this happens too soon after the selector appears the entered username is not captured
     // completely. // Give it time to settle before type()ing the username.
-    await page.waitForSelector('#userDetails');
     await page.waitForTimeout(500);
-    await page.type('#userDetails', username);
-};
-
-const login = async (page, username) => {
-    await page.goto('http://localhost:4280/.auth/login/google');
-    await enterUsername(page, username);
-    await page.click('#submit');
+    await page.locator('#userDetails').type(username);
+    await page.locator('#submit').click();
 };
 
 test.beforeEach(({ page }) => {
@@ -33,12 +28,11 @@ test.describe('Navigation', () => {
             }
         };
         page.on('response', responseListener);
-        await page.goto('http://localhost:4280/automatedtesting');
-        await page.waitForSelector('.report');
-        const reportElements = await page.$$('.report > .name');
-        expect(reportElements).toHaveLength(reports.length);
-        for (const reportElement of reportElements) {
-            const title = await reportElement.innerText();
+        await page.goto('http://localhost:4280/automatedtesting', { waitUntil: 'networkidle' });
+        const reportNames = await page.locator('.report > .name');
+        expect(await reportNames.count()).toEqual(reports.length);
+        for (const reportName of await reportNames.elementHandles()) {
+            const title = await reportName.innerText();
             expect(reports).toContain(title.replace(/ Report$/, ''));
         }
     });
@@ -46,19 +40,16 @@ test.describe('Navigation', () => {
     test('should list all pages of current report', async ({ page }) => {
         await login(page, 'rwaldin@signatureanalytics.com');
         await page.goto('http://localhost:4280/automatedtesting');
-        await page.waitForSelector('.report');
-        await page.waitForSelector('.page');
-        await page.waitForTimeout(4000);
-        const pages = await page.evaluate(async _ => {
+        const pages = await page.locator('.page.selected').evaluate(async _ => {
             const main = document.querySelector('sa-main');
             const report = main.shadowRoot.querySelector('sa-report').report;
             const pages = await report.getPages();
             return pages.map(({ name, displayName }) => ({ name, displayName }));
         });
-        const pageElements = await page.$$('.report.selected .page');
-        for (const pageElement of pageElements) {
+        const pageNames = pages.map(p => p.displayName);
+        for (const pageElement of await page.locator('.report.selected .page').elementHandles()) {
             const title = await pageElement.innerText();
-            expect(pages.map(p => p.displayName)).toContain(title);
+            expect(pageNames).toContain(title);
         }
     });
 });

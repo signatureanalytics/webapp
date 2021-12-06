@@ -55,12 +55,6 @@ module.exports = async (context, req) => {
         oAuthToken.expires_on * 1000 - Date.now() > oAuthToken.expires_in * 1000 * (5 / 6)
             ? Promise.resolve(oAuthToken)
             : fetchOAuthToken();
-    // extract user info from client principal header
-    const clientPrincipalHeader = req.headers[clientPrincipalHeaderName];
-    if (!clientPrincipalHeader) {
-        context.res = { status: 401, headers: { vary } };
-        return;
-    }
 
     // extract workspace name from referrer header
     const referrerHeader = req.headers[referrerHeaderName];
@@ -73,6 +67,17 @@ module.exports = async (context, req) => {
     const workspace = await getWorkspace(context, workspaceSlug);
 
     if (context.res.status === 404) {
+        return;
+    }
+
+    // extract user info from client principal header
+    const clientPrincipalHeader = req.headers[clientPrincipalHeaderName];
+    if (!clientPrincipalHeader) {
+        context.res = {
+            status: 401,
+            headers: { vary, 'content-type': jsonContentType },
+            body: JSON.stringify({ identityProvider: workspace.identity_provider }),
+        };
         return;
     }
 
