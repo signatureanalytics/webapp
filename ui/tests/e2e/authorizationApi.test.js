@@ -53,10 +53,6 @@ test.describe('Authorization API', () => {
     });
 
     test('should return 404 for unrecognized workspace', async ({ page }) => {
-        await page.goto('http://localhost:4280/foo');
-        await page.waitForSelector('#userDetails');
-        await enterUsername(page, 'rwaldin@signatureanalytics.com');
-        await page.click('#submit');
         const responseListener = async response => {
             if (response.url() === `http://localhost:4280/api/workspace`) {
                 page.off('response', responseListener);
@@ -64,7 +60,7 @@ test.describe('Authorization API', () => {
             }
         };
         page.on('response', responseListener);
-        await page.goto('http://localhost:4280/automatedtesting');
+        await page.goto('http://localhost:4280/foo');
     });
 
     test('should return 200 for recognized user', async ({ page }) => {
