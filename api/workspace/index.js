@@ -75,8 +75,7 @@ module.exports = async (context, req) => {
     if (!clientPrincipalHeader) {
         context.res = {
             status: 401,
-            headers: { vary, 'content-type': jsonContentType },
-            body: JSON.stringify({ identityProvider: workspace.identity_provider }),
+            headers: { vary, 'x-identity-provider': workspace.identity_provider },
         };
         return;
     }

@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
-const login = async (page, username) => {
+const login = async (page, provider, username) => {
+    await page.goto(`http://localhost:4280/.auth/login/${provider}`);
     // This page is poorly implemented. It requires the username to be type()d and not fill()ed.
     // If this happens too soon after the selector appears the entered username is not captured
     // completely.
@@ -24,8 +25,7 @@ test.describe('Authorization API', () => {
     });
 
     test('should return 403 for unrecognized AAD user', async ({ page }) => {
-        await page.goto('http://localhost:4280/.auth/login/aad');
-        await login(page, 'rwaldin@signatureanalytic.onmicrosoft.com');
+        await login(page, 'aad', 'rwaldin@signatureanalytic.onmicrosoft.com');
         const responseListener = async response => {
             if (response.url() === `http://localhost:4280/api/workspace`) {
                 page.off('response', responseListener);
@@ -37,8 +37,7 @@ test.describe('Authorization API', () => {
     });
 
     test('should return 403 for unrecognized Google user', async ({ page }) => {
-        await page.goto('http://localhost:4280/automatedtesting');
-        await login(page, 'ray@waldin.net');
+        await login(page, 'google', 'ray@waldin.net');
         const responseListener = async response => {
             if (response.url() === `http://localhost:4280/api/workspace`) {
                 page.off('response', responseListener);
@@ -61,8 +60,7 @@ test.describe('Authorization API', () => {
     });
 
     test('should return 200 for recognized user', async ({ page }) => {
-        await page.goto('http://localhost:4280/automatedtesting');
-        await login(page, 'rwaldin@signatureanalytics.com');
+        await login(page, 'google', 'rwaldin@signatureanalytics.com');
         const responseListener = async response => {
             if (response.url() === `http://localhost:4280/api/workspace`) {
                 page.off('response', responseListener);
@@ -74,8 +72,7 @@ test.describe('Authorization API', () => {
     });
 
     test('should return 200 and redirect to first report for disallowed report', async ({ page }) => {
-        await page.goto('http://localhost:4280/automatedtesting/sales');
-        await login(page, 'rwaldin@signatureanalytics.com');
+        await login(page, 'google', 'rwaldin@signatureanalytics.com');
         const responseListener = async response => {
             if (response.url() === `http://localhost:4280/api/workspace`) {
                 page.off('response', responseListener);
@@ -83,12 +80,11 @@ test.describe('Authorization API', () => {
             }
         };
         page.on('response', responseListener);
-        await page.goto('http://localhost:4280/automatedtesting');
+        await page.goto('http://localhost:4280/automatedtesting/sales');
     });
 
     test('should return 200 and redirect to first report for unrecognized report', async ({ page }) => {
-        await page.goto('http://localhost:4280/automatedtesting/foo');
-        await login(page, 'rwaldin@signatureanalytics.com');
+        await login(page, 'google', 'rwaldin@signatureanalytics.com');
         const responseListener = async response => {
             if (response.url() === `http://localhost:4280/api/workspace`) {
                 page.off('response', responseListener);
@@ -96,6 +92,6 @@ test.describe('Authorization API', () => {
             }
         };
         page.on('response', responseListener);
-        await page.goto('http://localhost:4280/automatedtesting');
+        await page.goto('http://localhost:4280/automatedtesting/foo');
     });
 });
