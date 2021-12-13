@@ -22,10 +22,10 @@ class Main extends ConnectedLitElement {
             .then(response => (response.ok ? response.json() : { clientPrincipal: {} }))
             .then(json => {
                 const user = {
-                    email: json.clientPrincipal.userDetails,
-                    id: json.clientPrincipal.userId,
-                    roles: json.clientPrincipal.userRoles,
-                    identityProvider: json.clientPrincipal.identityProvider,
+                    email: json.clientPrincipal?.userDetails,
+                    id: json.clientPrincipal?.userId,
+                    roles: json.clientPrincipal?.userRoles,
+                    identityProvider: json.clientPrincipal?.identityProvider,
                 };
                 store.dispatch(setUser({ ...user }));
             });
