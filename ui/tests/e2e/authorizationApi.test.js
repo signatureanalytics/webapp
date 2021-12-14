@@ -71,6 +71,18 @@ test.describe('Authorization API', () => {
         await page.goto('http://localhost:4280/automatedtesting');
     });
 
+    test('should return 200 for recognized user with different case in email address', async ({ page }) => {
+        await login(page, 'google', 'TESTuser@example.com');
+        const responseListener = async response => {
+            if (response.url() === `http://localhost:4280/api/workspace`) {
+                page.off('response', responseListener);
+                expect(await response.status()).toEqual(200);
+            }
+        };
+        page.on('response', responseListener);
+        await page.goto('http://localhost:4280/automatedtesting');
+    });
+
     test('should return 200 and redirect to first report for disallowed report', async ({ page }) => {
         await login(page, 'google', 'testuser@example.com');
         const responseListener = async response => {
