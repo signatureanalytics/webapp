@@ -83,7 +83,7 @@ module.exports = async (context, req) => {
     const userInfo = JSON.parse(Buffer.from(clientPrincipalHeader, 'base64').toString('ascii'));
     const reportRoles = workspace.reports;
     const users = workspace.users[userInfo.identityProvider] || {};
-    const userRoles = users[userInfo.userDetails] || [];
+    const userRoles = users[userInfo.userDetails ? userInfo.userDetails.toLowerCase() : ''] || [];
 
     const userReportNames = Object.entries(reportRoles)
         .filter(([, roles]) => roles.some(role => userRoles.includes(role)))

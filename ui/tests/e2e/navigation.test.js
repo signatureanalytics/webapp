@@ -17,7 +17,7 @@ test.beforeEach(({ page }) => {
 
 test.describe('Navigation', () => {
     test('should list all reports from API', async ({ page }) => {
-        await login(page, 'rwaldin@signatureanalytics.com');
+        await login(page, 'testuser@example.com');
         const reports = [];
         const responseListener = async response => {
             if (response.url() === `http://localhost:4280/api/workspace`) {
@@ -38,7 +38,7 @@ test.describe('Navigation', () => {
     });
 
     test('should list all pages of current report', async ({ page }) => {
-        await login(page, 'rwaldin@signatureanalytics.com');
+        await login(page, 'testuser@example.com');
         await page.goto('http://localhost:4280/automatedtesting');
         const pages = await page.locator('.page.selected').evaluate(async _ => {
             const main = document.querySelector('sa-main');

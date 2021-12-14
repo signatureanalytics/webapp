@@ -25,7 +25,7 @@ test.describe('Authorization API', () => {
     });
 
     test('should return 403 for unrecognized AAD user', async ({ page }) => {
-        await login(page, 'aad', 'rwaldin@signatureanalytic.onmicrosoft.com');
+        await login(page, 'aad', 'aaduser@example.com');
         const responseListener = async response => {
             if (response.url() === `http://localhost:4280/api/workspace`) {
                 page.off('response', responseListener);
@@ -37,7 +37,7 @@ test.describe('Authorization API', () => {
     });
 
     test('should return 403 for unrecognized Google user', async ({ page }) => {
-        await login(page, 'google', 'ray@waldin.net');
+        await login(page, 'google', 'unrecognizeduser@example.com');
         const responseListener = async response => {
             if (response.url() === `http://localhost:4280/api/workspace`) {
                 page.off('response', responseListener);
@@ -60,7 +60,19 @@ test.describe('Authorization API', () => {
     });
 
     test('should return 200 for recognized user', async ({ page }) => {
-        await login(page, 'google', 'rwaldin@signatureanalytics.com');
+        await login(page, 'google', 'testuser@example.com');
+        const responseListener = async response => {
+            if (response.url() === `http://localhost:4280/api/workspace`) {
+                page.off('response', responseListener);
+                expect(await response.status()).toEqual(200);
+            }
+        };
+        page.on('response', responseListener);
+        await page.goto('http://localhost:4280/automatedtesting');
+    });
+
+    test('should return 200 for recognized user with different case in email address', async ({ page }) => {
+        await login(page, 'google', 'TESTuser@example.com');
         const responseListener = async response => {
             if (response.url() === `http://localhost:4280/api/workspace`) {
                 page.off('response', responseListener);
@@ -72,7 +84,7 @@ test.describe('Authorization API', () => {
     });
 
     test('should return 200 and redirect to first report for disallowed report', async ({ page }) => {
-        await login(page, 'google', 'rwaldin@signatureanalytics.com');
+        await login(page, 'google', 'testuser@example.com');
         const responseListener = async response => {
             if (response.url() === `http://localhost:4280/api/workspace`) {
                 page.off('response', responseListener);
@@ -84,7 +96,7 @@ test.describe('Authorization API', () => {
     });
 
     test('should return 200 and redirect to first report for unrecognized report', async ({ page }) => {
-        await login(page, 'google', 'rwaldin@signatureanalytics.com');
+        await login(page, 'google', 'testuser@example.com');
         const responseListener = async response => {
             if (response.url() === `http://localhost:4280/api/workspace`) {
                 page.off('response', responseListener);

@@ -2,7 +2,7 @@
 import 'colors';
 import { Command } from 'commander';
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
-import { diffChars } from 'diff';
+import { diffLines } from 'diff';
 import dotenv from 'dotenv';
 import { readFile, writeFile } from 'fs/promises';
 import { createServer } from 'http';
@@ -291,12 +291,12 @@ program
         if (!(workspaceEnv in settings.properties)) {
             throw new Error(`workspace "${workspaceSlug}" does not exist.`);
         }
-        const workspace = unparseYaml(parseYaml(workspaceEnv), {
+        const workspace = unparseYaml(parseYaml(settings.properties[workspaceEnv]), {
             flowLevel: 3,
         });
         const fileWorkspace = unparseYaml(parseYaml(await readFile(filename)), { flowLevel: 3 });
 
-        const diff = diffChars(workspace, fileWorkspace);
+        const diff = diffLines(workspace, fileWorkspace);
 
         if (diff.find(part => part.added || part.removed)) {
             diff.forEach(part => {
