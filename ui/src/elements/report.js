@@ -5,6 +5,15 @@ import { selectors } from '../state/selectors';
 import { loadPageId, selectPageId, selectReportId, setWorkspace, setWorkspaceToken } from '../state/slice';
 import { ConnectedLitElement, store } from '../state/store';
 import reportStyles from './reportStyles';
+import { ApplicationInsights } from '@microsoft/applicationinsights-web';
+
+const appInsights = new ApplicationInsights({
+    config: {
+        instrumentationKey: 'c19e2a02-9538-4212-b75d-eeaac38b0a28',
+        /* ...Other Configuration Options... */
+    },
+});
+appInsights.loadAppInsights();
 
 // Token refreshes between 1 and 9 minutes before it expires, randomized to prevent synchronization between clients.
 const refreshTokenMs = expires => new Date(expires) - Date.now() - ~~((Math.random() * 8 + 1) * 60 * 1000);
@@ -21,6 +30,7 @@ class Report extends ConnectedLitElement {
         reports: Array,
         selectedPageId: String,
         workspace: Object,
+        user: Object,
     };
 
     stateChanged(state) {
@@ -143,6 +153,8 @@ class Report extends ConnectedLitElement {
             this.report.off('rendered');
             this.report.on('rendered', _ => {
                 console.log('Report render successful');
+                appInsights.setAuthenticatedUserContext(this.user.email);
+                appInsights.trackPageView(); // Manually call trackPageView to establish the current user/session/pageview
             });
 
             this.report.off('error');
