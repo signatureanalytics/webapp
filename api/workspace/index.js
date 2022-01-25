@@ -158,7 +158,6 @@ module.exports = async (context, req) => {
             token: getTokenJson.token,
             tokenExpires: getTokenJson.expiration,
             reports,
-            env: process.env,
         },
     };
 };
