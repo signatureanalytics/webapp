@@ -10,7 +10,6 @@ import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 const appInsights = new ApplicationInsights({
     config: {
         instrumentationKey: 'c19e2a02-9538-4212-b75d-eeaac38b0a28',
-        /* ...Other Configuration Options... */
     },
 });
 appInsights.loadAppInsights();
@@ -112,6 +111,9 @@ class Report extends ConnectedLitElement {
     }
 
     async setReport(report, page = report.pages[0]) {
+        const metricsPageName = `${report.name} Report - ${page.name}`;
+        appInsights.setAuthenticatedUserContext(this.user.email);
+        appInsights.startTrackPage(metricsPageName);
         const reportContainer = document.createElement('div');
         this.shadowRoot.getElementById('reportContainer').replaceWith(reportContainer);
         reportContainer.id = 'reportContainer';
@@ -153,8 +155,11 @@ class Report extends ConnectedLitElement {
             this.report.off('rendered');
             this.report.on('rendered', _ => {
                 console.log('Report render successful');
-                appInsights.setAuthenticatedUserContext(this.user.email);
-                appInsights.trackPageView(); // Manually call trackPageView to establish the current user/session/pageview
+                appInsights.stopTrackPage(metricsPageName, location.href, {
+                    workspace: this.workspace?.name,
+                    report: report.name,
+                    page: page.name
+                });
             });
 
             this.report.off('error');
