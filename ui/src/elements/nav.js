@@ -136,7 +136,11 @@ class Nav extends ConnectedLitElement {
     }
 
     renderFavoritesButton() {
-        return html`<a tabstop=0 class="favoritesButton" href="#" @click=${this.toggleShowFavoritePages}>${this.showFavoritePages ? 'All Pages' : 'Favorites'}</a>`;
+        const [, workspaceSlug] = location.pathname.split('/');
+        if (this.showFavoritePages || this.favoritePages.filter(p => p.startsWith(`${workspaceSlug}/`)).length) {
+            return html`<a tabstop=0 class="favoritesButton" href="#" @click=${this.toggleShowFavoritePages}>${this.showFavoritePages ? 'All Pages' : 'Favorites'}</a>`;
+        }
+        return '';
     }
 
     render() {
