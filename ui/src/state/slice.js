@@ -7,6 +7,8 @@ const initialState = {
     selectedPageId: undefined,
     loadingReportId: undefined,
     loadingPageId: undefined,
+    favoritePages: [],
+    showFavoritePages: false,
 };
 
 const slice = createSlice({
@@ -59,6 +61,22 @@ const slice = createSlice({
         setUser(state, { payload: { email, id, identityProvider, roles } }) {
             state.user = { email, id, identityProvider, roles };
         },
+        setShowFavoritePages(state, { payload: { showFavoritePages }}) {
+            state.showFavoritePages = showFavoritePages;
+        },
+        initFavoritePages(state, {}) {
+            state.favoritePages = localStorage.favoritePages ? localStorage.favoritePages.split(',') : [];
+        },
+        addFavoritePage(state, { payload: { page }}) {
+            const favoritePages = [...new Set([...state.favoritePages, page])];
+            localStorage.favoritePages = favoritePages;
+            state.favoritePages = favoritePages;
+        },
+        removeFavoritePage(state, { payload: { page }}) {
+            const favoritePages = state.favoritePages.filter(f => f !== page);
+            localStorage.favoritePages = favoritePages;
+            state.favoritePages = favoritePages;
+        }
     },
 });
 
@@ -72,6 +90,10 @@ export const {
     loadPageId,
     collapseReport,
     expandReport,
+    setShowFavoritePages,
+    initFavoritePages,
+    addFavoritePage,
+    removeFavoritePage,
 } = slice.actions;
 
 export default slice.reducer;

@@ -11,7 +11,8 @@ export const createSelectors = state => {
     const selectedPageId = createSelector(state, state => state.selectedPageId);
     const loadingReportId = createSelector(state, state => state.loadingReportId);
     const loadingPageId = createSelector(state, state => state.loadingPageId);
-
+    const favoritePages = createSelector(state, state => state.favoritePages);
+    const showFavoritePages = createSelector(state, state => state.showFavoritePages);
     const reportEmbedUrl = createSelector(workspace, workspace =>
         memoize(reportName => workspace?.reports?.[reportName]?.embedUrl)
     );
@@ -63,6 +64,8 @@ export const createSelectors = state => {
         title,
         workspace,
         user,
+        showFavoritePages,
+        favoritePages,
     };
 };
 

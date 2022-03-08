@@ -110,4 +110,16 @@ export default css`
             content: '...';
         }
     }
+    .favoritesButton {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        color: blue;
+        text-decoration: underline;
+        opacity: 0.4;
+        transition: opacity 400ms ease;
+    }
+    .favoritesButton:hover {
+        opacity: 1;
+    }
 `;
