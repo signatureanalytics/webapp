@@ -29,7 +29,6 @@ jobs:
                 WORKSPACE_AUTOMATEDTESTING: ${{ secrets.WORKSPACE_AUTOMATEDTESTING }}
               run: |
                 set -ev
-                echo "`dig @8.8.8.8 +short +time=30 app.powerbi.com | tail -n1` app.powerbi.com" | sudo tee -a /etc/hosts
 
                 cd api
                 npm ci
