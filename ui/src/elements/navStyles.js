@@ -35,6 +35,9 @@ export default css`
     .selected.report:not(.expanded) > .name {
         background-color: #ddd;
     }
+    .page .name svg {
+        fill: #4688ba;
+    }
     .expander {
         height: 22px;
         width: 22px;
@@ -109,5 +112,17 @@ export default css`
         100% {
             content: '...';
         }
+    }
+    .favoritesButton {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        color: #4688ba;
+        text-decoration: underline;
+        opacity: 0.4;
+        transition: opacity 400ms ease;
+    }
+    .favoritesButton:hover {
+        opacity: 1;
     }
 `;

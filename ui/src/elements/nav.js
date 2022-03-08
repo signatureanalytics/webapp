@@ -3,9 +3,10 @@ import { classMap } from 'lit/directives/class-map.js';
 import caret from '../assets/caret.svg';
 import slug from '../slug';
 import { selectors } from '../state/selectors';
-import { collapseReport, expandReport, loadPageId, loadReportId } from '../state/slice';
+import { collapseReport, expandReport, loadPageId, loadReportId, setShowFavoritePages } from '../state/slice';
 import { ConnectedLitElement, store } from '../state/store';
 import navStyles from './navStyles';
+import { repeat } from 'lit/directives/repeat.js'
 
 const fixAssetUrl = url => `${`/${url}`.replace('//', '/')}`;
 
@@ -17,6 +18,8 @@ class Nav extends ConnectedLitElement {
         reports: Array,
         selectedPageId: String,
         selectedReportId: String,
+        showFavoritePages: Boolean,
+        favoritePages: Array,
     };
 
     stateChanged(state) {
@@ -87,9 +90,16 @@ class Nav extends ConnectedLitElement {
                     class="name"
                     href="${url}"
                     >${report.name} Report</a
-                >${report.pages.map(page => this.#renderPage(report, page))}
+                >${repeat(report.pages, ({id}) => id, page => this.#renderPage(report, page))}
             </div>
         `;
+    }
+
+    #renderPageStar(workspaceSlug, report, page) {
+        if (this.favoritePages.includes(`${workspaceSlug}/${slug(report.name)}/${slug(page.name)}`)) {
+            return html`<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="14px" viewBox="0 0 24 24" width="14px" fill="#000000"><g><path d="M0,0h24v24H0V0z" fill="none"/><path d="M0,0h24v24H0V0z" fill="none"/></g><g><path d="M12,17.27L18.18,21l-1.64-7.03L22,9.24l-7.19-0.61L12,2L9.19,8.63L2,9.24l5.46,4.73L5.82,21L12,17.27z"/></g></svg>`
+        }
+        return '';
     }
 
     #renderPage(report, page) {
@@ -102,13 +112,38 @@ class Nav extends ConnectedLitElement {
         const url = `${location.origin}/${workspaceSlug}/${reportSlug}/${pageSlug}`;
         return html`
             <div class="page ${classMap(pageClasses)}" @click=${this.#pageSelector(report.id, page.id)}>
-                <a tabindex=${tabindex} class="name" href="${url}">${page.name}</a>
+                <a tabindex=${tabindex} class="name" href="${url}">${page.name}${this.#renderPageStar(workspaceSlug, report, page)}</a>
             </div>
         `;
     }
 
+    filterReports() {
+        const [, workspaceSlug] = location.pathname.split('/');
+        if (this.showFavoritePages) {
+            return this.reports.map(report => ({
+                ...report,
+                pages: report.pages.filter(page => 
+                    this.favoritePages.includes(`${workspaceSlug}/${slug(report.name)}/${slug(page.name)}`))
+            })).filter(report => report.pages.length > 0);
+        }
+        return this.reports;
+    }
+
+    toggleShowFavoritePages(evt) {
+        store.dispatch(setShowFavoritePages({showFavoritePages: !this.showFavoritePages}));
+        evt.preventDefault();
+        evt.stopPropagation();
+    }
+
+    renderFavoritesButton() {
+        return html`<a tabstop=0 class="favoritesButton" href="#" @click=${this.toggleShowFavoritePages}>${this.showFavoritePages ? 'All Pages' : 'Favorites'}</a>`;
+    }
+
     render() {
-        return html`<nav>${this.reports.map(report => this.#renderReport(report))}</nav> `;
+        const filteredReports = this.filterReports();
+        const favoritesButton = this.renderFavoritesButton();
+        const reportPages = html`<nav>${repeat(filteredReports, ({id}) => id, report => this.#renderReport(report))}</nav>`;
+        return [favoritesButton, reportPages];
     }
 }
 

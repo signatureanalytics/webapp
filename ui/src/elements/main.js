@@ -1,5 +1,5 @@
 import { html } from 'lit';
-import { setUser } from '../state/slice';
+import { setUser, initFavoritePages } from '../state/slice';
 import { ConnectedLitElement, store } from '../state/store';
 import './header';
 import mainStyles from './mainStyles';
@@ -29,6 +29,7 @@ class Main extends ConnectedLitElement {
                 };
                 store.dispatch(setUser({ ...user }));
             });
+            store.dispatch(initFavoritePages());
     }
 
     // interactions

@@ -39,4 +39,10 @@ export default css`
         margin: auto;
         padding-inline: 14px;
     }
+    svg { 
+        fill: #ddd;
+    }
+    .favoritePage svg {
+        fill: #4688ba;
+    }
 `;
