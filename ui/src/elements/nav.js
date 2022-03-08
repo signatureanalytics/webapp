@@ -136,7 +136,7 @@ class Nav extends ConnectedLitElement {
     }
 
     renderFavoritesButton() {
-        return html`<a class="favoritesButton" href="#" @click=${this.toggleShowFavoritePages}>${this.showFavoritePages ? 'All Pages' : 'Favorites'}</a>`;
+        return html`<a tabstop=0 class="favoritesButton" href="#" @click=${this.toggleShowFavoritePages}>${this.showFavoritePages ? 'All Pages' : 'Favorites'}</a>`;
     }
 
     render() {

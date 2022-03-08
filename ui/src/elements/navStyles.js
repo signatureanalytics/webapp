@@ -117,7 +117,7 @@ export default css`
         position: absolute;
         top: 5px;
         right: 5px;
-        color: blue;
+        color: #4688ba;
         text-decoration: underline;
         opacity: 0.4;
         transition: opacity 400ms ease;

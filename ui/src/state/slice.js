@@ -63,9 +63,11 @@ const slice = createSlice({
         },
         setShowFavoritePages(state, { payload: { showFavoritePages }}) {
             state.showFavoritePages = showFavoritePages;
+            localStorage.showFavoritePages = showFavoritePages;
         },
         initFavoritePages(state, {}) {
             state.favoritePages = localStorage.favoritePages ? localStorage.favoritePages.split(',') : [];
+            state.showFavoritePages = localStorage.showFavoritePages === 'true';
         },
         addFavoritePage(state, { payload: { page }}) {
             const favoritePages = [...new Set([...state.favoritePages, page])];
