@@ -35,6 +35,9 @@ export default css`
     .selected.report:not(.expanded) > .name {
         background-color: #ddd;
     }
+    .page .name svg {
+        fill: #4688ba;
+    }
     .expander {
         height: 22px;
         width: 22px;

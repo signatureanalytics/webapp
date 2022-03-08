@@ -43,6 +43,6 @@ export default css`
         fill: #ddd;
     }
     .favoritePage svg {
-        fill: black;
+        fill: #4688ba;
     }
 `;
