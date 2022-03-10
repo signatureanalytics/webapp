@@ -30,6 +30,8 @@ class Report extends ConnectedLitElement {
         selectedPageId: String,
         workspace: Object,
         user: Object,
+        favoritePages: Array,
+        showFavoritePages: Boolean,
     };
 
     stateChanged(state) {
@@ -49,8 +51,10 @@ class Report extends ConnectedLitElement {
             this.report.setPage(this.selectedPageId);
         } else if (changedProps.has('loadingReportId') && this.report) {
             const report = this.reportById(this.loadingReportId);
+            const [, workspaceSlug] = location.pathname.split('/');
             const page = changedProps.has('loadingPageId')
                 ? report.pages.find(page => page.id === this.loadingPageId)
+                : this.showFavoritePages ? report.pages.find(page => this.favoritePages.includes(`${workspaceSlug}/${slug(report.name)}/${slug(page.name)}`)) 
                 : report.pages[0];
             this.setReport(report, page);
         } else if (changedProps.has('loadingPageId')) {
@@ -99,10 +103,10 @@ class Report extends ConnectedLitElement {
                 await this.report.setAccessToken(workspace.token);
             } else {
                 store.dispatch(setWorkspace({ workspace }));
-                const [, , reportSlug, pageSlug] = location.pathname.split('/');
+                const [, workspaceSlug, reportSlug, pageSlug] = location.pathname.split('/');
                 const report = this.reportBySlug(reportSlug) ?? this.reports[0];
                 const page = this.pageBySlugs(reportSlug, pageSlug);
-                await this.setReport(report, page);
+                await this.setReport(report, page ?? this.showFavoritePages ? report.pages.find(page => this.favoritePages.includes(`${workspaceSlug}/${slug(report.name)}/${slug(page.name)}`)) : report.pages[0]);
             }
             setTimeout(_ => this.loadWorkspace(), refreshTokenMs(workspace.tokenExpires));
         } catch (error) {
