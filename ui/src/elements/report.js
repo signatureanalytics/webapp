@@ -106,7 +106,7 @@ class Report extends ConnectedLitElement {
                 const [, workspaceSlug, reportSlug, pageSlug] = location.pathname.split('/');
                 const report = this.reportBySlug(reportSlug) ?? this.reports[0];
                 const page = this.pageBySlugs(reportSlug, pageSlug);
-                await this.setReport(report, page ?? this.showFavoritePages ? report.pages.find(page => this.favoritePages.includes(`${workspaceSlug}/${slug(report.name)}/${slug(page.name)}`)) : report.pages[0]);
+                await this.setReport(report, page ?? (this.showFavoritePages ? report.pages.find(page => this.favoritePages.includes(`${workspaceSlug}/${slug(report.name)}/${slug(page.name)}`)) : report.pages[0]));
             }
             setTimeout(_ => this.loadWorkspace(), refreshTokenMs(workspace.tokenExpires));
         } catch (error) {
