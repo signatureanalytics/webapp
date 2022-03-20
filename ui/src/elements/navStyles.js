@@ -21,22 +21,29 @@ export default css`
         outline-offset: -2px;
     }
     .name {
-        display: inline-block;
-        width: 225px;
+        width: 205px;
         padding: 3px;
+        display: inline-block;
         text-overflow: ellipsis;
         overflow-x: hidden;
         white-space: nowrap;
     }
-    :not(.loading):not(.selected) > .name:hover {
+    .page:not(.loading):not(.selected):hover {
         background-color: #eee;
     }
-    .selected.page > .name,
-    .selected.report:not(.expanded) > .name {
+    .selected.page,
+    .selected.report:not(.expanded) {
         background-color: #ddd;
     }
-    .page .name svg {
+    .page svg {
+        display: inline-block;
+        position: relative;
+        --star-size: 18px;
         fill: #4688ba;
+        height: var(--star-size);
+        width: var(--star-size);
+        vertical-align: top;
+        margin-top:4px;
     }
     .expander {
         height: 22px;
@@ -52,6 +59,7 @@ export default css`
         white-space: nowrap;
     }
     .page {
+        position: relative;
         margin-left: 30px;
         font-size: 16px;
         overflow: hidden;

@@ -112,7 +112,8 @@ class Nav extends ConnectedLitElement {
         const url = `${location.origin}/${workspaceSlug}/${reportSlug}/${pageSlug}`;
         return html`
             <div class="page ${classMap(pageClasses)}" @click=${this.#pageSelector(report.id, page.id)}>
-                <a tabindex=${tabindex} class="name" href="${url}">${page.name}${this.#renderPageStar(workspaceSlug, report, page)}</a>
+                <a tabindex=${tabindex} class="name" href="${url}">${page.name}</a>
+                ${this.#renderPageStar(workspaceSlug, report, page)}
             </div>
         `;
     }
@@ -137,7 +138,8 @@ class Nav extends ConnectedLitElement {
 
     renderFavoritesButton() {
         const [, workspaceSlug] = location.pathname.split('/');
-        if (this.showFavoritePages || this.favoritePages.filter(p => p.startsWith(`${workspaceSlug}/`)).length) {
+        const pageSlugs = this.reports.flatMap(report => report.pages.map(page => `${workspaceSlug}/${slug(report.name)}/${slug(page.name)}`));
+        if (this.showFavoritePages || this.favoritePages.some(p => pageSlugs.includes(p))) {
             return html`<a tabstop=0 class="favoritesButton" href="#" @click=${this.toggleShowFavoritePages}>${this.showFavoritePages ? 'All Pages' : 'Favorites'}</a>`;
         }
         return '';
@@ -147,7 +149,7 @@ class Nav extends ConnectedLitElement {
         const filteredReports = this.filterReports();
         const favoritesButton = this.renderFavoritesButton();
         const reportPages = html`<nav>${repeat(filteredReports, ({id}) => id, report => this.#renderReport(report))}</nav>`;
-        return [favoritesButton, reportPages];
+        return [reportPages, favoritesButton];
     }
 }
 
