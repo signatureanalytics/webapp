@@ -138,7 +138,8 @@ class Nav extends ConnectedLitElement {
 
     renderFavoritesButton() {
         const [, workspaceSlug] = location.pathname.split('/');
-        if (this.showFavoritePages || this.favoritePages.filter(p => p.startsWith(`${workspaceSlug}/`)).length) {
+        const pageSlugs = this.reports.flatMap(report => report.pages.map(page => `${workspaceSlug}/${slug(report.name)}/${slug(page.name)}`));
+        if (this.showFavoritePages || this.favoritePages.some(p => pageSlugs.includes(p))) {
             return html`<a tabstop=0 class="favoritesButton" href="#" @click=${this.toggleShowFavoritePages}>${this.showFavoritePages ? 'All Pages' : 'Favorites'}</a>`;
         }
         return '';
