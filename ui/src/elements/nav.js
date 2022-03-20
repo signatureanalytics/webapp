@@ -112,7 +112,8 @@ class Nav extends ConnectedLitElement {
         const url = `${location.origin}/${workspaceSlug}/${reportSlug}/${pageSlug}`;
         return html`
             <div class="page ${classMap(pageClasses)}" @click=${this.#pageSelector(report.id, page.id)}>
-                <a tabindex=${tabindex} class="name" href="${url}">${page.name}${this.#renderPageStar(workspaceSlug, report, page)}</a>
+                <a tabindex=${tabindex} class="name" href="${url}">${page.name}</a>
+                ${this.#renderPageStar(workspaceSlug, report, page)}
             </div>
         `;
     }
@@ -147,7 +148,7 @@ class Nav extends ConnectedLitElement {
         const filteredReports = this.filterReports();
         const favoritesButton = this.renderFavoritesButton();
         const reportPages = html`<nav>${repeat(filteredReports, ({id}) => id, report => this.#renderReport(report))}</nav>`;
-        return [favoritesButton, reportPages];
+        return [reportPages, favoritesButton];
     }
 }
 
