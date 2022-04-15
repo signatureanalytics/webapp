@@ -48,13 +48,18 @@ class Report extends ConnectedLitElement {
     updated(changedProps) {
         super.updated(changedProps);
         if (changedProps.has('selectedPageId') && this.report) {
-            this.report.setPage(this.selectedPageId);
+            this.report.setPage(this.selectedPageId).catch(error => {
+                console.error(`Error setting page ${this.selectedPageId}: ${error ?? 'unspecified error'}`);
+            });
         } else if (changedProps.has('loadingReportId') && this.report) {
             const report = this.reportById(this.loadingReportId);
             const [, workspaceSlug] = location.pathname.split('/');
             const page = changedProps.has('loadingPageId')
                 ? report.pages.find(page => page.id === this.loadingPageId)
-                : this.showFavoritePages ? report.pages.find(page => this.favoritePages.includes(`${workspaceSlug}/${slug(report.name)}/${slug(page.name)}`)) 
+                : this.showFavoritePages
+                ? report.pages.find(page =>
+                      this.favoritePages.includes(`${workspaceSlug}/${slug(report.name)}/${slug(page.name)}`)
+                  )
                 : report.pages[0];
             this.setReport(report, page);
         } else if (changedProps.has('loadingPageId')) {
@@ -106,7 +111,17 @@ class Report extends ConnectedLitElement {
                 const [, workspaceSlug, reportSlug, pageSlug] = location.pathname.split('/');
                 const report = this.reportBySlug(reportSlug) ?? this.reports[0];
                 const page = this.pageBySlugs(reportSlug, pageSlug);
-                await this.setReport(report, page ?? (this.showFavoritePages ? report.pages.find(page => this.favoritePages.includes(`${workspaceSlug}/${slug(report.name)}/${slug(page.name)}`)) : report.pages[0]));
+                await this.setReport(
+                    report,
+                    page ??
+                        (this.showFavoritePages
+                            ? report.pages.find(page =>
+                                  this.favoritePages.includes(
+                                      `${workspaceSlug}/${slug(report.name)}/${slug(page.name)}`
+                                  )
+                              )
+                            : report.pages[0])
+                );
             }
             setTimeout(_ => this.loadWorkspace(), refreshTokenMs(workspace.tokenExpires));
         } catch (error) {
@@ -162,7 +177,7 @@ class Report extends ConnectedLitElement {
                 appInsights.stopTrackPage(metricsPageName, location.href, {
                     workspace: this.workspace?.name,
                     report: report.name,
-                    page: page.name
+                    page: page.name,
                 });
             });
 
