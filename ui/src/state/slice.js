@@ -36,6 +36,7 @@ const slice = createSlice({
         selectPageId(state, { payload: { pageId } }) {
             if (pageId !== state.selectedPageId) {
                 state.selectedPageId = pageId;
+                state.loadingPageId = pageId;
             }
         },
         // action called to initiate loading of the specified report
@@ -61,7 +62,7 @@ const slice = createSlice({
         setUser(state, { payload: { email, id, identityProvider, roles } }) {
             state.user = { email, id, identityProvider, roles };
         },
-        setShowFavoritePages(state, { payload: { showFavoritePages }}) {
+        setShowFavoritePages(state, { payload: { showFavoritePages } }) {
             state.showFavoritePages = showFavoritePages;
             localStorage.showFavoritePages = showFavoritePages;
         },
@@ -69,16 +70,16 @@ const slice = createSlice({
             state.favoritePages = localStorage.favoritePages ? localStorage.favoritePages.split(',') : [];
             state.showFavoritePages = localStorage.showFavoritePages === 'true';
         },
-        addFavoritePage(state, { payload: { page }}) {
+        addFavoritePage(state, { payload: { page } }) {
             const favoritePages = [...new Set([...state.favoritePages, page])];
             localStorage.favoritePages = favoritePages;
             state.favoritePages = favoritePages;
         },
-        removeFavoritePage(state, { payload: { page }}) {
+        removeFavoritePage(state, { payload: { page } }) {
             const favoritePages = state.favoritePages.filter(f => f !== page);
             localStorage.favoritePages = favoritePages;
             state.favoritePages = favoritePages;
-        }
+        },
     },
 });
 
