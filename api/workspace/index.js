@@ -154,6 +154,7 @@ module.exports = async (context, req) => {
         body: {
             name: workspace.name,
             id: workspace.id,
+            logo: workspace.logo,
             tokenId: getTokenJson.tokenId,
             token: getTokenJson.token,
             tokenExpires: getTokenJson.expiration,

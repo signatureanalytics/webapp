@@ -6,7 +6,8 @@ export default css`
         display: grid;
         grid-auto-flow: column;
         grid-auto-columns: 300px auto min-content;
-        gap: 10px;
+        grid-template-areas: 'logo title clientLogo' 'logo title userEmail';
+        gap: 5px 10px;
         position: relative;
         height: 100%;
         padding: 10px 16px;
@@ -15,6 +16,10 @@ export default css`
     .logo {
         position: relative;
         height: 60px;
+        grid-area: logo;
+    }
+    .title {
+        grid-area: title;
     }
     h1,
     h2 {
@@ -32,14 +37,19 @@ export default css`
         font-size: 22px;
         margin-top: 2px;
     }
-    .userinfo {
-        vertical-align: bottom;
+    .clientLogo {
+        grid-area: clientLogo;
+        max-height: 35px;
+        justify-self: center;
+    }
+    .userEmail {
         font-family: var(--font-body);
         font-size: 18px;
         margin: auto;
         padding-inline: 14px;
+        grid-area: userEmail;
     }
-    svg { 
+    svg {
         fill: #ddd;
     }
     .favoritePage svg {
