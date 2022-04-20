@@ -5,6 +5,7 @@ const { load: parseYaml } = require('js-yaml');
 const { promisify } = require('util');
 const { readFile: rf } = require('fs');
 const readFile = promisify(rf);
+const TZOFFSETS = require('./mstz.js');
 
 const referrerHeaderName = 'referer'; // [sic] see https://en.wikipedia.org/wiki/HTTP_referer#Etymology
 const cookieHeaderName = 'cookie';
@@ -33,6 +34,34 @@ const checkResponse = response => {
 const fetchOAuthToken = _ => fetch(oAuthUrl, oAuthRequest).then(response => checkResponse(response).json());
 
 setInterval(async _ => (oAuthToken = await fetchOAuthToken()), 10 * 60 * 1000);
+
+const timezoneNameFormatter = Intl.DateTimeFormat('en-US', { timeZone: 'US/Pacific', timeZoneName: 'long' });
+const weekdayFormatter = Intl.DateTimeFormat('en-US', { timeZone: 'US/Pacific', weekday: 'long' });
+
+const utcDate = (timezoneId, date, hours, minutes) => {
+    const daylightOffset = timezoneNameFormatter.format(date).includes('Daylight') ? 1 : 0;
+    const adjustedHours = hours - TZOFFSETS[timezoneId] - daylightOffset;
+    const year = date.getUTCFullYear();
+    const month = date.getUTCMonth();
+    const day = date.getUTCDate();
+    return new Date(Date.UTC(year, month, day, adjustedHours, minutes));
+};
+
+const getNextRefreshDate = ({ days, times, localTimeZoneId, enabled }) => {
+    if (enabled) {
+        const now = new Date();
+        for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+            const dayOffsetMs = dayOffset * 24 * 60 * 60 * 1000;
+            for (const time of times) {
+                const [hours, minutes] = time.split(':');
+                const date = utcDate(localTimeZoneId, new Date(now + dayOffsetMs), hours, minutes);
+                if (date > now && days.includes(weekdayFormatter.format(date))) {
+                    return date;
+                }
+            }
+        }
+    }
+};
 
 const getWorkspace = async (context, workspaceSlug) => {
     const envWorkspaceYaml = process.env[`WORKSPACE_${workspaceSlug.toUpperCase()}`];
@@ -133,6 +162,14 @@ module.exports = async (context, req) => {
         body: JSON.stringify(getTokenBody),
     });
 
+    `${config.apiUrl}groups/${workspace.id}/reports`;
+
+    const getDatasetRefreshHistoryUrl = `${config.apiUrl}groups/${workspace.id}/datasets/${uniqueDatasetIds[0]}/refreshes?$top=1`;
+    const getDatasetRefreshScheduleUrl = `${config.apiUrl}groups/${workspace.id}/datasets/${uniqueDatasetIds[0]}/refreshSchedule`;
+
+    const getDatasetRefreshHistoryPromise = fetch(getDatasetRefreshHistoryUrl, pbiRestHeaders);
+    const getDatasetRefreshSchedulePromise = fetch(getDatasetRefreshScheduleUrl, pbiRestHeaders);
+
     const getTokenJson = await getTokenPromise.then(response => checkResponse(response).json());
 
     const tokenExpiresMs = new Date(getTokenJson.expiration).getTime() - Date.now();
@@ -143,6 +180,14 @@ module.exports = async (context, req) => {
             .sort(({ order: a }, { order: b }) => a - b)
             .map(({ Name: id, displayName: name }) => ({ name, id }));
     }
+
+    const getDatasetRefreshHistoryJson = await getDatasetRefreshHistoryPromise.then(response =>
+        checkResponse(response).json()
+    );
+
+    const getDatasetRefreshScheduleJson = await getDatasetRefreshSchedulePromise.then(response =>
+        checkResponse(response).json()
+    );
 
     context.res = {
         status: getTokenJson.status,
@@ -159,6 +204,12 @@ module.exports = async (context, req) => {
             token: getTokenJson.token,
             tokenExpires: getTokenJson.expiration,
             reports,
+            lastRefresh: {
+                how: getDatasetRefreshHistoryJson.value?.[0]?.refreshType,
+                when: getDatasetRefreshHistoryJson.value?.[0]?.endTime,
+                status: getDatasetRefreshHistoryJson.value?.[0]?.status,
+            },
+            nextRefresh: getNextRefreshDate(getDatasetRefreshScheduleJson)?.toISOString(),
         },
     };
 };

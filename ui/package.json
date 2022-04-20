@@ -5,8 +5,7 @@
     "scripts": {
         "start": "bash -C scripts/start.sh",
         "test": "bash -C scripts/test.sh",
-        "build": "bash -C scripts/build.sh",
-        "getWorkspace": "scripts/getWorkspace.js $*"
+        "build": "bash -C scripts/build.sh"
     },
     "dependencies": {
         "@microsoft/applicationinsights-web": "^2.7.2",
