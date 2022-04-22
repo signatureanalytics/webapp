@@ -35,8 +35,8 @@ const fetchOAuthToken = _ => fetch(oAuthUrl, oAuthRequest).then(response => chec
 
 setInterval(async _ => (oAuthToken = await fetchOAuthToken()), 10 * 60 * 1000);
 
-const timezoneNameFormatter = Intl.DateTimeFormat('en-US', { timeZone: 'US/Pacific', timeZoneName: 'long' });
-const weekdayFormatter = Intl.DateTimeFormat('en-US', { timeZone: 'US/Pacific', weekday: 'long' });
+const timezoneNameFormatter = Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', timeZoneName: 'long' });
+const weekdayFormatter = Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', weekday: 'long' });
 
 const utcDate = (timezoneId, date, hours, minutes) => {
     const daylightOffset = timezoneNameFormatter.format(date).includes('Daylight') ? 1 : 0;
