@@ -8,6 +8,7 @@ export default css`
         user-select: none;
         -webkit-user-select: none;
         font-family: var(--font-body);
+        width: 280px;
     }
     nav {
         overflow-y: auto;

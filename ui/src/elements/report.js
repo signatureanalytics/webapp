@@ -179,6 +179,8 @@ class Report extends ConnectedLitElement {
                     report: report.name,
                     page: page.name,
                 });
+                // update dataset refreshes by calling loadWorkspace for each report load
+                this.loadWorkspace();
             });
 
             this.report.off('error');

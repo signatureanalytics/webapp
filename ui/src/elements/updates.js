@@ -60,7 +60,24 @@ class Updates extends ConnectedLitElement {
                 })),
             ];
         } else {
-            return [this.updates.slice(-1)[0], { status: 'Pending', when: this.pendingUpdates[0] }];
+            const updates = [];
+            const update = [...this.updates].reverse().find(update => update.status !== 'Unknown');
+            const runningUpdate = [...this.updates].reverse().find(update => update.status === 'Unknown');
+            const pendingUpdate = this.pendingUpdates[0]
+                ? {
+                      status: 'Pending',
+                      when: this.pendingUpdates[0],
+                  }
+                : undefined;
+            if (update) {
+                updates.push(update);
+            }
+            if (runningUpdate) {
+                updates.push(runningUpdate);
+            } else if (pendingUpdate) {
+                updates.push(pendingUpdate);
+            }
+            return updates;
         }
     }
 
