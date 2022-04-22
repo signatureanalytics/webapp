@@ -2,13 +2,23 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
     user: { email: undefined, identityProvider: undefined, id: undefined, roles: [] },
-    workspace: { name: undefined, id: undefined, token: undefined, tokenId: undefined, tokenExpires: 0, reports: [] },
+    workspace: {
+        name: undefined,
+        id: undefined,
+        token: undefined,
+        tokenId: undefined,
+        tokenExpires: 0,
+        reports: [],
+        updates: [],
+        pendingUpdates: [],
+    },
     selectedReportId: undefined,
     selectedPageId: undefined,
     loadingReportId: undefined,
     loadingPageId: undefined,
     favoritePages: [],
     showFavoritePages: false,
+    showMoreUpdates: false,
 };
 
 const slice = createSlice({
@@ -80,6 +90,10 @@ const slice = createSlice({
             localStorage.favoritePages = favoritePages;
             state.favoritePages = favoritePages;
         },
+        // action called to toggle the showMoreUpdates state
+        toggleShowMoreUpdates(state, {}) {
+            state.showMoreUpdates = !state.showMoreUpdates;
+        },
     },
 });
 
@@ -97,6 +111,7 @@ export const {
     initFavoritePages,
     addFavoritePage,
     removeFavoritePage,
+    toggleShowMoreUpdates,
 } = slice.actions;
 
 export default slice.reducer;

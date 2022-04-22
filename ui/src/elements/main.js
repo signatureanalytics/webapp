@@ -5,9 +5,20 @@ import './header';
 import mainStyles from './mainStyles';
 import './nav';
 import './report';
+import './updates';
+import { selectors } from '../state/selectors.js';
 
 class Main extends ConnectedLitElement {
     static styles = mainStyles;
+    static properties = {
+        showMoreUpdates: { type: Boolean, attribute: true, reflect: true },
+    };
+
+    stateChanged(state) {
+        for (const name in this.constructor.properties) {
+            this[name] = selectors[name](state);
+        }
+    }
 
     constructor() {
         super();
@@ -29,7 +40,7 @@ class Main extends ConnectedLitElement {
                 };
                 store.dispatch(setUser({ ...user }));
             });
-            store.dispatch(initFavoritePages());
+        store.dispatch(initFavoritePages());
     }
 
     // interactions
@@ -39,6 +50,7 @@ class Main extends ConnectedLitElement {
         return html`
             <sa-header></sa-header>
             <sa-nav></sa-nav>
+            <sa-updates></sa-updates>
             <sa-report></sa-report>
         `;
     }

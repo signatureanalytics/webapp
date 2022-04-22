@@ -47,19 +47,18 @@ const utcDate = (timezoneId, date, hours, minutes) => {
     return new Date(Date.UTC(year, month, day, adjustedHours, minutes));
 };
 
-const getNextRefreshDate = ({ days, times, localTimeZoneId, enabled }) => {
+const getPendingUpdates = ({ days, times, localTimeZoneId, enabled }) => {
+    const now = new Date();
+    const oneDayMs = 24 * 60 * 60 * 1000;
     if (enabled) {
-        const now = new Date();
-        for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
-            const dayOffsetMs = dayOffset * 24 * 60 * 60 * 1000;
-            for (const time of times) {
+        const dates = Array.from({ length: 7 }, (_, dayOffset) => {
+            const dayOffsetMs = dayOffset * oneDayMs;
+            return times.map(time => {
                 const [hours, minutes] = time.split(':');
-                const date = utcDate(localTimeZoneId, new Date(now + dayOffsetMs), hours, minutes);
-                if (date > now && days.includes(weekdayFormatter.format(date))) {
-                    return date;
-                }
-            }
-        }
+                return utcDate(localTimeZoneId, new Date(now.getTime() + dayOffsetMs), hours, minutes);
+            });
+        }).flat();
+        return dates.filter(date => date > now && days.includes(weekdayFormatter.format(date))).slice(0, 4);
     }
 };
 
@@ -164,7 +163,7 @@ module.exports = async (context, req) => {
 
     `${config.apiUrl}groups/${workspace.id}/reports`;
 
-    const getDatasetRefreshHistoryUrl = `${config.apiUrl}groups/${workspace.id}/datasets/${uniqueDatasetIds[0]}/refreshes?$top=1`;
+    const getDatasetRefreshHistoryUrl = `${config.apiUrl}groups/${workspace.id}/datasets/${uniqueDatasetIds[0]}/refreshes?$top=4`;
     const getDatasetRefreshScheduleUrl = `${config.apiUrl}groups/${workspace.id}/datasets/${uniqueDatasetIds[0]}/refreshSchedule`;
 
     const getDatasetRefreshHistoryPromise = fetch(getDatasetRefreshHistoryUrl, pbiRestHeaders);
@@ -204,12 +203,14 @@ module.exports = async (context, req) => {
             token: getTokenJson.token,
             tokenExpires: getTokenJson.expiration,
             reports,
-            lastRefresh: {
-                how: getDatasetRefreshHistoryJson.value?.[0]?.refreshType,
-                when: getDatasetRefreshHistoryJson.value?.[0]?.endTime,
-                status: getDatasetRefreshHistoryJson.value?.[0]?.status,
-            },
-            nextRefresh: getNextRefreshDate(getDatasetRefreshScheduleJson)?.toISOString(),
+            updates: getDatasetRefreshHistoryJson.value
+                .sort((a, b) => a.endTime.localeCompare(b.endTime))
+                .map(update => ({
+                    how: update.refreshType,
+                    when: update.endTime,
+                    status: update.status,
+                })),
+            pendingUpdates: getPendingUpdates(getDatasetRefreshScheduleJson),
         },
     };
 };

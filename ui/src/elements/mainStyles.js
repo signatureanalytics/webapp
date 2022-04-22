@@ -15,9 +15,9 @@ export default css`
         --color-brand: #228dc1;
 
         display: grid;
-        grid-template-areas: 'header header' 'nav report';
-        grid-template-rows: 80px auto;
-        grid-template-columns: 275px auto;
+        grid-template-areas: 'header header' 'nav report' 'updates report';
+        grid-template-rows: 80px 1fr min-content;
+        grid-template-columns: min-content 1fr;
         height: 100%;
         position: relative;
     }
@@ -31,6 +31,9 @@ export default css`
     }
     sa-nav {
         grid-area: nav;
+    }
+    sa-updates {
+        grid-area: updates;
     }
     sa-nav,
     sa-report {

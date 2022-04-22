@@ -20,8 +20,6 @@ class Nav extends ConnectedLitElement {
         selectedReportId: String,
         showFavoritePages: Boolean,
         favoritePages: Array,
-        lastRefresh: String,
-        nextRefresh: String,
     };
 
     stateChanged(state) {
@@ -175,24 +173,10 @@ class Nav extends ConnectedLitElement {
         return '';
     }
 
-    dateFormatter = Intl.DateTimeFormat('en-US', {
-        year: 'numeric',
-        month: 'numeric',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-        timeZoneName: 'short',
-    });
-
     render() {
         const filteredReports = this.filterReports();
         const favoritesButton = this.renderFavoritesButton();
-        const lastRefresh = this.lastRefresh
-            ? this.dateFormatter.format(new Date(this.lastRefresh ?? 0)).replace(',', '')
-            : '';
-        const nextRefresh = this.nextRefresh
-            ? this.dateFormatter.format(new Date(this.nextRefresh ?? 0)).replace(',', '')
-            : '';
+
         const reportPages = html`<nav>
             ${repeat(
                 filteredReports,
@@ -200,17 +184,8 @@ class Nav extends ConnectedLitElement {
                 report => this.#renderReport(report)
             )}
         </nav>`;
-        const datasetRefresh = html`<div class="datasetRefresh">
-            <div class="lastRefresh">
-                <h3>Last Update</h3>
-                ${lastRefresh}
-            </div>
-            <div class="nextRefresh">
-                <h3>Next Update</h3>
-                ${nextRefresh}
-            </div>
-        </div>`;
-        return [reportPages, datasetRefresh, favoritesButton];
+
+        return [reportPages, favoritesButton];
     }
 }
 

@@ -13,13 +13,13 @@ export const createSelectors = state => {
     const loadingPageId = createSelector(state, state => state.loadingPageId);
     const favoritePages = createSelector(state, state => state.favoritePages);
     const showFavoritePages = createSelector(state, state => state.showFavoritePages);
+    const showMoreUpdates = createSelector(state, state => state.showMoreUpdates);
+
     const reportEmbedUrl = createSelector(workspace, workspace =>
         memoize(reportName => workspace?.reports?.[reportName]?.embedUrl)
     );
-    const lastRefresh = createSelector(workspace, workspace => workspace.lastRefresh?.when);
-    const lastRefreshMethod = createSelector(workspace, workspace => workspace.lastRefresh?.how);
-    const lastRefreshStatus = createSelector(workspace, workspace => workspace.lastRefresh?.status);
-    const nextRefresh = createSelector(workspace, workspace => workspace.nextRefresh);
+    const updates = createSelector(workspace, workspace => workspace.updates);
+    const pendingUpdates = createSelector(workspace, workspace => workspace.pendingUpdates);
 
     const reports = createSelector(workspace, workspace => {
         return Object.entries(workspace?.reports ?? {}).map(([name, { id, pages, expanded }]) => ({
@@ -70,10 +70,9 @@ export const createSelectors = state => {
         user,
         showFavoritePages,
         favoritePages,
-        lastRefresh,
-        lastRefreshMethod,
-        lastRefreshStatus,
-        nextRefresh,
+        updates,
+        pendingUpdates,
+        showMoreUpdates,
     };
 };
 

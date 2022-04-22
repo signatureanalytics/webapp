@@ -11,26 +11,7 @@ export default css`
     }
     nav {
         overflow-y: auto;
-        height: calc(100% - 40px);
-    }
-    .datasetRefresh {
-        height: 40px;
-        font-size: 0.9rem;
-        padding: 4px 2px;
-        border-top: 2px solid #ddd;
-    }
-    .datasetRefresh > nav {
-        margin-bottom: 10px;
-    }
-    .datasetRefresh h3 {
-        font-size: 0.9rem;
-        margin: 0;
-        display: inline-block;
-        font-weight: normal;
-        font-style: italic;
-    }
-    .datasetRefresh h3::after {
-        content: ':';
+        height: 100%;
     }
     a,
     a:visited,
