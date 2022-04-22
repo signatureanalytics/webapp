@@ -6,6 +6,7 @@ import mainStyles from './mainStyles';
 import './nav';
 import './report';
 import './updates';
+import './navButtons';
 import { selectors } from '../state/selectors.js';
 
 class Main extends ConnectedLitElement {
@@ -49,6 +50,7 @@ class Main extends ConnectedLitElement {
     render() {
         return html`
             <sa-header></sa-header>
+            <sa-nav-buttons></sa-nav-buttons>
             <sa-nav></sa-nav>
             <sa-updates></sa-updates>
             <sa-report></sa-report>

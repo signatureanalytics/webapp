@@ -101,24 +101,7 @@ class Nav extends ConnectedLitElement {
 
     #renderPageStar(workspaceSlug, report, page) {
         if (this.favoritePages.includes(`${workspaceSlug}/${slug(report.name)}/${slug(page.name)}`)) {
-            return html`<svg
-                xmlns="http://www.w3.org/2000/svg"
-                enable-background="new 0 0 24 24"
-                height="14px"
-                viewBox="0 0 24 24"
-                width="14px"
-                fill="#000000"
-            >
-                <g>
-                    <path d="M0,0h24v24H0V0z" fill="none" />
-                    <path d="M0,0h24v24H0V0z" fill="none" />
-                </g>
-                <g>
-                    <path
-                        d="M12,17.27L18.18,21l-1.64-7.03L22,9.24l-7.19-0.61L12,2L9.19,8.63L2,9.24l5.46,4.73L5.82,21L12,17.27z"
-                    />
-                </g>
-            </svg>`;
+            return html`<sa-icon name="star" size="20" fill="#4688ba"></sa-icon>`;
         }
         return '';
     }
@@ -154,38 +137,16 @@ class Nav extends ConnectedLitElement {
         return this.reports;
     }
 
-    toggleShowFavoritePages(evt) {
-        store.dispatch(setShowFavoritePages({ showFavoritePages: !this.showFavoritePages }));
-        evt.preventDefault();
-        evt.stopPropagation();
-    }
-
-    renderFavoritesButton() {
-        const [, workspaceSlug] = location.pathname.split('/');
-        const pageSlugs = this.reports.flatMap(report =>
-            report.pages.map(page => `${workspaceSlug}/${slug(report.name)}/${slug(page.name)}`)
-        );
-        if (this.showFavoritePages || this.favoritePages.some(p => pageSlugs.includes(p))) {
-            return html`<a tabstop="0" class="favoritesButton" href="#" @click=${this.toggleShowFavoritePages}
-                >${this.showFavoritePages ? 'All Pages' : 'Favorites'}</a
-            >`;
-        }
-        return '';
-    }
-
     render() {
         const filteredReports = this.filterReports();
-        const favoritesButton = this.renderFavoritesButton();
 
-        const reportPages = html`<nav>
+        return html`<nav>
             ${repeat(
                 filteredReports,
                 ({ id }) => id,
                 report => this.#renderReport(report)
             )}
         </nav>`;
-
-        return [reportPages, favoritesButton];
     }
 }
 

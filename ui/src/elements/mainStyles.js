@@ -15,8 +15,8 @@ export default css`
         --color-brand: #228dc1;
 
         display: grid;
-        grid-template-areas: 'header header' 'nav report' 'updates report';
-        grid-template-rows: 80px 1fr min-content;
+        grid-template-areas: 'header header' 'nav-buttons report' 'nav report' 'updates report';
+        grid-template-rows: 80px 40px 1fr min-content;
         grid-template-columns: min-content 1fr;
         height: 100%;
         position: relative;
@@ -28,6 +28,9 @@ export default css`
     }
     sa-header {
         grid-area: header;
+    }
+    sa-nav-buttons {
+        grid-area: nav-buttons;
     }
     sa-nav {
         grid-area: nav;

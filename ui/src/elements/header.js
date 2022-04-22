@@ -51,26 +51,15 @@ class Header extends ConnectedLitElement {
         const isFavorite = this.favoritePages.includes(location.pathname.slice(1));
         const starClasses = { favoritePage: isFavorite };
         const title = `${isFavorite ? 'Remove' : 'Add'} Favorite Page`;
-        const filledStar = html`<a title=${title} class=${classMap(starClasses)} href="#" @click=${this.toggleStar}
-            ><svg
-                xmlns="http://www.w3.org/2000/svg"
-                enable-background="new 0 0 24 24"
-                height="20px"
-                viewBox="0 0 24 24"
-                width="20px"
-                fill="#000000"
-            >
-                <g>
-                    <path d="M0,0h24v24H0V0z" fill="none" />
-                    <path d="M0,0h24v24H0V0z" fill="none" />
-                </g>
-                <g>
-                    <path
-                        d="M12,17.27L18.18,21l-1.64-7.03L22,9.24l-7.19-0.61L12,2L9.19,8.63L2,9.24l5.46,4.73L5.82,21L12,17.27z"
-                    />
-                </g></svg
-        ></a>`;
-        const pageName = this.selectedPage ? html`${this.selectedPage.name}${filledStar}` : ``;
+        const starColor = isFavorite ? '#4688ba' : '#ddd';
+        const star = html`<sa-icon
+            name="star"
+            title=${title}
+            fill="${starColor}"
+            size="22"
+            @click=${this.toggleStar}
+        ></sa-icon>`;
+        const pageName = this.selectedPage ? html`${this.selectedPage.name}${star}` : ``;
         return html`
             <header>
                 <img class="logo" src="${fixAssetUrl(logo)}" />

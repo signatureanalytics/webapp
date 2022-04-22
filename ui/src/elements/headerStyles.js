@@ -49,10 +49,7 @@ export default css`
         padding-inline: 14px;
         grid-area: userEmail;
     }
-    svg {
-        fill: #ddd;
-    }
-    .favoritePage svg {
-        fill: #4688ba;
+    sa-icon {
+        cursor: pointer;
     }
 `;
