@@ -63,19 +63,19 @@ class NavButtons extends ConnectedLitElement {
         );
         const starColor = this.showFavoritePages || showFavoritePagesDisabled ? '#bbb' : '#4688ba';
         return html`
-            <sa-button @click=${this.expand} label="Expand all" name="expand" size="32"></sa-button>
-            <sa-button @click=${this.collapse} label="Collapse all" name="collapse" size="32"></sa-button>
+            <sa-button @click=${this.expand} label="Expand All" name="expand" size="32"></sa-button>
+            <sa-button @click=${this.collapse} label="Collapse All" name="collapse" size="32"></sa-button>
             <sa-button
                 ?disabled=${showFavoritePagesDisabled}
                 @click=${!showFavoritePagesDisabled ? this.toggleShowFavorites : _ => {}}
-                label="Show ${this.showFavoritePages ? 'all' : 'favorites'}"
+                label="Show ${this.showFavoritePages ? 'All' : 'Favorites'}"
                 name="star"
                 size="32"
                 fill="${starColor}"
             ></sa-button>
             <sa-button
                 @click=${this.toggleHideNavSidebar}
-                label="Hide sidebar"
+                label="Hide Sidebar"
                 name="doubleArrow"
                 transform="rotate(180)"
                 size="32"

@@ -17,12 +17,14 @@ export default css`
     .update-list {
         height: 40px;
         transition: height 200ms ease;
+        background-color: white;
+        width: 100%;
     }
     .updates.expanded .update-list {
         height: 175px;
     }
     .update {
-        padding: 3px 3px 0 3px;
+        margin: 3px 3px 0 3px;
         cursor: default;
     }
     sa-button[name='doubleArrow'] {
@@ -32,6 +34,6 @@ export default css`
         cursor: pointer;
     }
     h4 {
-        margin-block: 0;
+        margin: 0;
     }
 `;

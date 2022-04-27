@@ -12,7 +12,6 @@ export default css`
         align-content: bottom;
         width: 275px;
         overflow-x: hidden;
-        overflow-y: visible;
     }
     sa-button {
         width: 40px;

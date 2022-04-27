@@ -6,15 +6,12 @@ export default css`
         font-size: 0.75em;
         position: relative;
         box-sizing: border-box;
+        display: block;
     }
     .wrapper {
         margin: auto;
         cursor: pointer;
         border-radius: 50%;
-        background-color: #f3f3f3;
-    }
-    .wrapper:last-child {
-        border: 0;
     }
     .wrapper:hover {
         background-color: #ddd;
