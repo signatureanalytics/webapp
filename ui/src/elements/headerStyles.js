@@ -49,7 +49,10 @@ export default css`
         padding-inline: 14px;
         grid-area: userEmail;
     }
-    sa-icon {
-        cursor: pointer;
+    sa-button {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        vertical-align: bottom;
     }
 `;

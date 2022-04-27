@@ -1,8 +1,8 @@
 import { LitElement, html, svg } from 'lit';
-import { classMap } from 'lit/directives/class-map.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
-
+import iconStyles from './iconStyles';
 class Icon extends LitElement {
+    static styles = iconStyles;
     static properties = {
         name: { type: String, attribute: true },
         size: Number,

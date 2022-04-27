@@ -3,7 +3,7 @@ import { classMap } from 'lit/directives/class-map.js';
 import caret from '../assets/caret.svg';
 import slug from '../slug';
 import { selectors } from '../state/selectors';
-import { collapseReport, expandReport, loadPageId, loadReportId, setShowFavoritePages } from '../state/slice';
+import { collapseReport, expandReport, loadPageId, loadReportId } from '../state/slice';
 import { ConnectedLitElement, store } from '../state/store';
 import navStyles from './navStyles';
 import { repeat } from 'lit/directives/repeat.js';

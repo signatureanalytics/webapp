@@ -1,10 +1,10 @@
 import { html } from 'lit';
-import { classMap } from 'lit/directives/class-map.js';
 import logo from '../assets/sa-covantage-logo.png';
 import { selectors } from '../state/selectors';
 import { addFavoritePage, removeFavoritePage } from '../state/slice';
 import { ConnectedLitElement, store } from '../state/store';
 import headerStyles from './headerStyles';
+import './button.js';
 
 const fixAssetUrl = url => `${`/${url}`.replace('//', '/')}`;
 
@@ -51,14 +51,14 @@ class Header extends ConnectedLitElement {
         const isFavorite = this.favoritePages.includes(location.pathname.slice(1));
         const starClasses = { favoritePage: isFavorite };
         const title = `${isFavorite ? 'Remove' : 'Add'} Favorite Page`;
-        const starColor = isFavorite ? '#4688ba' : '#ddd';
-        const star = html`<sa-icon
+        const starColor = isFavorite ? '#4688ba' : '#bbb';
+        const star = html`<sa-button
             name="star"
             title=${title}
             fill="${starColor}"
             size="22"
             @click=${this.toggleStar}
-        ></sa-icon>`;
+        ></sa-button>`;
         const pageName = this.selectedPage ? html`${this.selectedPage.name}${star}` : ``;
         return html`
             <header>

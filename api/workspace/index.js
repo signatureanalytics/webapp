@@ -60,6 +60,7 @@ const getPendingUpdates = ({ days, times, localTimeZoneId, enabled }) => {
         }).flat();
         return dates.filter(date => date > now && days.includes(weekdayFormatter.format(date))).slice(0, 4);
     }
+    return [];
 };
 
 const getWorkspace = async (context, workspaceSlug) => {

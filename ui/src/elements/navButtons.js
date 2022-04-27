@@ -1,8 +1,9 @@
 import { html } from 'lit';
 import './icon.js';
+import './button.js';
 import { ConnectedLitElement, store } from '../state/store.js';
 import { selectors } from '../state/selectors.js';
-import { setShowFavoritePages, expandReport, collapseReport } from '../state/slice.js';
+import { toggleShowFavoritePages, expandReport, collapseReport, toggleHideNavSidebar } from '../state/slice.js';
 import navButtonStyles from './navButtonsStyles.js';
 import { slug } from '../slug.js';
 
@@ -41,7 +42,13 @@ class NavButtons extends ConnectedLitElement {
     }
 
     toggleShowFavorites(e) {
-        store.dispatch(setShowFavoritePages({ showFavoritePages: !this.showFavoritePages }));
+        store.dispatch(toggleShowFavoritePages());
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+    toggleHideNavSidebar(e) {
+        store.dispatch(toggleHideNavSidebar());
         e.stopPropagation();
         e.preventDefault();
     }
@@ -56,16 +63,24 @@ class NavButtons extends ConnectedLitElement {
         );
         const starColor = this.showFavoritePages || showFavoritePagesDisabled ? '#bbb' : '#4688ba';
         return html`
-            <div @click=${this.expand}><sa-icon name="expand" size="20"></sa-icon>Expand</div>
-            <div @click=${this.collapse}><sa-icon name="collapse" size="20"></sa-icon>Collapse</div>
-            <div
+            <sa-button @click=${this.expand} label="Expand all" name="expand" size="32"></sa-button>
+            <sa-button @click=${this.collapse} label="Collapse all" name="collapse" size="32"></sa-button>
+            <sa-button
                 ?disabled=${showFavoritePagesDisabled}
                 @click=${!showFavoritePagesDisabled ? this.toggleShowFavorites : _ => {}}
+                label="Show ${this.showFavoritePages ? 'all' : 'favorites'}"
+                name="star"
+                size="32"
+                fill="${starColor}"
+            ></sa-button>
+            <sa-button
+                @click=${this.toggleHideNavSidebar}
+                label="Hide sidebar"
+                name="doubleArrow"
+                transform="rotate(180)"
+                size="32"
             >
-                <sa-icon name="star" size="20" fill="${starColor}"></sa-icon>
-                ${this.showFavoritePages ? 'Show All' : 'Favorites'}
-            </div>
-            <div><sa-icon name="doubleArrow" transform="rotate(180)" size="20"></sa-icon>Hide</div>
+            </sa-button>
         `;
     }
 }

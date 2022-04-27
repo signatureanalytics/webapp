@@ -13,6 +13,7 @@ class Main extends ConnectedLitElement {
     static styles = mainStyles;
     static properties = {
         showMoreUpdates: { type: Boolean, attribute: true, reflect: true },
+        hideNavSidebar: { type: Boolean, attribute: 'nav-sidebar-hidden', reflect: true },
     };
 
     stateChanged(state) {
@@ -50,10 +51,10 @@ class Main extends ConnectedLitElement {
     render() {
         return html`
             <sa-header></sa-header>
-            <sa-nav-buttons></sa-nav-buttons>
             <sa-nav></sa-nav>
             <sa-updates></sa-updates>
             <sa-report></sa-report>
+            <sa-nav-buttons></sa-nav-buttons>
         `;
     }
 }

@@ -4,14 +4,17 @@ export default css`
     :host {
         font-family: var(--font-body);
         font-size: 16px;
+        position: relative;
+        width: 275px;
+        overflow-x: hidden;
     }
     .updates {
         padding: 10px;
         border-right: 2px solid #ddd;
         border-top: 2px solid #ddd;
+        white-space: nowrap;
     }
     .update-list {
-        overflow: hidden;
         height: 40px;
         transition: height 200ms ease;
     }
@@ -22,11 +25,10 @@ export default css`
         padding: 3px 3px 0 3px;
         cursor: default;
     }
-    sa-icon {
-        display: inline-block;
-    }
-    sa-icon[name='doubleArrow'] {
+    sa-button[name='doubleArrow'] {
         float: right;
+        width: 30px;
+        height: 30px;
         cursor: pointer;
     }
     h4 {

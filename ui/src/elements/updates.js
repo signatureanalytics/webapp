@@ -5,6 +5,7 @@ import updatesStyles from './updatesStyles.js';
 import { selectors } from '../state/selectors';
 import { toggleShowMoreUpdates } from '../state/slice.js';
 import './icon.js';
+import './button.js';
 
 const dateFormatter = Intl.DateTimeFormat('en-US', {
     year: 'numeric',
@@ -54,7 +55,7 @@ class Updates extends ConnectedLitElement {
         if (this.showMoreUpdates) {
             return [
                 ...this.updates,
-                ...this.pendingUpdates.map(update => ({
+                ...this.pendingUpdates?.map(update => ({
                     when: update,
                     status: 'Pending',
                 })),
@@ -63,7 +64,7 @@ class Updates extends ConnectedLitElement {
             const updates = [];
             const update = [...this.updates].reverse().find(update => update.status !== 'Unknown');
             const runningUpdate = [...this.updates].reverse().find(update => update.status === 'Unknown');
-            const pendingUpdate = this.pendingUpdates[0]
+            const pendingUpdate = this.pendingUpdates?.[0]
                 ? {
                       status: 'Pending',
                       when: this.pendingUpdates[0],
@@ -86,14 +87,14 @@ class Updates extends ConnectedLitElement {
             updates: true,
             expanded: this.showMoreUpdates,
         };
-        return html`<div class="${classMap(classes)}">
+        return html`<div @click=${this.toggleShowMoreUpdates} class="${classMap(classes)}">
             <h4>
-                Updates<sa-icon
-                    @click=${this.toggleShowMoreUpdates}
+                Updates<sa-button
                     name="doubleArrow"
                     size="20"
                     transform="rotate(${this.showMoreUpdates ? 90 : -90})"
-                ></sa-icon>
+                    title="${this.showMoreUpdates ? 'Collpse' : 'Expand'} updates"
+                ></sa-button>
             </h4>
             <div class="update-list">${this.getUpdates().map(update => this.renderUpdate(update))}</div>
         </div>`;

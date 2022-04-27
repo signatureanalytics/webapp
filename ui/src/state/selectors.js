@@ -14,6 +14,7 @@ export const createSelectors = state => {
     const favoritePages = createSelector(state, state => state.favoritePages);
     const showFavoritePages = createSelector(state, state => state.showFavoritePages);
     const showMoreUpdates = createSelector(state, state => state.showMoreUpdates);
+    const hideNavSidebar = createSelector(state, state => state.hideNavSidebar);
 
     const reportEmbedUrl = createSelector(workspace, workspace =>
         memoize(reportName => workspace?.reports?.[reportName]?.embedUrl)
@@ -73,6 +74,7 @@ export const createSelectors = state => {
         updates,
         pendingUpdates,
         showMoreUpdates,
+        hideNavSidebar,
     };
 };
 
