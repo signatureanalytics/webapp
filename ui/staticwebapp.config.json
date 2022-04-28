@@ -1,4 +1,20 @@
 {
+    "routes": [{
+        "route": "/*.js",
+        "headers": {
+            "cache-control": "public, max-age=525600, immutable"
+        }
+    }, {
+        "route": "/assets*",
+        "headers": {
+            "cache-control": "public, max-age=525600, immutable"
+        }
+    }, {
+        "route": "/*",
+        "headers": {
+            "cache-control": "no-cache"
+        }
+    }],
     "navigationFallback": {
         "rewrite": "/dashboard.html",
         "exclude": ["/assets/*.{png,jpg,gif,svg}", "/.auth/*", "/api/*"]
