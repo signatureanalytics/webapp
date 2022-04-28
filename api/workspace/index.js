@@ -5,6 +5,7 @@ const { load: parseYaml } = require('js-yaml');
 const { promisify } = require('util');
 const { readFile: rf } = require('fs');
 const readFile = promisify(rf);
+const TZOFFSETS = require('./mstz.js');
 
 const referrerHeaderName = 'referer'; // [sic] see https://en.wikipedia.org/wiki/HTTP_referer#Etymology
 const cookieHeaderName = 'cookie';
@@ -33,6 +34,34 @@ const checkResponse = response => {
 const fetchOAuthToken = _ => fetch(oAuthUrl, oAuthRequest).then(response => checkResponse(response).json());
 
 setInterval(async _ => (oAuthToken = await fetchOAuthToken()), 10 * 60 * 1000);
+
+const timezoneNameFormatter = Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', timeZoneName: 'long' });
+const weekdayFormatter = Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', weekday: 'long' });
+
+const utcDate = (timezoneId, date, hours, minutes) => {
+    const daylightOffset = timezoneNameFormatter.format(date).includes('Daylight') ? 1 : 0;
+    const adjustedHours = hours - TZOFFSETS[timezoneId] - daylightOffset;
+    const year = date.getUTCFullYear();
+    const month = date.getUTCMonth();
+    const day = date.getUTCDate();
+    return new Date(Date.UTC(year, month, day, adjustedHours, minutes));
+};
+
+const getPendingUpdates = ({ days, times, localTimeZoneId, enabled }) => {
+    const now = new Date();
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    if (enabled) {
+        const dates = Array.from({ length: 7 }, (_, dayOffset) => {
+            const dayOffsetMs = dayOffset * oneDayMs;
+            return times.map(time => {
+                const [hours, minutes] = time.split(':');
+                return utcDate(localTimeZoneId, new Date(now.getTime() + dayOffsetMs), hours, minutes);
+            });
+        }).flat();
+        return dates.filter(date => date > now && days.includes(weekdayFormatter.format(date))).slice(0, 4);
+    }
+    return [];
+};
 
 const getWorkspace = async (context, workspaceSlug) => {
     const envWorkspaceYaml = process.env[`WORKSPACE_${workspaceSlug.toUpperCase()}`];
@@ -133,6 +162,14 @@ module.exports = async (context, req) => {
         body: JSON.stringify(getTokenBody),
     });
 
+    `${config.apiUrl}groups/${workspace.id}/reports`;
+
+    const getDatasetRefreshHistoryUrl = `${config.apiUrl}groups/${workspace.id}/datasets/${uniqueDatasetIds[0]}/refreshes?$top=4`;
+    const getDatasetRefreshScheduleUrl = `${config.apiUrl}groups/${workspace.id}/datasets/${uniqueDatasetIds[0]}/refreshSchedule`;
+
+    const getDatasetRefreshHistoryPromise = fetch(getDatasetRefreshHistoryUrl, pbiRestHeaders);
+    const getDatasetRefreshSchedulePromise = fetch(getDatasetRefreshScheduleUrl, pbiRestHeaders);
+
     const getTokenJson = await getTokenPromise.then(response => checkResponse(response).json());
 
     const tokenExpiresMs = new Date(getTokenJson.expiration).getTime() - Date.now();
@@ -144,6 +181,14 @@ module.exports = async (context, req) => {
             .map(({ Name: id, displayName: name }) => ({ name, id }));
     }
 
+    const getDatasetRefreshHistoryJson = await getDatasetRefreshHistoryPromise.then(response =>
+        checkResponse(response).json()
+    );
+
+    const getDatasetRefreshScheduleJson = await getDatasetRefreshSchedulePromise.then(response =>
+        checkResponse(response).json()
+    );
+
     context.res = {
         status: getTokenJson.status,
         headers: {
@@ -154,10 +199,19 @@ module.exports = async (context, req) => {
         body: {
             name: workspace.name,
             id: workspace.id,
+            logo: workspace.logo,
             tokenId: getTokenJson.tokenId,
             token: getTokenJson.token,
             tokenExpires: getTokenJson.expiration,
             reports,
+            updates: getDatasetRefreshHistoryJson.value
+                .sort((a, b) => a.endTime.localeCompare(b.endTime))
+                .map(update => ({
+                    how: update.refreshType,
+                    when: update.endTime,
+                    status: update.status,
+                })),
+            pendingUpdates: getPendingUpdates(getDatasetRefreshScheduleJson),
         },
     };
 };

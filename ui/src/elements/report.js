@@ -2,10 +2,18 @@ import { html } from 'lit';
 import { models } from 'powerbi-client';
 import slug from '../slug';
 import { selectors } from '../state/selectors';
-import { loadPageId, selectPageId, selectReportId, setWorkspace, setWorkspaceToken } from '../state/slice';
+import {
+    loadPageId,
+    selectPageId,
+    selectReportId,
+    setWorkspace,
+    setWorkspaceToken,
+    toggleHideNavSidebar,
+} from '../state/slice';
 import { ConnectedLitElement, store } from '../state/store';
 import reportStyles from './reportStyles';
 import { ApplicationInsights } from '@microsoft/applicationinsights-web';
+import './button.js';
 
 const appInsights = new ApplicationInsights({
     config: {
@@ -32,6 +40,7 @@ class Report extends ConnectedLitElement {
         user: Object,
         favoritePages: Array,
         showFavoritePages: Boolean,
+        hideNavSidebar: { type: Boolean, attribute: 'nav-sidebar-hidden', reflect: true },
     };
 
     stateChanged(state) {
@@ -179,6 +188,8 @@ class Report extends ConnectedLitElement {
                     report: report.name,
                     page: page.name,
                 });
+                // update dataset refreshes by calling loadWorkspace for each report load
+                this.loadWorkspace();
             });
 
             this.report.off('error');
@@ -192,8 +203,15 @@ class Report extends ConnectedLitElement {
         iframe.addEventListener('load', iframeLoad, { once: true });
     }
 
+    toggleHideNavSidebar(e) {
+        store.dispatch(toggleHideNavSidebar());
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
     render() {
-        return html`<div id="reportContainer"></div>`;
+        return html`<div id="reportContainer"></div>
+            <sa-button label="Show" @click=${this.toggleHideNavSidebar} name="doubleArrow" size="32"></sa-button>`;
     }
 }
 

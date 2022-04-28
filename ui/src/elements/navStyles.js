@@ -8,6 +8,7 @@ export default css`
         user-select: none;
         -webkit-user-select: none;
         font-family: var(--font-body);
+        width: 275px;
     }
     nav {
         overflow-y: auto;
@@ -21,7 +22,7 @@ export default css`
         outline-offset: -2px;
     }
     .name {
-        width: 205px;
+        width: 202px;
         padding: 3px;
         display: inline-block;
         text-overflow: ellipsis;
@@ -38,12 +39,8 @@ export default css`
     .page svg {
         display: inline-block;
         position: relative;
-        --star-size: 18px;
-        fill: #4688ba;
-        height: var(--star-size);
-        width: var(--star-size);
         vertical-align: top;
-        margin-top:4px;
+        margin-top: 4px;
     }
     .expander {
         height: 22px;
