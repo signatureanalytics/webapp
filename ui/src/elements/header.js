@@ -1,5 +1,5 @@
 import { html } from 'lit';
-import logo from '../assets/sa-covantage-logo.png';
+import logos from '../logos.js';
 import { selectors } from '../state/selectors';
 import { addFavoritePage, removeFavoritePage } from '../state/slice';
 import { ConnectedLitElement, store } from '../state/store';
@@ -49,7 +49,6 @@ class Header extends ConnectedLitElement {
         const clientLogo = this.workspace?.logo;
         const reportName = this.selectedReport?.name;
         const isFavorite = this.favoritePages.includes(location.pathname.slice(1));
-        const starClasses = { favoritePage: isFavorite };
         const title = `${isFavorite ? 'Remove' : 'Add'} Favorite Page`;
         const starColor = isFavorite ? '#4688ba' : '#bbb';
         const star = html`<sa-button
@@ -62,12 +61,12 @@ class Header extends ConnectedLitElement {
         const pageName = this.selectedPage ? html`${this.selectedPage.name}${star}` : ``;
         return html`
             <header>
-                <img class="logo" src="${fixAssetUrl(logo)}" />
+                <img class="logo" src="${fixAssetUrl(logos.covantage)}" />
                 <div class="title">
                     <h1>${reportName ? `${workspaceName} - ${reportName} Report` : ''}</h1>
                     <h2>${pageName}</h2>
                 </div>
-                ${clientLogo ? html`<img class="clientLogo" src="/assets/${fixAssetUrl(clientLogo)}" />` : ''}
+                ${clientLogo && logos[clientLogo] ? html`<img class="clientLogo" src="${fixAssetUrl(logos[clientLogo])}" />` : ''}
                 <div class="userEmail">${this.user.email}</div>
             </header>
         `;
