@@ -27,13 +27,16 @@ export default css`
         margin: 3px 3px 0 3px;
         cursor: default;
     }
+    .update:hover {
+        background-color: #eee;
+    }
     sa-button[name='doubleArrow'] {
         float: right;
         width: 30px;
         height: 30px;
-        cursor: pointer;
     }
     h4 {
         margin: 0;
+        cursor: pointer;
     }
 `;

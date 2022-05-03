@@ -10,7 +10,7 @@ export const store = configureStore({
 export class ConnectedLitElement extends LitElement {
     connectedCallback() {
         super.connectedCallback();
-        this._storeUnsubscribe = store.subscribe(() => this.stateChanged(store.getState()));
+        this._storeUnsubscribe = store.subscribe(_ => this.stateChanged(store.getState()));
         this.stateChanged(store.getState());
     }
 

@@ -37,13 +37,25 @@ class Updates extends ConnectedLitElement {
         running: html`<sa-icon name="running" size="14"></sa-icon>`,
         disabled: html`<sa-icon name="disabled" size="14" stroke="darkgrey"></sa-icon>`,
     };
-    renderUpdate({ when, status }) {
+    renderUpdate({ when, status, serviceExceptionJson }) {
         const classes = {
             update: true,
             [status.toLowerCase()]: true,
         };
-        return html`<div class=${classMap(classes)} title="Update ${status}">
-            ${this.icons[status.toLowerCase()]} ${dateFormatter.format(new Date(when)).replace(',', '')}
+        let message = status;
+        if (status === 'Failed') {
+            try {
+                const description = JSON.parse(serviceExceptionJson).errorDescription;
+                const table = description.match(/Table: (?<table>\w+).$/)?.groups?.table;
+                message += `: ${
+                    JSON.parse(description.replace(/}[^}]*$/, '}'))?.error['pbi.error']?.details?.find(
+                        d => d.code === 'DM_ErrorDetailNameCode_UnderlyingErrorMessage'
+                    )?.detail?.value
+                } ${table ? ` (Table ${table})` : ``} `;
+            } catch (error) {}
+        }
+        return html`<div class=${classMap(classes)} title="Update ${message}">
+            ${this.icons[status.toLowerCase()]} ${dateFormatter.format(new Date(when ?? Date.now())).replace(',', '')}
         </div>`;
     }
 
@@ -87,8 +99,8 @@ class Updates extends ConnectedLitElement {
             updates: true,
             expanded: this.showMoreUpdates,
         };
-        return html`<div @click=${this.toggleShowMoreUpdates} class="${classMap(classes)}">
-            <h4>
+        return html`<div class="${classMap(classes)}">
+            <h4 @click=${this.toggleShowMoreUpdates}>
                 Updates<sa-button
                     name="doubleArrow"
                     size="20"
