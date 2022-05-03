@@ -66,7 +66,9 @@ class Header extends ConnectedLitElement {
                     <h1>${reportName ? `${workspaceName} - ${reportName} Report` : ''}</h1>
                     <h2>${pageName}</h2>
                 </div>
-                ${clientLogo && logos[clientLogo] ? html`<img class="clientLogo" src="${fixAssetUrl(logos[clientLogo])}" />` : ''}
+                ${clientLogo && logos[clientLogo]
+                    ? html`<img class="clientLogo" src="${fixAssetUrl(logos[clientLogo])}" />`
+                    : ''}
                 <div class="userEmail">${this.user.email}</div>
             </header>
         `;

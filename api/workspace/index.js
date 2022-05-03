@@ -210,6 +210,7 @@ module.exports = async (context, req) => {
                     how: update.refreshType,
                     when: update.endTime,
                     status: update.status,
+                    serviceExceptionJson: update.serviceExceptionJson,
                 })),
             pendingUpdates: getPendingUpdates(getDatasetRefreshScheduleJson),
         },
