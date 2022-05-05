@@ -43,15 +43,23 @@ class Updates extends ConnectedLitElement {
             [status.toLowerCase()]: true,
         };
         let message = status;
+
         if (status === 'Failed') {
             try {
-                const description = JSON.parse(serviceExceptionJson).errorDescription;
-                const table = description.match(/Table: (?<table>\w+).$/)?.groups?.table;
-                message += `: ${
-                    JSON.parse(description.replace(/}[^}]*$/, '}'))?.error['pbi.error']?.details?.find(
-                        d => d.code === 'DM_ErrorDetailNameCode_UnderlyingErrorMessage'
-                    )?.detail?.value
-                } ${table ? ` (Table ${table})` : ``} `;
+                const exceptionJson = JSON.parse(serviceExceptionJson);
+                if (exceptionJson.errorDescription) {
+                    try {
+                        const table = exceptionJson.errorDescription.match(/Table: (?<table>\w+).$/)?.groups?.table;
+                        const description = JSON.parse(exceptionJson.errorDescription);
+                        message += `: ${
+                            JSON.parse(description.replace(/}[^}]*$/, '}'))?.error['pbi.error']?.details?.find(
+                                d => d.code === 'DM_ErrorDetailNameCode_UnderlyingErrorMessage'
+                            )?.detail?.value
+                        } ${table ? ` (Table ${table})` : ``} `;
+                    } catch (e) {
+                        message += `: ${exceptionJson.errorDescription.replace(/<\/?pii>/g, '')}`;
+                    }
+                }
             } catch (error) {}
         }
         return html`<div class=${classMap(classes)} title="Update ${message}">
