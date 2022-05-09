@@ -34,7 +34,7 @@ class Updates extends ConnectedLitElement {
         pending: html`<sa-icon name="pending" size="14"></sa-icon>`,
         completed: html`<sa-icon name="completed" size="14" stroke="green"></sa-icon>`,
         failed: html`<sa-icon name="failed" size="14" stroke="red"></sa-icon>`,
-        running: html`<sa-icon name="running" size="14"></sa-icon>`,
+        unknown: html`<sa-icon name="running" size="14"></sa-icon>`,
         disabled: html`<sa-icon name="disabled" size="14" stroke="darkgrey"></sa-icon>`,
     };
     renderUpdate({ when, status, serviceExceptionJson }) {
@@ -42,7 +42,7 @@ class Updates extends ConnectedLitElement {
             update: true,
             [status.toLowerCase()]: true,
         };
-        let message = status;
+        let message = status === 'Unknown' ? 'Running' : status;
 
         if (status === 'Failed') {
             try {
