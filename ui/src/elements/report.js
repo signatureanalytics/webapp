@@ -1,7 +1,13 @@
+import './button.js';
+
+import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { html } from 'lit';
 import { models } from 'powerbi-client';
+
+import delay from '../delay.js';
+import reportStyles from './reportStyles';
 import slug from '../slug';
-import { selectors } from '../state/selectors';
+import { ConnectedLitElement, store } from '../state/store';
 import {
     loadPageId,
     selectPageId,
@@ -10,10 +16,7 @@ import {
     setWorkspaceToken,
     toggleHideNavSidebar,
 } from '../state/slice';
-import { ConnectedLitElement, store } from '../state/store';
-import reportStyles from './reportStyles';
-import { ApplicationInsights } from '@microsoft/applicationinsights-web';
-import './button.js';
+import { selectors } from '../state/selectors';
 
 const appInsights = new ApplicationInsights({
     config: {
@@ -191,7 +194,24 @@ class Report extends ConnectedLitElement {
                 // update dataset refreshes by calling loadWorkspace for each report load
                 this.loadWorkspace();
             });
-
+            this.report.off('pageChanged');
+            const delayedHandler = delay(e => {
+                if (this.selectedPageId !== e.detail.newPage.name) {
+                    const page = e.detail.newPage;
+                    const pageId = page.name;
+                    const reportId = report.id;
+                    const [, workspaceSlug] = location.pathname.split('/');
+                    const pageSlug = slug(page.displayName);
+                    const reportSlug = slug(report.name);
+                    history.pushState(
+                        { report: reportId, page: pageId },
+                        null,
+                        `${location.origin}/${workspaceSlug}/${reportSlug}/${pageSlug}`
+                    );
+                    store.dispatch(selectPageId({ pageId: e.detail.newPage.name }));
+                }
+            }, 250);
+            this.report.on('pageChanged', delayedHandler);
             this.report.off('error');
             this.report.on('error', event => {
                 let errorMsg = event.detail;
