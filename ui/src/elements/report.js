@@ -210,7 +210,7 @@ class Report extends ConnectedLitElement {
                     );
                     store.dispatch(selectPageId({ pageId: e.detail.newPage.name }));
                 }
-            }, 250);
+            }, 1000);
             this.report.on('pageChanged', delayedHandler);
             this.report.off('error');
             this.report.on('error', event => {
