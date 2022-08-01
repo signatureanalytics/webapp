@@ -178,7 +178,7 @@ module.exports = async (context, req) => {
     for await (const [name, { value: pages }] of getReportPagesPromises) {
         reports[name].pages = pages
             .sort(({ order: a }, { order: b }) => a - b)
-            .map(({ Name: id, displayName: name }) => ({ name, id }));
+            .map(page => ({ name: page.displayName, id: page.Name || page.name }));
     }
 
     const getDatasetRefreshHistoryJson = await getDatasetRefreshHistoryPromise.then(response =>
