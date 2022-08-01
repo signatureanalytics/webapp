@@ -4,7 +4,6 @@ import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { html } from 'lit';
 import { models } from 'powerbi-client';
 
-import delay from '../delay.js';
 import reportStyles from './reportStyles';
 import slug from '../slug';
 import { ConnectedLitElement, store } from '../state/store';
@@ -194,24 +193,7 @@ class Report extends ConnectedLitElement {
                 // update dataset refreshes by calling loadWorkspace for each report load
                 this.loadWorkspace();
             });
-            this.report.off('pageChanged');
-            const delayedHandler = delay(e => {
-                if (this.selectedPageId !== e.detail.newPage.name) {
-                    const page = e.detail.newPage;
-                    const pageId = page.name;
-                    const reportId = report.id;
-                    const [, workspaceSlug] = location.pathname.split('/');
-                    const pageSlug = slug(page.displayName);
-                    const reportSlug = slug(report.name);
-                    history.pushState(
-                        { report: reportId, page: pageId },
-                        null,
-                        `${location.origin}/${workspaceSlug}/${reportSlug}/${pageSlug}`
-                    );
-                    store.dispatch(selectPageId({ pageId: e.detail.newPage.name }));
-                }
-            }, 1000);
-            this.report.on('pageChanged', delayedHandler);
+
             this.report.off('error');
             this.report.on('error', event => {
                 let errorMsg = event.detail;
