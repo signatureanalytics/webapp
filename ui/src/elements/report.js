@@ -59,8 +59,12 @@ class Report extends ConnectedLitElement {
     updated(changedProps) {
         super.updated(changedProps);
         if (changedProps.has('selectedPageId') && this.report) {
-            this.report.setPage(this.selectedPageId).catch(error => {
-                console.error(`Error setting page ${this.selectedPageId}: ${error ?? 'unspecified error'}`);
+            this.report.getActivePage().then(page => {
+                if (page.name !== this.selectedPageId) {
+                    this.report.setPage(this.selectedPageId).catch(error => {
+                        console.error(`Error setting page ${this.selectedPageId}: ${error ?? 'unspecified error'}`);
+                    });
+                }
             });
         } else if (changedProps.has('loadingReportId') && this.report) {
             const report = this.reportById(this.loadingReportId);
@@ -182,14 +186,34 @@ class Report extends ConnectedLitElement {
                 this.report.render();
             });
 
+            this.report.off('pageChanged');
             this.report.off('rendered');
             this.report.on('rendered', _ => {
                 console.log('Report render successful');
-                appInsights.stopTrackPage(metricsPageName, location.href, {
-                    workspace: this.workspace?.name,
-                    report: report.name,
-                    page: page.name,
+                this.report.off('pageChanged');
+                this.report.on('pageChanged', e => {
+                    appInsights.stopTrackPage(metricsPageName, location.href, {
+                        workspace: this.workspace?.name,
+                        report: report.name,
+                        page: page.name,
+                    });
+
+                    if (this.selectedPageId !== e.detail.newPage.name) {
+                        const page = e.detail.newPage;
+                        const pageId = page.name;
+                        const reportId = report.id;
+                        const [, workspaceSlug] = location.pathname.split('/');
+                        const pageSlug = slug(page.displayName);
+                        const reportSlug = slug(report.name);
+                        history.pushState(
+                            { report: reportId, page: pageId },
+                            null,
+                            `${location.origin}/${workspaceSlug}/${reportSlug}/${pageSlug}`
+                        );
+                        store.dispatch(selectPageId({ pageId: e.detail.newPage.name }));
+                    }
                 });
+
                 // update dataset refreshes by calling loadWorkspace for each report load
                 this.loadWorkspace();
             });
