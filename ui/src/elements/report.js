@@ -190,14 +190,14 @@ class Report extends ConnectedLitElement {
             this.report.off('rendered');
             this.report.on('rendered', _ => {
                 console.log('Report render successful');
+                appInsights.stopTrackPage(metricsPageName, location.href, {
+                    workspace: this.workspace?.name,
+                    report: report.name,
+                    page: page.name,
+                });
+
                 this.report.off('pageChanged');
                 this.report.on('pageChanged', e => {
-                    appInsights.stopTrackPage(metricsPageName, location.href, {
-                        workspace: this.workspace?.name,
-                        report: report.name,
-                        page: page.name,
-                    });
-
                     if (this.selectedPageId !== e.detail.newPage.name) {
                         const page = e.detail.newPage;
                         const pageId = page.name;
