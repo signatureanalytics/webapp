@@ -22,8 +22,9 @@ export default css`
         outline-offset: -2px;
     }
     .name {
-        width: 210px;
+        width: 199px;
         padding: 3px;
+        margin-right: 3px;
         display: inline-block;
         text-overflow: ellipsis;
         overflow-x: hidden;
