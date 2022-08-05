@@ -1,11 +1,13 @@
 const fetch = require('node-fetch');
 const config = require('./config.json');
-const dotenv = require('dotenv').config();
+const dotenv = require('dotenv');
 const { load: parseYaml } = require('js-yaml');
 const { promisify } = require('util');
 const { readFile: rf } = require('fs');
 const readFile = promisify(rf);
 const TZOFFSETS = require('./mstz.js');
+
+dotenv.config();
 
 const referrerHeaderName = 'referer'; // [sic] see https://en.wikipedia.org/wiki/HTTP_referer#Etymology
 const cookieHeaderName = 'cookie';
@@ -47,20 +49,18 @@ const utcDate = (timezoneId, date, hours, minutes) => {
     return new Date(Date.UTC(year, month, day, adjustedHours, minutes));
 };
 
+const oneDayMs = 24 * 60 * 60 * 1000;
+
 const getPendingUpdates = ({ days, times, localTimeZoneId, enabled }) => {
     const now = new Date();
-    const oneDayMs = 24 * 60 * 60 * 1000;
-    if (enabled) {
-        const dates = Array.from({ length: 7 }, (_, dayOffset) => {
-            const dayOffsetMs = dayOffset * oneDayMs;
-            return times.map(time => {
-                const [hours, minutes] = time.split(':');
-                return utcDate(localTimeZoneId, new Date(now.getTime() + dayOffsetMs), hours, minutes);
-            });
-        }).flat();
-        return dates.filter(date => date > now && days.includes(weekdayFormatter.format(date))).slice(0, 4);
-    }
-    return [];
+    return Array.from({ length: enabled ? 28 : 0 })
+        .flatMap((_, dayOffset) =>
+            times.map(time =>
+                utcDate(localTimeZoneId, new Date(now.getTime() + dayOffset * oneDayMs), ...time.split(':'))
+            )
+        )
+        .filter(date => date > now && days.includes(weekdayFormatter.format(date)))
+        .slice(0, 4);
 };
 
 const getWorkspace = async (context, workspaceSlug) => {
@@ -162,13 +162,20 @@ module.exports = async (context, req) => {
         body: JSON.stringify(getTokenBody),
     });
 
-    `${config.apiUrl}groups/${workspace.id}/reports`;
+    const refreshHistoryByDataset = {};
+    const refreshScheduleByDataset = {};
+    const getDatasetRefreshBaseUrl = `${config.apiUrl}groups/${workspace.id}/datasets`;
 
-    const getDatasetRefreshHistoryUrl = `${config.apiUrl}groups/${workspace.id}/datasets/${uniqueDatasetIds[0]}/refreshes?$top=4`;
-    const getDatasetRefreshScheduleUrl = `${config.apiUrl}groups/${workspace.id}/datasets/${uniqueDatasetIds[0]}/refreshSchedule`;
-
-    const getDatasetRefreshHistoryPromise = fetch(getDatasetRefreshHistoryUrl, pbiRestHeaders);
-    const getDatasetRefreshSchedulePromise = fetch(getDatasetRefreshScheduleUrl, pbiRestHeaders);
+    const getDatasetRefreshPromise = Promise.all(
+        uniqueDatasetIds.flatMap(datasetId => [
+            fetch(`${getDatasetRefreshBaseUrl}/${datasetId}/refreshes?$top=4`, pbiRestHeaders)
+                .then(response => checkResponse(response).json())
+                .then(json => (refreshHistoryByDataset[datasetId] = json)),
+            fetch(`${getDatasetRefreshBaseUrl}/${datasetId}/refreshSchedule`, pbiRestHeaders)
+                .then(response => checkResponse(response).json())
+                .then(json => (refreshScheduleByDataset[datasetId] = json)),
+        ])
+    );
 
     const getTokenJson = await getTokenPromise.then(response => checkResponse(response).json());
 
@@ -181,12 +188,24 @@ module.exports = async (context, req) => {
             .map(page => ({ name: page.displayName, id: page.Name || page.name }));
     }
 
-    const getDatasetRefreshHistoryJson = await getDatasetRefreshHistoryPromise.then(response =>
-        checkResponse(response).json()
+    await getDatasetRefreshPromise;
+
+    const updates = Object.fromEntries(
+        Object.entries(refreshHistoryByDataset).map(([id, { value }]) => [
+            id,
+            value
+                .sort((a, b) => a.endTime.localeCompare(b.endTime))
+                .map(update => ({
+                    how: update.refreshType,
+                    when: update.endTime,
+                    status: update.status,
+                    serviceExceptionJson: update.serviceExceptionJson,
+                })),
+        ])
     );
 
-    const getDatasetRefreshScheduleJson = await getDatasetRefreshSchedulePromise.then(response =>
-        checkResponse(response).json()
+    const pendingUpdates = Object.fromEntries(
+        Object.entries(refreshScheduleByDataset).map(([id, json]) => [id, getPendingUpdates(json)])
     );
 
     context.res = {
@@ -204,15 +223,8 @@ module.exports = async (context, req) => {
             token: getTokenJson.token,
             tokenExpires: getTokenJson.expiration,
             reports,
-            updates: getDatasetRefreshHistoryJson.value
-                .sort((a, b) => a.endTime.localeCompare(b.endTime))
-                .map(update => ({
-                    how: update.refreshType,
-                    when: update.endTime,
-                    status: update.status,
-                    serviceExceptionJson: update.serviceExceptionJson,
-                })),
-            pendingUpdates: getPendingUpdates(getDatasetRefreshScheduleJson),
+            updates,
+            pendingUpdates,
         },
     };
 };

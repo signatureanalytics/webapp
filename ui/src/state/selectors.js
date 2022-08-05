@@ -1,5 +1,6 @@
 import memoize from 'nano-memoize';
 import { createSelectorCreator } from 'reselect';
+
 import slug from '../slug';
 
 const createSelector = createSelectorCreator(memoize);
@@ -19,15 +20,14 @@ export const createSelectors = state => {
     const reportEmbedUrl = createSelector(workspace, workspace =>
         memoize(reportName => workspace?.reports?.[reportName]?.embedUrl)
     );
-    const updates = createSelector(workspace, workspace => workspace.updates);
-    const pendingUpdates = createSelector(workspace, workspace => workspace.pendingUpdates);
 
     const reports = createSelector(workspace, workspace => {
-        return Object.entries(workspace?.reports ?? {}).map(([name, { id, pages, expanded }]) => ({
+        return Object.entries(workspace?.reports ?? {}).map(([name, { id, pages, expanded, dataset }]) => ({
             name,
             id,
             pages,
             expanded,
+            dataset,
         }));
     });
     const reportById = createSelector(reports, reports => memoize(id => reports.find(report => report.id === id)));
@@ -53,7 +53,16 @@ export const createSelectors = state => {
                 : ''
         }`;
     });
-
+    const updates = createSelector(
+        workspace,
+        selectedReport,
+        (workspace, selectedReport) => workspace.updates?.[selectedReport?.dataset] ?? []
+    );
+    const pendingUpdates = createSelector(
+        workspace,
+        selectedReport,
+        (workspace, selectedReport) => workspace.pendingUpdates?.[selectedReport?.dataset] ?? []
+    );
     return {
         loadingReportId,
         loadingPageId,
