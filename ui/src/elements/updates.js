@@ -1,11 +1,13 @@
-import { ConnectedLitElement, store } from '../state/store.js';
-import { html } from 'lit';
-import { classMap } from 'lit/directives/class-map.js';
-import updatesStyles from './updatesStyles.js';
-import { selectors } from '../state/selectors';
-import { toggleShowMoreUpdates } from '../state/slice.js';
 import './icon.js';
 import './button.js';
+
+import { classMap } from 'lit/directives/class-map.js';
+import { html } from 'lit';
+
+import updatesStyles from './updatesStyles.js';
+import { ConnectedLitElement, store } from '../state/store.js';
+import { selectors } from '../state/selectors';
+import { toggleShowMoreUpdates } from '../state/slice.js';
 
 const dateFormatter = Intl.DateTimeFormat('en-US', {
     year: 'numeric',
@@ -19,8 +21,9 @@ const dateFormatter = Intl.DateTimeFormat('en-US', {
 class Updates extends ConnectedLitElement {
     static styles = updatesStyles;
     static properties = {
-        updates: Array,
-        pendingUpdates: Array,
+        updates: Object,
+        pendingUpdates: Object,
+        selectedReport: Object,
         showMoreUpdates: Boolean,
     };
 
@@ -37,6 +40,7 @@ class Updates extends ConnectedLitElement {
         unknown: html`<sa-icon name="running" size="14"></sa-icon>`,
         disabled: html`<sa-icon name="disabled" size="14" stroke="darkgrey"></sa-icon>`,
     };
+
     renderUpdate({ when, status, serviceExceptionJson }) {
         const classes = {
             update: true,
