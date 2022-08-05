@@ -22,7 +22,7 @@ export default css`
         outline-offset: -2px;
     }
     .name {
-        width: 202px;
+        width: 210px;
         padding: 3px;
         display: inline-block;
         text-overflow: ellipsis;
