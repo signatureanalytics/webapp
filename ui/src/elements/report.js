@@ -151,12 +151,42 @@ class Report extends ConnectedLitElement {
         const reportContainer = document.createElement('div');
         this.shadowRoot.getElementById('reportContainer').replaceWith(reportContainer);
         reportContainer.id = 'reportContainer';
+        
+        const slicers = Object.entries(report.slicers ?? {}).flatMap(([table, columns]) => 
+            Object.entries(columns).map(([column, value]) => ({
+                selector: {
+                    $schema: "http://powerbi.com/product/schema#slicerTargetSelector",
+                    target: {table, column}, 
+                },
+                state: {
+                    filters: [{
+                        $schema: "http://powerbi.com/product/schema#basic",
+                        target: {table, column}, 
+                        filterType: models.FilterType.Basic,
+                        operator: "In",
+                        values: [value]
+                    }]
+                }
+            })
+        ));
+
+        const filters = Object.entries(report.filters ?? {}).flatMap(([table, columns]) => 
+            Object.entries(columns).map(([column, value]) => ({
+                $schema: "http://powerbi.com/product/schema#basic",
+                target: {table, column}, 
+                filterType: models.FilterType.Basic,
+                operator: "In",
+                values: [value]
+            }))
+        );
 
         let reportLoadConfig = {
             type: 'report',
             tokenType: models.TokenType.Embed,
             accessToken: this.workspace.token,
             embedUrl: this.reportEmbedUrl(report.name),
+            slicers,
+            filters,
             settings: {
                 panes: {
                     pageNavigation: {

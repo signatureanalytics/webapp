@@ -110,12 +110,28 @@ module.exports = async (context, req) => {
     }
 
     const userInfo = JSON.parse(Buffer.from(clientPrincipalHeader, 'base64').toString('ascii'));
-    const reportRoles = workspace.reports;
-    const users = workspace.users[userInfo.identityProvider] || {};
-    const userRoles = users[userInfo.userDetails ? userInfo.userDetails.toLowerCase() : ''] || [];
+    
+    const reportRoles = {};
+    const reportSlicers = {};
+    const reportFilters = {};
+    for(const [report, fields] of Object.entries(workspace.reports)) {
+        reportRoles[report] = Array.isArray(fields) ? fields : fields.roles;
+        reportSlicers[report] = fields.slicers;
+        reportFilters[report] = fields.filters;
+    }
+    
+    const usersRecords = workspace.users[userInfo.identityProvider] || {};
+    const users = Object.fromEntries(Object.entries(usersRecords).map(([userId, roles]) => {
+        // userId can be either "rwaldin@signatureanalytics.com" or "Ray Waldin <rwaldin@signatureanalytics.com>" 
+        const {email, name} = userId.match(/^(?:(?<name>[^<]+) <)?(?<email>[^@]+@[^>]+)/)?.groups;
+        return [email, {name, roles}];
+    }));
+    
+    const email = userInfo.userDetails?.toLowerCase();
+    const user = {...users[email], email};
 
     const userReportNames = Object.entries(reportRoles)
-        .filter(([, roles]) => roles.some(role => userRoles.includes(role)))
+        .filter(([, roles]) => roles.some(role => user.roles.includes(role)))
         .map(([name]) => name);
 
     if (userReportNames.length === 0) {
@@ -140,7 +156,9 @@ module.exports = async (context, req) => {
         userReportNames.map(name => {
             const report = getReportsJson.value.find(report => `${name} Report` === report.name);
             const { id, datasetId: dataset, embedUrl } = report;
-            return [name, { id, dataset, embedUrl }];
+            const slicers = reportSlicers[name];
+            const filters = reportFilters[name]
+            return [name, { id, dataset, embedUrl, slicers, filters }];
         })
     );
 
@@ -208,6 +226,20 @@ module.exports = async (context, req) => {
         Object.entries(refreshScheduleByDataset).map(([id, json]) => [id, getPendingUpdates(json)])
     );
 
+    // render value templates for filters and slicers
+    const filterSlicerValues = {
+        'user.name': user.name,
+        'user.email': user.email
+    };
+    
+    for (const filterOrSlicer of [...Object.values(reportSlicers), ...Object.values(reportFilters)]) {
+        for(const [, table] of Object.entries(filterOrSlicer ?? {})) {
+            for (const [column, valueTemplate] of Object.entries(table ?? {})) {
+                table[column] = filterSlicerValues[valueTemplate];
+            }
+        }
+    }
+    
     context.res = {
         status: getTokenJson.status,
         headers: {

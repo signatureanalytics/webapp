@@ -22,12 +22,14 @@ export const createSelectors = state => {
     );
 
     const reports = createSelector(workspace, workspace => {
-        return Object.entries(workspace?.reports ?? {}).map(([name, { id, pages, expanded, dataset }]) => ({
+        return Object.entries(workspace?.reports ?? {}).map(([name, { id, pages, expanded, dataset, slicers, filters }]) => ({
             name,
             id,
             pages,
             expanded,
             dataset,
+            slicers,
+            filters,
         }));
     });
     const reportById = createSelector(reports, reports => memoize(id => reports.find(report => report.id === id)));
