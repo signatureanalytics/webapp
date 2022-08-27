@@ -131,7 +131,7 @@ module.exports = async (context, req) => {
     const user = {...users[email], email};
 
     const userReportNames = Object.entries(reportRoles)
-        .filter(([, roles]) => roles.some(role => user.roles.includes(role)))
+        .filter(([, roles]) => roles.some(role => user.roles?.includes(role)))
         .map(([name]) => name);
 
     if (userReportNames.length === 0) {
