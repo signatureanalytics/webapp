@@ -20,6 +20,6 @@
         "exclude": ["/assets/*.{png,jpg,gif,svg}", "/.auth/*", "/api/*"]
     },
     "platform": {
-        "apiRuntime": "node:16"
+        "apiRuntime": "node:14"
     }
 }
