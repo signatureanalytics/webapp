@@ -28,7 +28,7 @@ test.describe('Navigation', () => {
             }
         };
         page.on('response', responseListener);
-        await page.goto('http://localhost:4280/automatedtesting', { waitUntil: 'networkidle' });
+        await page.goto('http://localhost:4280/automatedtesting', { waitUntil: 'load' });
         const reportNames = await page.locator('.report > .name');
         expect(await reportNames.count()).toEqual(reports.length);
         for (const reportName of await reportNames.elementHandles()) {

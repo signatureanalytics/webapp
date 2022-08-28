@@ -18,5 +18,8 @@
     "navigationFallback": {
         "rewrite": "/dashboard.html",
         "exclude": ["/assets/*.{png,jpg,gif,svg}", "/.auth/*", "/api/*"]
+    },
+    "platform": {
+        "apiRuntime": "node:14"
     }
 }
