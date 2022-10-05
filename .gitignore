@@ -127,3 +127,9 @@ test-results
 api/workspace/workspaces
 api/workspace/workspaces/*
 *.rest
+webapp.code-workspace
+.vscode/settings.json
+api/.vscode/extensions.json
+api/.vscode/launch.json
+api/.vscode/settings.json
+api/.vscode/tasks.json

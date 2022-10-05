@@ -1,18 +1,21 @@
 #!/usr/bin/env node
+
 import 'colors';
-import { Command } from 'commander';
-import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
-import { diffLines } from 'diff';
+
 import dotenv from 'dotenv';
-import { readFile, writeFile } from 'fs/promises';
-import { createServer } from 'http';
-import { dump as unparseYaml, load as parseYaml } from 'js-yaml';
 import fetch from 'node-fetch';
 import open from 'open';
-import { homedir } from 'os';
 import path from 'path';
+import { Command } from 'commander';
 import { URLSearchParams } from 'url';
+import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
+import { createServer } from 'http';
 import { deflateSync, inflateSync } from 'zlib';
+import { diffLines } from 'diff';
+import { homedir } from 'os';
+import { readFile, writeFile } from 'fs/promises';
+import { dump as unparseYaml, load as parseYaml } from 'js-yaml';
+
 import { config } from './config.js';
 
 dotenv.config();
@@ -127,10 +130,7 @@ const getBranchMap = async _ => {
     }
     const json = await response.json();
     return Object.fromEntries(
-        json.value.map(({ properties }) => [
-            properties.sourceBranch,
-            { build: properties.buildId, hostname: properties.hostname },
-        ])
+        json.value.map(({ properties }) => [properties.sourceBranch, { build: properties.buildId, hostname: properties.hostname }])
     );
 };
 
@@ -250,7 +250,7 @@ program
         if (response.ok) {
             logIfNotRedir(`workspace "${workspaceSlug}" created`);
         } else {
-            throw new Error(`workspace creation failed: ${response.status} ${response.statusCode}`);
+            throw new Error(`workspace creation failed: ${response.status} ${response.statusText}`);
         }
     });
 
@@ -274,7 +274,8 @@ program
         if (response.ok) {
             logIfNotRedir(`workspace "${workspaceSlug}" updated`);
         } else {
-            throw new Error(`workspace update failed: ${response.status} ${response.statusCode}`);
+            const responseBody = await response.text();
+            throw new Error(`workspace update failed: ${response.status} ${response.statusText}\n${responseBody}`);
         }
     });
 
