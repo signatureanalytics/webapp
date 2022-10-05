@@ -77,7 +77,7 @@ const getWorkspace = async (context, workspaceSlug) => {
         return await readFile(workspaceYaml, 'utf-8').then(parseYaml);
     } catch (error) {
         console.error(`Error loading ${workspaceYaml}: ${error}`);
-        context.res = { status: 404, headers: { vary } };
+        context.res = { status: 404, headers: { vary }, body: `Error loading ${workspaceYaml}: ${error}` };
     }
 };
 
